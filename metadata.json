@@ -1,6 +1,6 @@
 {
-  "name": "NARKY",
-  "description": "Tactical multiplayer cyber-vector light trail arena. Feed on light, outmaneuver rival pilots, and outgrow the dark.",
+  "name": "SLINK — Vibrant Cyber-Worm Arena",
+  "description": "High-octane multiplayer cyber-worm arena. Slither, consume glowing energy orbs, outmaneuver rivals, and dominate the leaderboard in vibrant neon glory.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

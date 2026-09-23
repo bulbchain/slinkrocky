@@ -16,6 +16,9 @@ import {
   Zap,
   Shield,
   Magnet,
+  Trophy,
+  Flame,
+  Sparkles,
 } from 'lucide-react';
 
 interface ArenaCanvasProps {
@@ -53,6 +56,7 @@ interface Orb {
   vy: number;
   value: number;
   isLoot?: boolean;
+  type?: 'standard' | 'super' | 'star';
 }
 
 interface Spark {
@@ -81,12 +85,11 @@ interface TrailPoint {
   y: number;
 }
 
-type SoilCreatureType = 'worm' | 'snake' | 'centipede' | 'ant' | 'slug' | 'standard';
-
 interface BotCraft {
   name: string;
   color: string;
   coreColor: string;
+  eyeColor: string;
   x: number;
   y: number;
   angle: number;
@@ -96,9 +99,19 @@ interface BotCraft {
   thickness: number;
   turnRate: number;
   score: number;
-  creatureType: SoilCreatureType;
+  skinName: string;
   isFastPasser?: boolean;
 }
+
+const ORB_PALETTE = [
+  '#00f5d4', // Neon Cyan
+  '#ff007f', // Hot Magenta
+  '#00ff88', // Hyper Lime
+  '#ffaa00', // Radiant Gold
+  '#a855f7', // Electric Violet
+  '#38bdf8', // Ice Blue
+  '#ffffff', // Pure Star
+];
 
 export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
   callsign,
@@ -108,13 +121,13 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
   isFullscreen = false,
   onToggleFullscreen,
 }) => {
-  const restartRef = React.useRef<() => void>(() => {});
-  const isPausedRef = React.useRef(true);
+  const restartRef = useRef<() => void>(() => {});
+  const isPausedRef = useRef(true);
 
-  const [shareAvailable, setShareAvailable] = React.useState(false);
-  const [lastScore, setLastScore] = React.useState<number | null>(null);
-  const [showDeathModal, setShowDeathModal] = React.useState(false);
-  const [isPaused, setIsPaused] = React.useState(true);
+  const [shareAvailable, setShareAvailable] = useState(false);
+  const [lastScore, setLastScore] = useState<number | null>(null);
+  const [showDeathModal, setShowDeathModal] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
 
   const playGame = () => {
     sounds.playBeep(700);
@@ -122,15 +135,15 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     setIsPaused(false);
   };
 
-  const WEBSITE_URL = 'https://playnarky.lol';
-  const TWITTER_URL = 'https://x.com/playnarky';
+  const WEBSITE_URL = 'https://play-slink.io';
+  const TWITTER_URL = 'https://x.com/play_slink';
 
   const shareOnX = useCallback(() => {
     if (lastScore == null) return;
-    const text = `I scored ${lastScore} points in Narky Arena! Join me at ${WEBSITE_URL} — follow ${TWITTER_URL} to play.`;
+    const text = `I scored ${lastScore.toLocaleString()} points as ${callsign || 'SLINK_VIPER'} in SLINK Arena! 🐍 Feed on light and dominate the grid: ${WEBSITE_URL} via ${TWITTER_URL}`;
     const intent = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
     window.open(intent, '_blank', 'noopener');
-  }, [lastScore]);
+  }, [lastScore, callsign]);
 
   const shareThenRestart = useCallback(() => {
     shareOnX();
@@ -157,33 +170,33 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     boost: false,
   });
 
-  // HUD & Game State React Wrappers
+  // HUD & Game State
   const [score, setScore] = useState<number>(0);
   const [kills, setKills] = useState<number>(0);
-  const [bestToday, setBestToday] = useState<number>(5245);
+  const [bestToday, setBestToday] = useState<number>(6420);
   const [comboCount, setComboCount] = useState<number>(0);
   const [activeBuffs, setActiveBuffs] = useState<{ type: PowerUpType; percent: number }[]>([]);
 
-  const [alertText, setAlertText] = useState<string>('TRAIL COLLISION');
-  const [alertColor, setAlertColor] = useState<string>('#ffb2b7');
+  const [alertText, setAlertText] = useState<string>('ARENA LIVE');
+  const [alertColor, setAlertColor] = useState<string>('#00f5d4');
   const [hintVisible, setHintVisible] = useState<boolean>(true);
 
-  const [roster, setRoster] = useState<{ name: string; score: number; isPlayer?: boolean }[]>([
-    { name: 'RATTAIL', score: 617 },
-    { name: 'CHIMAERA', score: 548 },
-    { name: 'SIREN', score: 484 },
-    { name: 'BULPER', score: 481 },
-    { name: 'BRISTLE', score: 369 },
-    { name: callsign || 'CYBER_GHOST', score: 250, isPlayer: true },
+  const [roster, setRoster] = useState<{ name: string; score: number; isPlayer?: boolean; color?: string }[]>([
+    { name: 'VIPER_PRIME', score: 8420, color: '#ff007f' },
+    { name: 'NEON_HYDRA', score: 6810, color: '#00ff88' },
+    { name: 'SOLAR_COIL', score: 5320, color: '#ffaa00' },
+    { name: 'VOID_REAPER', score: 4190, color: '#a855f7' },
+    { name: 'CYBER_WORM', score: 3250, color: '#38bdf8' },
+    { name: callsign || 'SLINK_VIPER', score: 450, isPlayer: true, color: wormColor },
   ]);
 
   useEffect(() => {
     setRoster((prev) =>
       prev.map((item) =>
-        item.isPlayer ? { ...item, name: callsign || 'CYBER_GHOST' } : item
+        item.isPlayer ? { ...item, name: callsign || 'SLINK_VIPER', color: wormColor } : item
       )
     );
-  }, [callsign]);
+  }, [callsign, wormColor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -198,11 +211,11 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     let height = container.clientHeight || 500;
     const dpr = window.devicePixelRatio || 1;
 
-    const WORLD_WIDTH = 3200;
-    const WORLD_HEIGHT = 3200;
+    const WORLD_WIDTH = 3400;
+    const WORLD_HEIGHT = 3400;
     const ARENA_CENTER_X = WORLD_WIDTH / 2;
     const ARENA_CENTER_Y = WORLD_HEIGHT / 2;
-    const ARENA_RADIUS = WORLD_WIDTH / 2 - 40;
+    const ARENA_RADIUS = WORLD_WIDTH / 2 - 50;
 
     const resize = () => {
       if (!container || !canvas) return;
@@ -218,46 +231,50 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     const observer = new ResizeObserver(() => resize());
     observer.observe(container);
 
-    const orbPalette = ['#00f5d4', '#ffd57d', '#ffb2b7', '#70a4ff', '#ffffff', '#e60067', '#2bd966'];
-
     const createOrb = (x?: number, y?: number, isLoot = false, lootValue = 50): Orb => {
       let orbX = x;
       let orbY = y;
 
       if (orbX === undefined || orbY === undefined) {
         const angle = Math.random() * Math.PI * 2;
-        const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 60);
+        const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 70);
         orbX = ARENA_CENTER_X + Math.cos(angle) * r;
         orbY = ARENA_CENTER_Y + Math.sin(angle) * r;
       }
 
+      const isStar = isLoot && Math.random() < 0.35;
+      const orbColor = isLoot
+        ? isStar ? '#ffffff' : Math.random() < 0.5 ? '#ff007f' : '#ffaa00'
+        : ORB_PALETTE[Math.floor(Math.random() * ORB_PALETTE.length)];
+
       return {
         x: orbX,
         y: orbY,
-        radius: isLoot ? Math.random() * 2 + 5 : Math.random() * 2.2 + 2,
-        color: isLoot ? '#ff0055' : orbPalette[Math.floor(Math.random() * orbPalette.length)],
+        radius: isLoot ? (isStar ? 6.5 : 5.0) : Math.random() * 2.2 + 2.5,
+        color: orbColor,
         pulse: Math.random() * Math.PI * 2,
-        vx: (Math.random() - 0.5) * (isLoot ? 2.5 : 0.4),
-        vy: (Math.random() - 0.5) * (isLoot ? 2.5 : 0.4),
-        value: isLoot ? lootValue : Math.random() > 0.75 ? 50 : 25,
+        vx: (Math.random() - 0.5) * (isLoot ? 3.5 : 0.4),
+        vy: (Math.random() - 0.5) * (isLoot ? 3.5 : 0.4),
+        value: isLoot ? (isStar ? lootValue * 1.5 : lootValue) : Math.random() > 0.8 ? 60 : 30,
         isLoot,
+        type: isStar ? 'star' : isLoot ? 'super' : 'standard',
       };
     };
 
-    let orbs: Orb[] = Array.from({ length: 400 }, () => createOrb());
+    let orbs: Orb[] = Array.from({ length: 420 }, () => createOrb());
     let powerUps: PowerUp[] = [];
     let activePowerUps: Map<PowerUpType, ActivePowerUp> = new Map();
 
     const spawnPowerUp = () => {
       if (powerUps.length >= 6) return;
       const angle = Math.random() * Math.PI * 2;
-      const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 120);
+      const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 150);
       const types: PowerUpType[] = ['magnet', 'phase', 'overclock'];
       powerUps.push({
         x: ARENA_CENTER_X + Math.cos(angle) * r,
         y: ARENA_CENTER_Y + Math.sin(angle) * r,
         type: types[Math.floor(Math.random() * types.length)],
-        radius: 12,
+        radius: 14,
         pulse: 0,
       });
     };
@@ -268,10 +285,10 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     let floatingTexts: FloatingText[] = [];
     let screenShake = 0;
 
-    const emitSparks = (x: number, y: number, color: string, count = 10, speedMult = 1) => {
+    const emitSparks = (x: number, y: number, color: string, count = 12, speedMult = 1) => {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = (Math.random() * 3 + 1.5) * speedMult;
+        const speed = (Math.random() * 3.5 + 1.8) * speedMult;
         particles.push({
           x,
           y,
@@ -280,7 +297,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           life: 1.0,
           decay: Math.random() * 0.035 + 0.02,
           color,
-          size: Math.random() * 2.5 + 1.5,
+          size: Math.random() * 2.8 + 1.5,
         });
       }
     };
@@ -292,21 +309,21 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         text,
         color,
         life: 1.0,
-        decay: 0.02,
+        decay: 0.018,
         scale,
       });
     };
 
     const player = {
-      name: callsign || 'CYBER_GHOST',
+      name: callsign || 'SLINK_VIPER',
       x: ARENA_CENTER_X,
       y: ARENA_CENTER_Y,
       angle: -Math.PI / 2,
-      baseSpeed: 2.5,
-      boostSpeed: 4.8,
+      baseSpeed: 2.8,
+      boostSpeed: 5.2,
       trail: [] as TrailPoint[],
-      maxTrail: 34,
-      thickness: 7.5,
+      maxTrail: 36,
+      thickness: 9.0,
       color: wormColor,
     };
 
@@ -315,52 +332,59 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       y: player.y - height / 2,
     };
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 22; i++) {
       player.trail.push({ x: player.x, y: player.y + i * 3 });
     }
 
-    const createSingleBot = (index: number): BotCraft => {
-      const creatureConfigs: { type: SoilCreatureType; names: string[]; color: string; speedMult: number; thickness: number }[] = [
-        { type: 'worm', names: ['EARTHWORM', 'NIGHTCRAWLER', 'MUDLARK'], color: '#ff88aa', speedMult: 0.9, thickness: 8.5 },
-        { type: 'snake', names: ['COBRA', 'VIPER', 'PYTHON'], color: '#2bd966', speedMult: 1.3, thickness: 7.0 },
-        { type: 'centipede', names: ['CENTIPEDE', 'SCOLO', 'MILLI_SPEED'], color: '#ff5500', speedMult: 1.25, thickness: 8.0 },
-        { type: 'ant', names: ['SOLDIER_ANT', 'BULLET_ANT', 'FIRE_ANT'], color: '#e60067', speedMult: 1.1, thickness: 6.5 },
-        { type: 'slug', names: ['SLIME_SLUG', 'GLOP', 'MUD_SLUG'], color: '#a3e635', speedMult: 0.65, thickness: 11.0 },
-        { type: 'standard', names: ['WILL', 'VORTEX_9', 'PYRE', 'DRIFTER', 'BARRELEYE'], color: '#00c3ff', speedMult: 1.0, thickness: 7.5 },
-      ];
+    const botSkins = [
+      { name: 'CYBER_DRAGON', color: '#ff007f', coreColor: '#ffffff', eyeColor: '#ffff00', thickness: 9.0, speedMult: 1.05 },
+      { name: 'ACID_SERPENT', color: '#00ff88', coreColor: '#e0ffe8', eyeColor: '#003820', thickness: 8.5, speedMult: 1.1 },
+      { name: 'SOLAR_FLARE', color: '#ffaa00', coreColor: '#ffffff', eyeColor: '#ff0055', thickness: 9.5, speedMult: 0.95 },
+      { name: 'VOID_COIL', color: '#a855f7', coreColor: '#f3e8ff', eyeColor: '#00f5d4', thickness: 9.0, speedMult: 1.0 },
+      { name: 'GLACIER_SLINK', color: '#38bdf8', coreColor: '#ffffff', eyeColor: '#ffffff', thickness: 8.5, speedMult: 1.0 },
+      { name: 'NEON_VIPER', color: '#00f5d4', coreColor: '#ffffff', eyeColor: '#002820', thickness: 9.0, speedMult: 1.05 },
+    ];
 
-      const config = creatureConfigs[Math.floor(Math.random() * creatureConfigs.length)];
-      const isFastPasser = Math.random() < 0.22; // 22% chance of shock fast pass creature
+    const createSingleBot = (index: number): BotCraft => {
+      const skin = botSkins[Math.floor(Math.random() * botSkins.length)];
+      const isFastPasser = Math.random() < 0.2;
 
       const angle = Math.random() * Math.PI * 2;
-      const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 100);
+      const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 120);
       const bx = ARENA_CENTER_X + Math.cos(angle) * r;
       const by = ARENA_CENTER_Y + Math.sin(angle) * r;
 
       const bTrail: TrailPoint[] = [];
-      const trailLen = isFastPasser ? 45 : Math.floor(Math.random() * 15 + 25);
-      for (let j = 0; j < 18; j++) {
-        bTrail.push({ x: bx - j * 2, y: by - j * 2 });
+      const trailLen = isFastPasser ? 50 : Math.floor(Math.random() * 20 + 28);
+      for (let j = 0; j < 20; j++) {
+        bTrail.push({ x: bx - j * 2.5, y: by - j * 2.5 });
       }
 
-      const botName = isFastPasser 
-        ? `FAST_${config.names[Math.floor(Math.random() * config.names.length)]}` 
-        : `${config.names[Math.floor(Math.random() * config.names.length)]}_${Math.floor(Math.random() * 89 + 10)}`;
+      const botNames = [
+        'VIPER_X', 'COIL_QUEEN', 'NEON_HYDRA', 'TURBO_FANG',
+        'SOLAR_SLINK', 'CYBER_MUD', 'APEX_HUNTER', 'WORM_9',
+        'PHANTOM_TAIL', 'VORTEX_DEVOURER', 'HYPER_VIPER'
+      ];
+
+      const botName = isFastPasser
+        ? `FAST_${botNames[Math.floor(Math.random() * botNames.length)]}`
+        : `${botNames[Math.floor(Math.random() * botNames.length)]}_${Math.floor(Math.random() * 89 + 10)}`;
 
       return {
         name: botName,
-        color: isFastPasser ? '#ff0055' : config.color,
-        coreColor: isFastPasser ? '#ffff00' : '#ffffff',
+        color: isFastPasser ? '#ff0055' : skin.color,
+        coreColor: isFastPasser ? '#ffff00' : skin.coreColor,
+        eyeColor: isFastPasser ? '#ffffff' : skin.eyeColor,
         x: bx,
         y: by,
         angle: Math.random() * Math.PI * 2,
-        speed: (isFastPasser ? 4.5 + Math.random() * 1.5 : (1.8 + Math.random() * 0.6)) * config.speedMult,
+        speed: (isFastPasser ? 4.8 + Math.random() * 1.4 : (1.9 + Math.random() * 0.7)) * skin.speedMult,
         trail: bTrail,
         maxTrail: trailLen,
-        thickness: config.thickness,
-        turnRate: isFastPasser ? 0.015 : (0.04 + Math.random() * 0.01),
-        score: isFastPasser ? 750 : Math.floor(Math.random() * 500 + 100),
-        creatureType: config.type,
+        thickness: skin.thickness,
+        turnRate: isFastPasser ? 0.018 : (0.045 + Math.random() * 0.015),
+        score: isFastPasser ? 850 : Math.floor(Math.random() * 600 + 150),
+        skinName: skin.name,
         isFastPasser,
       };
     };
@@ -369,7 +393,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       return Array.from({ length: count }, (_, i) => createSingleBot(i));
     };
 
-    let bots: BotCraft[] = createBotPool(22);
+    let bots: BotCraft[] = createBotPool(24);
     let isBoosting = false;
     const mouse = { x: width / 2, y: height / 2, active: false };
     const mobileInput = mobileInputRef.current;
@@ -382,8 +406,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     let currentCombo = 0;
 
     const dropLootOrbs = (x: number, y: number, totalScore: number) => {
-      const numOrbs = Math.min(25, Math.max(8, Math.floor(totalScore / 50)));
-      const valuePerOrb = Math.max(25, Math.floor(totalScore / numOrbs));
+      const numOrbs = Math.min(30, Math.max(10, Math.floor(totalScore / 45)));
+      const valuePerOrb = Math.max(30, Math.floor(totalScore / numOrbs));
       for (let i = 0; i < numOrbs; i++) {
         orbs.push(createOrb(x, y, true, valuePerOrb));
       }
@@ -401,6 +425,12 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       player.y = ARENA_CENTER_Y;
       player.angle = -Math.PI / 2;
       player.trail = [];
+      player.maxTrail = 36;
+      player.color = wormColor;
+
+      for (let i = 0; i < 22; i++) {
+        player.trail.push({ x: player.x, y: player.y + i * 3 });
+      }
 
       isBoosting = false;
       mobileInput.active = false;
@@ -408,8 +438,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       mobileInput.dy = -1;
       mobileInput.boost = false;
 
-      bots = createBotPool(22);
-      orbs = Array.from({ length: 400 }, () => createOrb());
+      bots = createBotPool(24);
+      orbs = Array.from({ length: 420 }, () => createOrb());
       powerUps = [];
       for (let i = 0; i < 4; i++) spawnPowerUp();
 
@@ -467,11 +497,11 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         isBoosting = true;
       }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-        player.angle -= 0.12;
+        player.angle -= 0.14;
         mouse.active = false;
       }
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-        player.angle += 0.12;
+        player.angle += 0.14;
         mouse.active = false;
       }
     };
@@ -489,201 +519,234 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
+    // DRAW CYBER ARENA GRID & AMBIENT GLOW
     const drawGrid = () => {
       ctx.save();
-      ctx.strokeStyle = 'rgba(0, 245, 212, 0.05)';
-      ctx.lineWidth = 0.8;
-      const hexR = 24;
-      const hexH = hexR * Math.sqrt(3);
+      ctx.strokeStyle = 'rgba(0, 245, 212, 0.07)';
+      ctx.lineWidth = 1.0;
 
-      const startX = Math.floor(camera.x / (hexR * 3)) * (hexR * 3) - hexR * 3;
-      const endX = camera.x + width + hexR * 3;
-      const startY = Math.floor(camera.y / hexH) * hexH - hexH;
-      const endY = camera.y + height + hexH;
+      const gridSize = 48;
+      const startX = Math.floor(camera.x / gridSize) * gridSize;
+      const endX = camera.x + width + gridSize;
+      const startY = Math.floor(camera.y / gridSize) * gridSize;
+      const endY = camera.y + height + gridSize;
 
-      for (let x = startX; x < endX; x += hexR * 3) {
-        for (let y = startY; y < endY; y += hexH) {
+      ctx.beginPath();
+      for (let x = startX; x <= endX; x += gridSize) {
+        ctx.moveTo(x, camera.y);
+        ctx.lineTo(x, camera.y + height);
+      }
+      for (let y = startY; y <= endY; y += gridSize) {
+        ctx.moveTo(camera.x, y);
+        ctx.lineTo(camera.x + width, y);
+      }
+      ctx.stroke();
+
+      // Soft Hexagonal nodes
+      ctx.fillStyle = 'rgba(255, 0, 127, 0.04)';
+      for (let x = startX; x <= endX; x += gridSize * 2) {
+        for (let y = startY; y <= endY; y += gridSize * 2) {
           ctx.beginPath();
-          for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI / 3) * i;
-            const hx = x + hexR * Math.cos(angle);
-            const hy = y + hexR * Math.sin(angle);
-            if (i === 0) ctx.moveTo(hx, hy);
-            else ctx.lineTo(hx, hy);
-          }
-          ctx.closePath();
-          ctx.stroke();
-
-          ctx.beginPath();
-          for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI / 3) * i;
-            const hx = x + hexR * 1.5 + hexR * Math.cos(angle);
-            const hy = y + hexH * 0.5 + hexR * Math.sin(angle);
-            if (i === 0) ctx.moveTo(hx, hy);
-            else ctx.lineTo(hx, hy);
-          }
-          ctx.closePath();
-          ctx.stroke();
+          ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
       ctx.restore();
     };
 
+    // DRAW VIBRANT SEGMENTED WORM
+    const drawSlinkWorm = (
+      points: TrailPoint[],
+      headX: number,
+      headY: number,
+      angle: number,
+      color: string,
+      coreColor: string,
+      eyeColor: string,
+      baseThickness: number,
+      isPlayer = false,
+      boosting = false,
+      hasPhaseShield = false
+    ) => {
+      if (points.length < 2) return;
+
+      ctx.save();
+
+      // 1. Outer Glow Aura
+      ctx.shadowBlur = boosting ? 26 : 14;
+      ctx.shadowColor = hasPhaseShield ? '#38bdf8' : color;
+
+      // 2. Segmented Body: Draw smooth tapered circles
+      const segmentCount = points.length;
+      for (let i = segmentCount - 1; i >= 0; i--) {
+        const pt = points[i];
+        const progress = 1 - i / segmentCount; // 1 at head, 0 at tail
+        const segRadius = (baseThickness / 2) * (0.45 + progress * 0.55);
+
+        // Segment Outer Ring
+        ctx.fillStyle = hasPhaseShield ? 'rgba(56, 189, 248, 0.85)' : color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, segRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner glowing core
+        if (i % 2 === 0) {
+          ctx.fillStyle = coreColor;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, Math.max(1, segRadius * 0.45), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 3. Connective smooth line for seamless flow
+      ctx.beginPath();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = hasPhaseShield ? '#38bdf8' : color;
+      ctx.lineWidth = baseThickness;
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.stroke();
+
+      // Inner Core Line
+      ctx.strokeStyle = coreColor;
+      ctx.lineWidth = baseThickness * 0.35;
+      ctx.stroke();
+
+      // 4. Expressive Worm Head
+      ctx.save();
+      ctx.translate(headX, headY);
+      ctx.rotate(angle + Math.PI / 2);
+
+      const headRadius = baseThickness * 0.95;
+
+      // Antennae / Horns
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(-headRadius * 0.5, -headRadius * 0.8);
+      ctx.lineTo(-headRadius * 0.9, -headRadius * 1.5);
+      ctx.moveTo(headRadius * 0.5, -headRadius * 0.8);
+      ctx.lineTo(headRadius * 0.9, -headRadius * 1.5);
+      ctx.stroke();
+
+      // Antenna glowing tip bulbs
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-headRadius * 0.9, -headRadius * 1.5, 2.0, 0, Math.PI * 2);
+      ctx.arc(headRadius * 0.9, -headRadius * 1.5, 2.0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Main Head Dome
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Head Highlight
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.beginPath();
+      ctx.arc(0, -headRadius * 0.25, headRadius * 0.6, 0, Math.PI);
+      ctx.fill();
+
+      // Cute / Fierce Expressive Eyes
+      const eyeOffsetX = headRadius * 0.48;
+      const eyeOffsetY = -headRadius * 0.25;
+      const eyeRadius = headRadius * 0.32;
+      const pupilRadius = eyeRadius * 0.5;
+
+      [-eyeOffsetX, eyeOffsetX].forEach((ex) => {
+        // Eye White
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(ex, eyeOffsetY, eyeRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye Iris
+        ctx.fillStyle = eyeColor || '#002820';
+        ctx.beginPath();
+        ctx.arc(ex, eyeOffsetY - 0.8, pupilRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glint
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(ex + 0.6, eyeOffsetY - 1.4, pupilRadius * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Phase Shield Aura around Head
+      if (hasPhaseShield) {
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(0, 0, headRadius * 1.8, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+
+      // Boost exhaust sparks
+      if (boosting && frame % 2 === 0) {
+        emitSparks(headX - Math.cos(angle) * 12, headY - Math.sin(angle) * 12, color, 3, 1.8);
+      }
+
+      // Callsign tag above head
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = isPlayer ? '#00f5d4' : color;
+      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      ctx.fillText(isPlayer ? callsign || 'SLINK_VIPER' : color, headX - 20, headY - headRadius - 10);
+
+      ctx.restore();
+    };
+
+    // MAIN GAME LOOP
     const render = () => {
       frame++;
 
-      if (!isPausedRef.current) {
-        const remainingBuffs: { type: PowerUpType; percent: number }[] = [];
-        activePowerUps.forEach((buff, key) => {
-          buff.duration--;
-          if (buff.duration <= 0) {
-            activePowerUps.delete(key);
-          } else {
-            remainingBuffs.push({
-              type: key,
-              percent: (buff.duration / buff.maxDuration) * 100,
-            });
-          }
-        });
-        setActiveBuffs(remainingBuffs);
-
-        if (comboTimer > 0) {
-          comboTimer--;
-          if (comboTimer <= 0) {
-            currentCombo = 0;
-            setComboCount(0);
-          }
-        }
-      }
-
-      ctx.fillStyle = '#07111a';
-      ctx.fillRect(0, 0, width, height);
-
-      let shakeX = 0;
-      let shakeY = 0;
       if (screenShake > 0) {
-        shakeX = (Math.random() - 0.5) * screenShake;
-        shakeY = (Math.random() - 0.5) * screenShake;
         screenShake *= 0.88;
-        if (screenShake < 0.5) screenShake = 0;
+        if (screenShake < 0.2) screenShake = 0;
       }
 
-      camera.x += (player.x - width / 2 - camera.x) * 0.1;
-      camera.y += (player.y - height / 2 - camera.y) * 0.1;
-
-      ctx.save();
-      ctx.translate(-camera.x + shakeX, -camera.y + shakeY);
-
-      drawGrid();
-
-      // Circular Arena Boundary
-      ctx.save();
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = '#00ff66';
-      ctx.strokeStyle = 'rgba(0, 255, 102, 0.8)';
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.arc(ARENA_CENTER_X, ARENA_CENTER_Y, ARENA_RADIUS, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(0, 255, 102, 0.2)';
-      ctx.lineWidth = 14;
-      ctx.beginPath();
-      ctx.arc(ARENA_CENTER_X, ARENA_CENTER_Y, ARENA_RADIUS, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-
-      if (frame % 300 === 0 && !isPausedRef.current) spawnPowerUp();
-
-      for (let i = powerUps.length - 1; i >= 0; i--) {
-        const p = powerUps[i];
-        p.pulse += 0.05;
-
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        const scale = 1 + Math.sin(p.pulse) * 0.15;
-        ctx.scale(scale, scale);
-
-        let iconColor = '#00f5d4';
-        if (p.type === 'magnet') iconColor = '#a855f7';
-        if (p.type === 'phase') iconColor = '#3b82f6';
-        if (p.type === 'overclock') iconColor = '#eab308';
-
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = iconColor;
-        ctx.fillStyle = iconColor;
-        ctx.beginPath();
-        ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '900 10px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const label = p.type === 'magnet' ? 'MAG' : p.type === 'phase' ? 'PHS' : 'OVC';
-        ctx.fillText(label, 0, 0);
-
-        ctx.restore();
-
-        if (!isPausedRef.current) {
-          const dist = Math.hypot(player.x - p.x, player.y - p.y);
-          if (dist < player.thickness + p.radius + 4) {
-            sounds.playOrbChime(150);
-            const durationFrames = 360;
-            activePowerUps.set(p.type, { type: p.type, duration: durationFrames, maxDuration: durationFrames });
-            emitSparks(p.x, p.y, iconColor, 20, 2);
-            addScorePopup(p.x, p.y - 15, `${p.type.toUpperCase()} ACTIVATED!`, iconColor, 1.2);
-            powerUps.splice(i, 1);
-          }
+      if (comboTimer > 0) {
+        comboTimer--;
+        if (comboTimer <= 0) {
+          currentCombo = 0;
+          setComboCount(0);
         }
       }
 
+      // Update Powerups
+      for (let [type, active] of activePowerUps.entries()) {
+        active.duration--;
+        if (active.duration <= 0) {
+          activePowerUps.delete(type);
+        }
+      }
+
+      if (frame % 10 === 0) {
+        setActiveBuffs(
+          Array.from(activePowerUps.values()).map((b) => ({
+            type: b.type,
+            percent: Math.max(0, Math.floor((b.duration / b.maxDuration) * 100)),
+          }))
+        );
+      }
+
+      if (frame % 480 === 0) spawnPowerUp();
+
+      // Player Movement Logic
       const hasMagnet = activePowerUps.has('magnet');
-
-      for (let i = 0; i < orbs.length; i++) {
-        const orb = orbs[i];
-
-        if (!isPausedRef.current) {
-          if (hasMagnet) {
-            const md = Math.hypot(player.x - orb.x, player.y - orb.y);
-            if (md < 250) {
-              const magAngle = Math.atan2(player.y - orb.y, player.x - orb.x);
-              orb.vx += Math.cos(magAngle) * 0.6;
-              orb.vy += Math.sin(magAngle) * 0.6;
-            }
-          }
-
-          orb.x += orb.vx;
-          orb.y += orb.vy;
-          orb.vx *= 0.96;
-          orb.vy *= 0.96;
-          orb.pulse += 0.05;
-        }
-
-        const distFromCenter = Math.hypot(orb.x - ARENA_CENTER_X, orb.y - ARENA_CENTER_Y);
-        if (distFromCenter > ARENA_RADIUS - 10) {
-          const angle = Math.atan2(orb.y - ARENA_CENTER_Y, orb.x - ARENA_CENTER_X);
-          orb.x = ARENA_CENTER_X + Math.cos(angle) * (ARENA_RADIUS - 20);
-          orb.y = ARENA_CENTER_Y + Math.sin(angle) * (ARENA_RADIUS - 20);
-          orb.vx = -orb.vx;
-          orb.vy = -orb.vy;
-        }
-
-        const currentR = orb.radius + Math.sin(orb.pulse) * 0.7;
-
-        ctx.save();
-        ctx.shadowBlur = orb.isLoot ? 16 : 10;
-        ctx.shadowColor = orb.color;
-        ctx.fillStyle = orb.color;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, Math.max(1, currentR), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
       const hasOverclock = activePowerUps.has('overclock');
-      const boostActive = isBoosting || mobileInput.boost || hasOverclock;
-      const currentSpeed = boostActive ? player.boostSpeed * (hasOverclock ? 1.2 : 1.0) : player.baseSpeed;
+      const hasPhase = activePowerUps.has('phase');
+
+      let boostActive = (isBoosting || mobileInput.boost || hasOverclock) && !isPausedRef.current;
+      let currentSpeed = (boostActive ? player.boostSpeed : player.baseSpeed) * (hasOverclock ? 1.3 : 1.0);
 
       if (!isPausedRef.current) {
         if (mobileInput.active) {
@@ -691,7 +754,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           let diff = targetAngle - player.angle;
           while (diff < -Math.PI) diff += Math.PI * 2;
           while (diff > Math.PI) diff -= Math.PI * 2;
-          player.angle += diff * (boostActive ? 0.16 : 0.13);
+          player.angle += diff * (boostActive ? 0.14 : 0.09);
         } else if (mouse.active) {
           const worldMouseX = mouse.x + camera.x;
           const worldMouseY = mouse.y + camera.y;
@@ -699,26 +762,69 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           let diff = targetAngle - player.angle;
           while (diff < -Math.PI) diff += Math.PI * 2;
           while (diff > Math.PI) diff -= Math.PI * 2;
-          player.angle += diff * (boostActive ? 0.12 : 0.08);
+          player.angle += diff * (boostActive ? 0.14 : 0.09);
         }
 
         player.x += Math.cos(player.angle) * currentSpeed;
         player.y += Math.sin(player.angle) * currentSpeed;
+
+        player.trail.unshift({ x: player.x, y: player.y });
+        if (player.trail.length > player.maxTrail) player.trail.pop();
+
+        if (boostActive && !hasOverclock) {
+          localScore = Math.max(10, localScore - 0.2);
+          if (frame % 4 === 0) emitSparks(player.x, player.y, player.color, 2, 1.2);
+        }
       }
 
+      // Camera Follow Smooth
+      camera.x += (player.x - width / 2 - camera.x) * 0.1;
+      camera.y += (player.y - height / 2 - camera.y) * 0.1;
+
+      // Clear & Pre-render Transform
+      ctx.save();
+      ctx.fillStyle = '#060814';
+      ctx.fillRect(0, 0, width, height);
+
+      const shakeX = (Math.random() - 0.5) * screenShake;
+      const shakeY = (Math.random() - 0.5) * screenShake;
+      ctx.translate(-camera.x + shakeX, -camera.y + shakeY);
+
+      // Draw Cyber Arena Grid
+      drawGrid();
+
+      // Draw Arena Energy Boundary
+      ctx.save();
+      ctx.shadowBlur = 28;
+      ctx.shadowColor = '#00f5d4';
+      ctx.strokeStyle = '#00f5d4';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(ARENA_CENTER_X, ARENA_CENTER_Y, ARENA_RADIUS, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Danger Zone Ring
+      ctx.strokeStyle = 'rgba(255, 0, 127, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 8]);
+      ctx.beginPath();
+      ctx.arc(ARENA_CENTER_X, ARENA_CENTER_Y, ARENA_RADIUS - 15, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Check Player Wall Crash
       const playerDistFromCenter = Math.hypot(player.x - ARENA_CENTER_X, player.y - ARENA_CENTER_Y);
       if (playerDistFromCenter >= ARENA_RADIUS - 10) {
-        emitSparks(player.x, player.y, '#00ff66', 35, 3);
-        screenShake = 15;
-        addScorePopup(player.x, player.y - 20, `CRASHED! -200`, '#ffb2b7');
+        emitSparks(player.x, player.y, '#00ff88', 40, 3.5);
+        screenShake = 16;
+        addScorePopup(player.x, player.y - 20, `CRASHED! -200`, '#ff007f');
         sounds.playShatter();
 
-        setAlertText('YOU CRASHED');
-        setAlertColor('#ffb2b7');
-
+        setAlertText('ENERGY WALL COLLISION');
+        setAlertColor('#ff007f');
         dropLootOrbs(player.x, player.y, localScore);
 
-        setTimeout(() => setAlertText('TRAIL COLLISION'), 2600);
+        setTimeout(() => setAlertText('ARENA LIVE'), 2600);
 
         localScore = Math.max(0, localScore - 200);
         setScore(Math.floor(localScore));
@@ -730,6 +836,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         player.y = ARENA_CENTER_Y;
         player.angle = -Math.PI / 2;
         player.trail = [];
+        for (let i = 0; i < 22; i++) player.trail.push({ x: player.x, y: player.y + i * 3 });
 
         isBoosting = false;
         mobileInput.boost = false;
@@ -741,29 +848,98 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         setShowDeathModal(true);
       }
 
-      if (!isPausedRef.current) {
-        player.trail.unshift({ x: player.x, y: player.y });
-        if (player.trail.length > player.maxTrail) player.trail.pop();
+      // Draw & Check Powerups
+      for (let pIdx = powerUps.length - 1; pIdx >= 0; pIdx--) {
+        const pup = powerUps[pIdx];
+        pup.pulse += 0.05;
+        const pulseR = pup.radius + Math.sin(pup.pulse) * 3;
+
+        ctx.save();
+        ctx.shadowBlur = 18;
+        const colorMap = { magnet: '#a855f7', phase: '#38bdf8', overclock: '#ffaa00' };
+        ctx.shadowColor = colorMap[pup.type];
+        ctx.fillStyle = colorMap[pup.type];
+        ctx.beginPath();
+        ctx.arc(pup.x, pup.y, pulseR, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 9px "JetBrains Mono"';
+        ctx.fillText(pup.type.toUpperCase(), pup.x - 14, pup.y - 12);
+        ctx.restore();
+
+        // Check collection
+        const pDist = Math.hypot(player.x - pup.x, player.y - pup.y);
+        if (pDist < player.thickness + pup.radius + 8) {
+          activePowerUps.set(pup.type, { type: pup.type, duration: 420, maxDuration: 420 });
+          sounds.playBeep(880);
+          emitSparks(pup.x, pup.y, colorMap[pup.type], 25, 2.5);
+          addScorePopup(pup.x, pup.y - 20, `${pup.type.toUpperCase()} ACTIVATED!`, colorMap[pup.type], 1.2);
+          powerUps.splice(pIdx, 1);
+        }
       }
 
-      if (!isPausedRef.current && boostActive && !hasOverclock) {
-        localScore = Math.max(10, localScore - 0.2);
-        if (frame % 3 === 0) emitSparks(player.x, player.y, player.color, 2, 1.2);
-      }
-
+      // Draw & Eat Food Orbs
       for (let i = orbs.length - 1; i >= 0; i--) {
         const orb = orbs[i];
-        const dist = Math.hypot(player.x - orb.x, player.y - orb.y);
+        orb.pulse += 0.05;
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+        orb.vx *= 0.98;
+        orb.vy *= 0.98;
 
+        // Magnet attraction
+        if (hasMagnet) {
+          const mDist = Math.hypot(player.x - orb.x, player.y - orb.y);
+          if (mDist < 260) {
+            const pullAngle = Math.atan2(player.y - orb.y, player.x - orb.x);
+            orb.x += Math.cos(pullAngle) * 6;
+            orb.y += Math.sin(pullAngle) * 6;
+
+            // Draw luminous tractor beam
+            if (i % 6 === 0) {
+              ctx.save();
+              ctx.strokeStyle = 'rgba(168, 85, 247, 0.25)';
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(orb.x, orb.y);
+              ctx.lineTo(player.x, player.y);
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        }
+
+        // Draw Orb
+        ctx.save();
+        ctx.shadowBlur = orb.isLoot ? 16 : 8;
+        ctx.shadowColor = orb.color;
+        ctx.fillStyle = orb.color;
+        ctx.beginPath();
+        const r = orb.radius + Math.sin(orb.pulse) * 0.8;
+        ctx.arc(orb.x, orb.y, Math.max(1.5, r), 0, Math.PI * 2);
+        ctx.fill();
+
+        // Star orb glint
+        if (orb.type === 'star') {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, r * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // Player eats orb
+        const dist = Math.hypot(player.x - orb.x, player.y - orb.y);
         if (dist < player.thickness + orb.radius + 6) {
           if (!isPausedRef.current) {
             const comboMult = 1 + Math.min(4, currentCombo * 0.5);
             const gainedScore = Math.floor(orb.value * comboMult);
 
             localScore += gainedScore;
-            player.maxTrail = Math.min(140, player.maxTrail + (orb.isLoot ? 2 : 1));
+            player.maxTrail = Math.min(180, player.maxTrail + (orb.isLoot ? 2 : 1));
 
-            emitSparks(orb.x, orb.y, orb.color, orb.isLoot ? 12 : 8, 1.2);
+            emitSparks(orb.x, orb.y, orb.color, orb.isLoot ? 12 : 6, 1.2);
             addScorePopup(orb.x, orb.y - 10, `+${gainedScore}`, orb.color);
             sounds.playOrbChime(orb.value);
 
@@ -780,20 +956,19 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         }
       }
 
-      const hasPhase = activePowerUps.has('phase');
-
+      // BOT LOGIC & COMBAT
       bots.forEach((bot, bIdx) => {
         if (isPausedRef.current) return;
 
-        // Fast Passer Shock Trail Particles
         if (bot.isFastPasser && frame % 2 === 0) {
           emitSparks(bot.x, bot.y, '#ff0055', 2, 2.0);
         }
 
+        // Steer toward orbs
         let closestOrb: Orb | null = null;
-        let minDist = 220;
+        let minDist = 200;
 
-        for (let i = 0; i < orbs.length; i++) {
+        for (let i = 0; i < orbs.length; i += 2) {
           const d = Math.hypot(orbs[i].x - bot.x, orbs[i].y - bot.y);
           if (d < minDist) {
             minDist = d;
@@ -814,14 +989,15 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         bot.x += Math.cos(bot.angle) * bot.speed;
         bot.y += Math.sin(bot.angle) * bot.speed;
 
-        const botDistFromCenter = Math.hypot(bot.x - ARENA_CENTER_X, bot.y - ARENA_CENTER_Y);
-        if (botDistFromCenter >= ARENA_RADIUS - 15) {
+        const botDist = Math.hypot(bot.x - ARENA_CENTER_X, bot.y - ARENA_CENTER_Y);
+        if (botDist >= ARENA_RADIUS - 15) {
           bots[bIdx] = createSingleBot(bIdx);
         }
 
         bot.trail.unshift({ x: bot.x, y: bot.y });
         if (bot.trail.length > bot.maxTrail) bot.trail.pop();
 
+        // Bot eats orbs
         for (let i = orbs.length - 1; i >= 0; i--) {
           const d = Math.hypot(orbs[i].x - bot.x, orbs[i].y - bot.y);
           if (d < bot.thickness + orbs[i].radius + 5) {
@@ -834,32 +1010,32 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           }
         }
 
-        // PLAYER CUTS BOT
+        // 1. PLAYER CUTS BOT (Player Victory)
         for (let t = 6; t < player.trail.length; t++) {
           const td = Math.hypot(player.trail[t].x - bot.x, player.trail[t].y - bot.y);
-          if (td < player.thickness + 5) {
+          if (td < player.thickness + 6) {
             localKills += 1;
             currentCombo += 1;
-            comboTimer = 240;
+            comboTimer = 260;
             setComboCount(currentCombo);
 
-            const baseKillScore = bot.isFastPasser ? 900 : 420;
-            const comboBonus = currentCombo * 150;
+            const baseKillScore = bot.isFastPasser ? 1200 : 500;
+            const comboBonus = currentCombo * 180;
             const totalKillAward = baseKillScore + comboBonus;
             localScore += totalKillAward;
 
-            screenShake = 14;
-            emitSparks(bot.x, bot.y, bot.color, 45, 3.5);
+            screenShake = 16;
+            emitSparks(bot.x, bot.y, bot.color, 50, 4.0);
 
-            const comboLabel = currentCombo > 1 ? ` (${currentCombo}X COMBO!)` : '';
-            addScorePopup(bot.x, bot.y - 20, `${bot.name} SHATTERED! +${totalKillAward}${comboLabel}`, '#ffb2b7', 1.3);
+            const comboLabel = currentCombo > 1 ? ` (${currentCombo}X SLINK COMBO!)` : '';
+            addScorePopup(bot.x, bot.y - 20, `${bot.name} SHATTERED! +${totalKillAward}${comboLabel}`, '#ff007f', 1.3);
             sounds.playShatter();
 
-            dropLootOrbs(bot.x, bot.y, bot.score || 350);
+            dropLootOrbs(bot.x, bot.y, bot.score || 450);
 
-            setAlertText(currentCombo > 1 ? `MULTI-KILL x${currentCombo}!` : `${bot.name} ELIMINATED`);
-            setAlertColor('#ffb2b7');
-            setTimeout(() => setAlertText('TRAIL COLLISION'), 2600);
+            setAlertText(currentCombo > 1 ? `MULTI-SLINK x${currentCombo}!` : `${bot.name} ELIMINATED`);
+            setAlertColor('#ff007f');
+            setTimeout(() => setAlertText('ARENA LIVE'), 2600);
 
             setKills(localKills);
             setScore(Math.floor(localScore));
@@ -873,23 +1049,23 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           }
         }
 
-        // BOT CUTS PLAYER
+        // 2. BOT CUTS PLAYER (Bot Victory unless Phase Shield active)
         if (!hasPhase) {
           for (let t = 6; t < bot.trail.length; t++) {
             const pd = Math.hypot(bot.trail[t].x - player.x, bot.trail[t].y - player.y);
             if (pd < player.thickness + 5) {
               screenShake = 18;
-              emitSparks(player.x, player.y, player.color, 40, 3);
-              addScorePopup(player.x, player.y - 20, `KILLED BY ${bot.name}`, '#ffb2b7');
+              emitSparks(player.x, player.y, player.color, 45, 3.5);
+              addScorePopup(player.x, player.y - 20, `ELIMINATED BY ${bot.name}`, '#ff007f');
               sounds.playShatter();
 
               dropLootOrbs(player.x, player.y, localScore);
 
               setAlertText(`KILLED BY ${bot.name}`);
-              setAlertColor('#ffb2b7');
-              setTimeout(() => setAlertText('TRAIL COLLISION'), 2600);
+              setAlertColor('#ff007f');
+              setTimeout(() => setAlertText('ARENA LIVE'), 2600);
 
-              bot.score = (bot.score || 0) + 420;
+              bot.score = (bot.score || 0) + 500;
               localScore = Math.max(0, localScore - 200);
 
               setScore(Math.floor(localScore));
@@ -900,6 +1076,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
               player.y = ARENA_CENTER_Y;
               player.angle = -Math.PI / 2;
               player.trail = [];
+              for (let i = 0; i < 22; i++) player.trail.push({ x: player.x, y: player.y + i * 3 });
 
               isBoosting = false;
               mobileInput.boost = false;
@@ -915,243 +1092,36 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         }
       });
 
-      // RENDER BOT TRAILS & SOIL CREATURE HEADS
+      // DRAW BOT WORMS
       bots.forEach((bot) => {
-        if (bot.trail.length > 2) {
-          ctx.save();
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.shadowBlur = bot.isFastPasser ? 22 : 14;
-          ctx.shadowColor = bot.isFastPasser ? '#ff0055' : bot.color;
-          ctx.strokeStyle = bot.color;
-          ctx.lineWidth = bot.thickness;
-
-          ctx.beginPath();
-          ctx.moveTo(bot.trail[0].x, bot.trail[0].y);
-          for (let i = 1; i < bot.trail.length; i++) {
-            ctx.lineTo(bot.trail[i].x, bot.trail[i].y);
-          }
-          ctx.stroke();
-
-          ctx.shadowBlur = 4;
-          ctx.shadowColor = '#ffffff';
-          ctx.strokeStyle = bot.coreColor || '#ffffff';
-          ctx.lineWidth = 2.5;
-          ctx.stroke();
-
-          ctx.save();
-          ctx.translate(bot.x, bot.y);
-          ctx.rotate(bot.angle + Math.PI / 2);
-
-          // Render distinct soil creatures
-          if (bot.creatureType === 'worm') {
-            // Earthworm Head & Rings
-            ctx.fillStyle = bot.color;
-            ctx.beginPath();
-            ctx.arc(0, -6, 7, 0, Math.PI * 2);
-            ctx.fill();
-            // Clitellum (band)
-            ctx.fillStyle = '#ffb2b7';
-            ctx.fillRect(-6, 0, 12, 6);
-          } else if (bot.creatureType === 'snake') {
-            // Snake head with eyes and tongue
-            ctx.fillStyle = bot.color;
-            ctx.beginPath();
-            ctx.moveTo(0, -12);
-            ctx.lineTo(-7, 4);
-            ctx.lineTo(7, 4);
-            ctx.closePath();
-            ctx.fill();
-
-            // Eyes
-            ctx.fillStyle = '#ffff00';
-            ctx.beginPath();
-            ctx.arc(-3, -3, 1.8, 0, Math.PI * 2);
-            ctx.arc(3, -3, 1.8, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Flickering Tongue
-            if (frame % 20 < 10) {
-              ctx.strokeStyle = '#ff0033';
-              ctx.lineWidth = 1.5;
-              ctx.beginPath();
-              ctx.moveTo(0, -12);
-              ctx.lineTo(0, -18);
-              ctx.lineTo(-2, -21);
-              ctx.moveTo(0, -18);
-              ctx.lineTo(2, -21);
-              ctx.stroke();
-            }
-          } else if (bot.creatureType === 'centipede') {
-            // Centipede Head & Legs
-            ctx.fillStyle = bot.color;
-            ctx.beginPath();
-            ctx.arc(0, -4, 8, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Legs protruding
-            ctx.strokeStyle = '#ffbb00';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-8, -4); ctx.lineTo(-14, -8);
-            ctx.moveTo(8, -4); ctx.lineTo(14, -8);
-            ctx.moveTo(-8, 2); ctx.lineTo(-14, 6);
-            ctx.moveTo(8, 2); ctx.lineTo(14, 6);
-            ctx.stroke();
-          } else if (bot.creatureType === 'ant') {
-            // Ant Head, Mandibles, Antennae
-            ctx.fillStyle = bot.color;
-            ctx.beginPath();
-            ctx.arc(0, -6, 6, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Antennae
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.moveTo(-2, -10); ctx.lineTo(-7, -16);
-            ctx.moveTo(2, -10); ctx.lineTo(7, -16);
-            ctx.stroke();
-          } else if (bot.creatureType === 'slug') {
-            // Slug Rounded Head & Stalk Eyes
-            ctx.fillStyle = bot.color;
-            ctx.beginPath();
-            ctx.arc(0, 0, 9, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Eye stalks
-            ctx.strokeStyle = bot.color;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-3, -4); ctx.lineTo(-6, -12);
-            ctx.moveTo(3, -4); ctx.lineTo(6, -12);
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(-6, -12, 2, 0, Math.PI * 2);
-            ctx.arc(6, -12, 2, 0, Math.PI * 2);
-            ctx.fill();
-          } else {
-            // Default Craft Head
-            const botCapW = 12;
-            const botCapH = 24;
-            const botCapR = botCapW / 2;
-
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = bot.color;
-            ctx.fillStyle = bot.color;
-
-            ctx.beginPath();
-            ctx.roundRect(-botCapW / 2, -botCapH / 2, botCapW, botCapH, botCapR);
-            ctx.fill();
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.beginPath();
-            ctx.roundRect(-botCapW / 2 + 2, -botCapH / 2 + 2, botCapW - 4, botCapH / 2, botCapR);
-            ctx.fill();
-
-            const botEyeY = -botCapH / 4;
-            const botEyeOffset = botCapW / 3;
-            const botEyeRadius = botCapW / 5;
-            const botPupilRadius = botEyeRadius / 2;
-
-            [-botEyeOffset, botEyeOffset].forEach((offsetX) => {
-              ctx.fillStyle = '#ffffff';
-              ctx.beginPath();
-              ctx.arc(offsetX, botEyeY, botEyeRadius, 0, Math.PI * 2);
-              ctx.fill();
-
-              ctx.fillStyle = '#000000';
-              ctx.beginPath();
-              ctx.arc(offsetX, botEyeY, botPupilRadius, 0, Math.PI * 2);
-              ctx.fill();
-            });
-          }
-
-          ctx.restore();
-
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = bot.isFastPasser ? '#ff0055' : bot.color;
-          ctx.font = '700 10px "JetBrains Mono", monospace';
-          ctx.fillText(bot.name, bot.x - 14, bot.y - 14);
-
-          ctx.restore();
-        }
+        drawSlinkWorm(
+          bot.trail,
+          bot.x,
+          bot.y,
+          bot.angle,
+          bot.color,
+          bot.coreColor,
+          bot.eyeColor,
+          bot.thickness,
+          false,
+          bot.isFastPasser
+        );
       });
 
-      // RENDER PLAYER TRAIL
-      if (player.trail.length > 2) {
-        ctx.save();
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.globalAlpha = hasPhase ? 0.45 : 1.0;
-
-        ctx.shadowBlur = boostActive ? 26 : 18;
-        ctx.shadowColor = hasPhase ? '#3b82f6' : player.color;
-        ctx.strokeStyle = hasPhase ? '#3b82f6' : player.color;
-        ctx.lineWidth = boostActive ? player.thickness + 2 : player.thickness;
-
-        ctx.beginPath();
-        ctx.moveTo(player.trail[0].x, player.trail[0].y);
-        for (let i = 1; i < player.trail.length; i++) {
-          ctx.lineTo(player.trail[i].x, player.trail[i].y);
-        }
-        ctx.stroke();
-
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = '#ffffff';
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        ctx.save();
-        ctx.translate(player.x, player.y);
-        ctx.rotate(player.angle + Math.PI / 2);
-
-        const capW = boostActive ? 14 : 12;
-        const capH = boostActive ? 28 : 24;
-        const capR = capW / 2;
-
-        ctx.shadowBlur = boostActive ? 20 : 12;
-        ctx.shadowColor = player.color;
-        ctx.fillStyle = player.color;
-
-        ctx.beginPath();
-        ctx.roundRect(-capW / 2, -capH / 2, capW, capH, capR);
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.beginPath();
-        ctx.roundRect(-capW / 2 + 2, -capH / 2 + 2, capW - 4, capH / 2, capR);
-        ctx.fill();
-
-        const eyeY = -capH / 4;
-        const eyeOffset = capW / 3;
-        const eyeRadius = capW / 5;
-        const pupilRadius = eyeRadius / 2;
-
-        [-eyeOffset, eyeOffset].forEach((offsetX) => {
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(offsetX, eyeY, eyeRadius, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = '#000000';
-          ctx.beginPath();
-          ctx.arc(offsetX, eyeY, pupilRadius, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        ctx.restore();
-
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = player.color;
-        ctx.font = '700 10px "JetBrains Mono", monospace';
-        ctx.fillText(callsign || 'CYBER_GHOST', player.x - 18, player.y - 16);
-
-        ctx.restore();
-      }
+      // DRAW PLAYER WORM
+      drawSlinkWorm(
+        player.trail,
+        player.x,
+        player.y,
+        player.angle,
+        player.color,
+        '#ffffff',
+        '#002820',
+        player.thickness,
+        true,
+        boostActive,
+        hasPhase
+      );
 
       // PARTICLES
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -1189,8 +1159,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
         ctx.save();
         ctx.globalAlpha = ft.life;
-        const textSize = Math.floor(11 * (ft.scale || 1));
-        ctx.font = `700 ${textSize}px "JetBrains Mono", monospace`;
+        const textSize = Math.floor(12 * (ft.scale || 1));
+        ctx.font = `bold ${textSize}px "JetBrains Mono", monospace`;
         ctx.fillStyle = ft.color;
         ctx.shadowBlur = 10;
         ctx.shadowColor = ft.color;
@@ -1200,18 +1170,19 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
       ctx.restore();
 
-      // ROSTER UPDATE
+      // UPDATE LEADERBOARD ROSTER
       if (frame % 30 === 0 && !isPausedRef.current) {
         try {
           setRoster(() => {
             const sortedBots = [...bots]
               .sort((a, b) => b.score - a.score)
-              .map((b) => ({ name: b.name, score: Math.floor(b.score || 0) }));
+              .map((b) => ({ name: b.name, score: Math.floor(b.score || 0), color: b.color }));
 
             const playerEntry = {
-              name: callsign || 'CYBER_GHOST',
+              name: callsign || 'SLINK_VIPER',
               score: Math.floor(localScore),
               isPlayer: true,
+              color: player.color,
             };
 
             return [...sortedBots, playerEntry]
@@ -1244,8 +1215,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     <div
       ref={containerRef}
       className={`
-        relative rounded-xl bg-[#07111a] border border-[#00f5d4]/40
-        shadow-[0_0_30px_rgba(0,245,212,0.15),0_8px_40px_rgba(0,0,0,0.9)]
+        relative rounded-2xl bg-[#060814] border border-cyan-500/30
+        shadow-[0_0_40px_rgba(0,245,212,0.15),0_12px_45px_rgba(0,0,0,0.8)]
         ${isFullscreen ? 'overflow-visible' : 'overflow-hidden'}
         flex flex-col justify-between p-4 select-none group/arena
         ${isFullscreen ? 'w-full h-full min-h-screen' : 'h-[min(78vh,620px)] min-h-[440px] sm:min-h-[500px] sm:h-[600px]'}
@@ -1253,31 +1224,42 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block cursor-crosshair z-0" />
 
+      {/* START PLAY OVERLAY */}
       {isPaused && !showDeathModal && (
-        <button
-          type="button"
-          onClick={playGame}
-          className="absolute top-[58%] left-1/2 z-30 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 border border-[#00f5d4]/60 bg-transparent px-5 py-2 font-mono text-xs font-bold tracking-[0.24em] text-[#d7fff3] uppercase shadow-[0_0_18px_rgba(0,245,212,0.28)] backdrop-blur-sm transition-all hover:border-[#00f5d4] hover:bg-[#00f5d4]/10 hover:text-[#00f5d4]"
-        >
-          <Play className="h-4 w-4 fill-current" />
-          Play
-        </button>
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/40 backdrop-blur-xs pointer-events-auto">
+          <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-cyan-500/30 bg-[#0c1026]/90 shadow-[0_0_40px_rgba(0,245,212,0.3)]">
+            <span className="font-mono text-xs text-cyan-300 font-bold uppercase tracking-widest">
+              SLINK ARENA ENGINE READY
+            </span>
+            <button
+              type="button"
+              onClick={playGame}
+              className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#00f5d4] via-[#00ff88] to-[#00f5d4] px-8 py-3.5 font-display text-sm font-black tracking-widest text-[#002820] uppercase shadow-[0_0_25px_rgba(0,245,212,0.6)] hover:scale-105 transition-all cursor-pointer"
+            >
+              <Play className="h-4 w-4 fill-current" />
+              SLITHER TO PLAY
+            </button>
+            <span className="font-mono text-[10px] text-slate-400">
+              Steer: Move cursor · Boost: Hold Click
+            </span>
+          </div>
+        </div>
       )}
 
       {/* ACTIVE POWER-UP HUD */}
-      <div className="absolute top-[132px] left-4 z-20 flex flex-col gap-2 pointer-events-none md:top-[166px]">
+      <div className="absolute top-[135px] left-4 z-20 flex flex-col gap-2 pointer-events-none md:top-[160px]">
         {activeBuffs.map((buff) => (
           <div
             key={buff.type}
-            className="flex items-center gap-2 bg-[#0d1722]/90 border border-[#00f5d4]/30 px-3 py-1.5 rounded-md backdrop-blur-md shadow-lg"
+            className="flex items-center gap-2 bg-[#0c1026]/90 border border-white/20 px-3 py-1.5 rounded-lg backdrop-blur-md shadow-lg"
           >
             {buff.type === 'magnet' && <Magnet className="w-4 h-4 text-purple-400 animate-pulse" />}
-            {buff.type === 'phase' && <Shield className="w-4 h-4 text-blue-400 animate-pulse" />}
-            {buff.type === 'overclock' && <Zap className="w-4 h-4 text-yellow-400 animate-pulse" />}
+            {buff.type === 'phase' && <Shield className="w-4 h-4 text-cyan-400 animate-pulse" />}
+            {buff.type === 'overclock' && <Zap className="w-4 h-4 text-amber-400 animate-pulse" />}
             <span className="font-mono text-[10px] text-white font-bold uppercase">{buff.type}</span>
-            <div className="w-12 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+            <div className="w-14 h-1.5 bg-gray-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#00f5d4] transition-all duration-75"
+                className="h-full bg-gradient-to-r from-cyan-400 to-pink-500 transition-all duration-75"
                 style={{ width: `${buff.percent}%` }}
               />
             </div>
@@ -1287,9 +1269,9 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
       {/* MULTI-KILL COMBO OVERLAY */}
       {comboCount > 1 && (
-        <div className="absolute top-24 right-1/2 translate-x-1/2 z-20 pointer-events-none animate-bounce">
-          <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white font-mono text-xs md:text-sm font-black px-4 py-1 rounded-full shadow-[0_0_20px_rgba(255,0,85,0.8)] border border-white/40 tracking-widest uppercase">
-            🔥 {comboCount}X MULTI-KILL STREAK! 🔥
+        <div className="absolute top-20 right-1/2 translate-x-1/2 z-20 pointer-events-none animate-bounce">
+          <div className="bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 text-white font-mono text-xs md:text-sm font-black px-5 py-1.5 rounded-full shadow-[0_0_25px_rgba(255,0,127,0.8)] border border-white/40 tracking-widest uppercase">
+            🔥 {comboCount}X SLINK STREAK! 🔥
           </div>
         </div>
       )}
@@ -1303,7 +1285,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           <button
             data-mobile-control="true"
             type="button"
-            className="absolute left-0 bottom-3 w-[78px] h-[78px] rounded-full border border-[#f9bd22]/60 bg-[#1b1913]/90 text-[#ffdf9f] font-mono text-[10px] font-bold tracking-widest shadow-[0_0_20px_rgba(249,189,34,0.18)] active:scale-95 active:bg-[#2b2216] touch-none select-none flex items-center justify-center z-40"
+            className="absolute left-0 bottom-3 w-[78px] h-[78px] rounded-full border border-amber-400/60 bg-[#1b1913]/90 text-amber-300 font-mono text-[10px] font-bold tracking-widest shadow-[0_0_20px_rgba(255,170,0,0.3)] active:scale-95 active:bg-[#2b2216] touch-none select-none flex items-center justify-center z-40 cursor-pointer pointer-events-auto"
             onPointerDown={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -1323,7 +1305,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
           <div
             data-mobile-control="true"
-            className="absolute right-0 bottom-0 w-[104px] h-[104px] rounded-full border border-[#00f5d4]/35 bg-[#07111a]/80 backdrop-blur-sm shadow-[0_0_22px_rgba(0,245,212,0.12)] pointer-events-auto touch-none select-none z-40"
+            className="absolute right-0 bottom-0 w-[104px] h-[104px] rounded-full border border-cyan-400/40 bg-[#060814]/85 backdrop-blur-sm shadow-[0_0_25px_rgba(0,245,212,0.2)] pointer-events-auto touch-none select-none z-40"
             onPointerDown={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -1379,10 +1361,10 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
               mobileInputRef.current.dy = -1;
             }}
           >
-            <div className="absolute inset-2 rounded-full border border-[#00f5d4]/15" />
-            <div className="absolute inset-5 rounded-full border border-[#00f5d4]/10" />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-[#00f5d4]/70 bg-[#0b2027]/95 shadow-[0_0_14px_rgba(0,245,212,0.25)] flex items-center justify-center">
-              <span className="text-[8px] font-mono tracking-widest text-[#83948f]">MOVE</span>
+            <div className="absolute inset-2 rounded-full border border-cyan-400/20" />
+            <div className="absolute inset-5 rounded-full border border-cyan-400/10" />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-cyan-400/80 bg-cyan-950/90 shadow-[0_0_15px_rgba(0,245,212,0.3)] flex items-center justify-center">
+              <span className="text-[9px] font-mono font-bold tracking-widest text-cyan-300">MOVE</span>
             </div>
           </div>
         </div>
@@ -1390,26 +1372,52 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
       {hintVisible && (
         <div className="absolute bottom-[125px] left-1/2 -translate-x-1/2 z-20 pointer-events-none whitespace-nowrap">
-          <span className="font-mono text-[8px] tracking-widest text-[#26fedc] uppercase px-2.5 py-1 rounded bg-[#080f18]/80 border border-[#00f5d4]/25">
-            DRAG TO STEER · HOLD BOOST
+          <span className="font-mono text-[9px] tracking-widest text-[#00f5d4] uppercase px-3 py-1.5 rounded-lg bg-[#060814]/90 border border-cyan-400/40 shadow-md">
+            MOVE CURSOR TO STEER · HOLD BOOST TO DASH
           </span>
         </div>
       )}
 
       {/* DEATH MODAL */}
       {showDeathModal && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/5 backdrop-blur-[1px]">
-          <div className="w-[320px] rounded-2xl border border-[#00f5d4]/35 bg-[#0d1722]/25 p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.3),0_0_24px_rgba(0,245,212,0.1)] backdrop-blur-sm">
-            <div className="font-mono text-[14px] font-bold uppercase tracking-wider text-[#ffb2b7] drop-shadow-[0_0_8px_rgba(255,178,183,0.55)]">You Were Eliminated</div>
-            <div className="mt-2 font-mono text-[12px] text-[#dce3f0]">
-              Final Score: {lastScore?.toLocaleString() || 0}
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md">
+          <div className="w-[340px] rounded-3xl border border-cyan-500/40 bg-[#0c1026]/95 p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(0,245,212,0.2)]">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-300 font-mono text-[10px] font-bold uppercase tracking-wider mb-2">
+              <Flame className="w-3.5 h-3.5 text-pink-400" />
+              WORM SHATTERED
             </div>
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <button onClick={shareThenRestart} className="flex items-center gap-2 rounded-lg border border-[#70bfff]/55 bg-[#1d9bf0]/25 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-[#70bfff] hover:bg-[#1d9bf0]/55 hover:shadow-[0_0_16px_rgba(112,191,255,0.28)]">
+
+            <div className="font-display text-2xl font-black uppercase tracking-tight text-white">
+              ROUND COMPLETE
+            </div>
+
+            <div className="my-4 p-4 rounded-xl bg-[#060814] border border-white/10 flex flex-col gap-2">
+              <div className="flex justify-between items-center font-mono text-xs">
+                <span className="text-slate-400">Final Score:</span>
+                <span className="text-cyan-300 font-black text-base">{lastScore?.toLocaleString() || 0}</span>
+              </div>
+              <div className="flex justify-between items-center font-mono text-xs">
+                <span className="text-slate-400">Rivals Shattered:</span>
+                <span className="text-pink-300 font-bold">{kills}</span>
+              </div>
+              <div className="flex justify-between items-center font-mono text-xs border-t border-white/10 pt-2">
+                <span className="text-slate-400">Best Today:</span>
+                <span className="text-amber-300 font-bold">{bestToday.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={shareThenRestart}
+                className="flex items-center gap-2 rounded-xl border border-sky-400/60 bg-sky-500/20 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wide text-white hover:bg-sky-500/40 transition-all cursor-pointer"
+              >
                 <Share2 className="h-4 w-4" />
-                Share on X
+                Share
               </button>
-              <button onClick={playAgain} className="flex items-center gap-2 rounded-lg border border-[#00f5d4]/65 bg-[#00f5d4]/25 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wide text-[#d7fff3] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-[#00f5d4] hover:bg-[#00f5d4]/55 hover:text-[#00382f] hover:shadow-[0_0_16px_rgba(0,245,212,0.28)]">
+              <button
+                onClick={playAgain}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00f5d4] via-[#00ff88] to-[#00f5d4] px-5 py-2.5 font-mono text-xs font-black uppercase tracking-wide text-[#002820] hover:scale-105 shadow-[0_0_20px_rgba(0,245,212,0.5)] transition-all cursor-pointer"
+              >
                 <RotateCcw className="h-4 w-4" />
                 Play Again
               </button>
@@ -1420,60 +1428,75 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
       {/* TOP HUD */}
       <div className="relative z-10 w-full flex items-start justify-between gap-4 pointer-events-none">
-        <div className="pointer-events-auto bg-[#0d1722]/90 border border-[#00f5d4]/40 rounded-lg p-2 md:p-3 shadow-[0_0_15px_rgba(0,245,212,0.15)] flex flex-col min-w-[100px] md:min-w-[130px] backdrop-blur-md">
-          <span className="font-mono text-[8px] md:text-[9px] text-[#83948f] tracking-widest uppercase">SCORE</span>
-          <span className="font-mono text-[18px] md:text-[28px] leading-tight font-bold text-[#d7fff3] my-0.5 tracking-tight drop-shadow-[0_0_8px_rgba(0,245,212,0.4)]">
+        {/* Score Card */}
+        <div className="pointer-events-auto bg-[#0c1026]/90 border border-cyan-400/40 rounded-xl p-3 shadow-[0_0_20px_rgba(0,245,212,0.15)] flex flex-col min-w-[110px] md:min-w-[140px] backdrop-blur-md">
+          <span className="font-mono text-[9px] text-cyan-400/80 tracking-widest uppercase font-bold">
+            SLINK SCORE
+          </span>
+          <span className="font-display text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-[0_0_10px_rgba(0,245,212,0.5)]">
             {score.toLocaleString()}
           </span>
-          <div className="flex items-center justify-between text-[9px] md:text-[10px] font-mono text-[#83948f] pt-1 border-t border-[#3a4a46]/40 mt-1">
+          <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 pt-1 border-t border-white/10 mt-1">
             <span>KILLS</span>
-            <span className="text-[#dce3f0] font-bold">{kills}</span>
+            <span className="text-pink-400 font-bold">{kills}</span>
           </div>
-          <div className="flex items-center justify-between text-[9px] md:text-[10px] font-mono text-[#83948f] mt-0.5">
-            <span>BEST TODAY</span>
-            <span className="text-[#00f5d4] font-bold">{bestToday.toLocaleString()}</span>
+          <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 mt-0.5">
+            <span>RECORD</span>
+            <span className="text-amber-400 font-bold">{bestToday.toLocaleString()}</span>
           </div>
         </div>
 
+        {/* Right Controls & Leaderboard */}
         <div className="pointer-events-auto flex flex-col items-end gap-2">
-          <div>
+          <div className="flex items-center gap-2">
             {onToggleFullscreen && (
               <button
                 onClick={() => {
                   sounds.playBeep(600);
                   onToggleFullscreen();
                 }}
-                className="text-[#83948f] hover:text-[#00f5d4] transition-colors cursor-pointer p-1 rounded hover:bg-[#00f5d4]/10"
+                className="text-slate-300 hover:text-[#00f5d4] transition-colors cursor-pointer p-1.5 rounded-lg bg-[#0c1026]/80 border border-white/10 hover:border-cyan-400/50"
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
             )}
           </div>
 
+          {/* Alert Status Pill */}
           <div
-            className="hidden md:flex bg-[#26131c]/90 border rounded-full px-3 py-1 items-center gap-1.5 shadow-[0_0_12px_rgba(255,178,183,0.25)] backdrop-blur-md"
-            style={{ borderColor: alertColor + '60' }}
+            className="hidden md:flex bg-[#0c1026]/90 border rounded-full px-3 py-1 items-center gap-1.5 shadow-[0_0_12px_rgba(0,245,212,0.2)] backdrop-blur-md"
+            style={{ borderColor: alertColor + '70' }}
           >
-            <span className="w-2 h-2 rounded-full animate-pulse shadow-[0_0_6px_#ffb2b7]" style={{ backgroundColor: alertColor }} />
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: alertColor }} />
             <span className="font-mono text-[9px] font-bold tracking-wider uppercase" style={{ color: alertColor }}>
               {alertText}
             </span>
           </div>
 
-          <div className="hidden md:flex relative bg-[#0d1722]/90 border border-[#00f5d4]/40 rounded-lg p-3 shadow-[0_0_15px_rgba(0,245,212,0.15)] min-w-[160px] flex-col backdrop-blur-md">
-            <div className="flex items-center justify-between text-[9px] font-mono text-[#83948f] uppercase pb-1 mb-1 border-b border-[#3a4a46]/40">
-              <span className="tracking-wider">LIVE MATCH</span>
+          {/* Mini Roster */}
+          <div className="hidden md:flex relative bg-[#0c1026]/90 border border-cyan-400/30 rounded-xl p-3 shadow-[0_0_20px_rgba(0,0,0,0.6)] min-w-[170px] flex-col backdrop-blur-md">
+            <div className="flex items-center justify-between text-[9px] font-mono text-slate-300 uppercase pb-1 mb-1 border-b border-white/10">
+              <span className="tracking-wider flex items-center gap-1 font-bold text-cyan-300">
+                <Trophy className="w-3 h-3 text-amber-400" /> TOP SLINKS
+              </span>
             </div>
-            <div className="flex flex-col gap-0.5 font-mono text-[10px]">
+            <div className="flex flex-col gap-1 font-mono text-[10px]">
               {roster.map((item, idx) => (
-                <div key={idx} className={`flex items-center justify-between ${item.isPlayer ? 'text-[#00f5d4] font-bold pt-0.5 border-t border-[#3a4a46]/30' : 'text-[#dce3f0]'}`}>
-                  <span>
-                    <strong className={item.isPlayer ? 'text-[#00f5d4] mr-1' : 'text-[#83948f] mr-1'}>
-                      {(idx + 1).toString().padStart(2, '0')}
-                    </strong>{' '}
+                <div
+                  key={idx}
+                  className={`flex items-center justify-between ${
+                    item.isPlayer
+                      ? 'text-[#00f5d4] font-bold py-0.5 px-1 rounded bg-cyan-500/15 border border-cyan-400/30'
+                      : 'text-slate-300'
+                  }`}
+                >
+                  <span className="truncate max-w-[100px] flex items-center gap-1">
+                    <span className={idx === 0 ? 'text-amber-400 font-black' : 'text-slate-500'}>
+                      {idx + 1}.
+                    </span>{' '}
                     {item.name}
                   </span>
-                  <span className={item.isPlayer ? 'text-[#00f5d4]' : 'text-[#00dfc1] font-bold'}>
+                  <span className={item.isPlayer ? 'text-[#00f5d4]' : 'text-slate-200 font-bold'}>
                     {item.score}
                   </span>
                 </div>

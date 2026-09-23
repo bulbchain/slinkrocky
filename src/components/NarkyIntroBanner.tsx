@@ -2,194 +2,142 @@ import React from 'react';
 import {
   Swords,
   Users2,
-  CircleDollarSign,
-  Radio,
   Zap,
+  Flame,
+  Award,
+  Sparkles,
 } from 'lucide-react';
+import slinkHero from '../assets/images/slink_arena_hero_1790168852962.jpg';
+import slinkLogo from '../assets/images/slink_creature_logo_1790169607687.jpg';
 
-const features = [
+const highlights = [
   {
-    label: 'Play with your friends for free',
+    label: 'Instant 60FPS Free-for-All',
     icon: Users2,
     color: 'text-[#00f5d4]',
+    bg: 'bg-cyan-500/10 border-cyan-500/30',
   },
   {
-    label: 'Challenge rivals',
+    label: 'Kinetic Boost & Cut Combat',
     icon: Swords,
-    color: 'text-[#f9bd22]',
+    color: 'text-[#ff007f]',
+    bg: 'bg-pink-500/10 border-pink-500/30',
   },
   {
-    label: 'Bet your SOL',
-    icon: CircleDollarSign,
-    color: 'text-[#26fedc]',
+    label: 'Chain Multi-Kill Bounties',
+    icon: Flame,
+    color: 'text-[#ffaa00]',
+    bg: 'bg-amber-500/10 border-amber-500/30',
+  },
+  {
+    label: 'Climb Apex Worm Leaderboard',
+    icon: Award,
+    color: 'text-[#a855f7]',
+    bg: 'bg-purple-500/10 border-purple-500/30',
   },
 ];
 
-export const NarkyIntroBanner = () => {
+export const NarkyIntroBanner: React.FC = () => {
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-3">
-      <div className="relative overflow-hidden rounded-[28px] border border-[#00f5d4]/20 bg-[#0b1118] px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 shadow-[0_25px_80px_rgba(0,0,0,0.55)]">
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
+      <div className="relative overflow-hidden rounded-3xl border border-cyan-500/30 bg-[#080b1e]/90 px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12 shadow-[0_20px_60px_rgba(0,0,0,0.8),inset_0_0_40px_rgba(0,245,212,0.06)]">
+        {/* Background glow layers */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,_rgba(0,245,212,0.18),_transparent_40%),radial-gradient(circle_at_80%_80%,_rgba(255,0,127,0.15),_transparent_40%),radial-gradient(circle_at_50%_100%,_rgba(168,85,247,0.15),_transparent_45%)]" />
 
-        {/* =========================================================
-            BACKGROUND ATMOSPHERE
-        ========================================================= */}
+        {/* Ambient hero art overlay */}
+        <div 
+          className="absolute inset-0 opacity-15 mix-blend-screen pointer-events-none bg-cover bg-center"
+          style={{ backgroundImage: `url(${slinkHero})` }}
+        />
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(0,245,212,0.22),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(249,189,34,0.12),_transparent_30%)]" />
+        {/* Cyber grid lines */}
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(0,245,212,1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,0,127,1) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+          }}
+        />
 
-        <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-[#00f5d4]/10 blur-3xl" />
-
-        <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-[#f9bd22]/10 blur-3xl" />
-
-        {/* =========================================================
-            GAME ARENA DECORATIONS
-            Everything below is absolute + pointer-events-none,
-            so it does not affect the layout of other components.
-        ========================================================= */}
-
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-
-          {/* Subtle arena grid */}
-          <div
-            className="absolute inset-0 opacity-[0.035]"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(0,245,212,1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,245,212,1) 1px, transparent 1px)
-              `,
-              backgroundSize: '34px 34px',
-            }}
-          />
-
-          {/* Top-left worm trail */}
-          <div className="absolute left-[6%] top-[17%] hidden sm:block">
-            <div className="flex items-center gap-1.5 opacity-40">
-              <span className="h-2 w-2 rounded-full bg-[#00f5d4]/20" />
-              <span className="h-2 w-2 rounded-full bg-[#00f5d4]/30" />
-              <span className="h-2 w-2 rounded-full bg-[#00f5d4]/45" />
-              <span className="h-2 w-2 rounded-full bg-[#00f5d4]/60" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#00f5d4] shadow-[0_0_14px_rgba(0,245,212,0.7)]" />
-            </div>
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto gap-6">
+          {/* Top Live Beacon */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-[#0c122c]/80 px-4 py-1.5 backdrop-blur-md shadow-[0_0_20px_rgba(0,245,212,0.2)]">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]" />
+            </span>
+            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#00f5d4]">
+              LIVE MULTIPLAYER CYBER-WORM ARENA
+            </span>
+            <span className="text-white/20">·</span>
+            <span className="font-mono text-[11px] text-amber-300 font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> SEASON 1
+            </span>
           </div>
 
-          {/* Bottom-right worm trail */}
-          <div className="absolute right-[7%] bottom-[18%] hidden sm:block">
-            <div className="flex items-center gap-1.5 opacity-30 rotate-[-12deg]">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#f9bd22] shadow-[0_0_12px_rgba(249,189,34,0.6)]" />
-              <span className="h-2 w-2 rounded-full bg-[#f9bd22]/60" />
-              <span className="h-2 w-2 rounded-full bg-[#f9bd22]/45" />
-              <span className="h-2 w-2 rounded-full bg-[#f9bd22]/30" />
-              <span className="h-1.5 w-1.5 rounded-full bg-[#f9bd22]/20" />
-            </div>
-          </div>
+          {/* Main Title with Mascot Creature Emblem */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+              <div className="relative shrink-0 group">
+                <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-r from-[#00f5d4] via-[#ff007f] to-[#ffaa00] opacity-80 blur-md group-hover:opacity-100 transition-opacity" />
+                <img
+                  src={slinkLogo}
+                  alt="SLINK Mascot Creature"
+                  referrerPolicy="no-referrer"
+                  className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl object-cover border-2 border-white/40 shadow-[0_0_30px_rgba(0,245,212,0.5)] transform group-hover:scale-105 transition-transform"
+                />
+              </div>
 
-          {/* Energy / food particles */}
-          <div className="absolute right-[11%] top-[23%] hidden sm:flex items-center gap-4 opacity-70">
-            <span className="h-2 w-2 rounded-full bg-[#f9bd22] shadow-[0_0_14px_rgba(249,189,34,0.9)]" />
-
-            <span className="mt-5 h-1.5 w-1.5 rounded-full bg-[#00f5d4] shadow-[0_0_12px_rgba(0,245,212,0.9)]" />
-
-            <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#f9bd22]/80 shadow-[0_0_14px_rgba(249,189,34,0.8)]" />
-          </div>
-
-          {/* Left floating HUD */}
-          <div className="absolute left-5 bottom-6 hidden lg:block">
-            <div className="rounded-lg border border-[#00f5d4]/15 bg-[#081016]/60 px-3 py-2 backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#00f5d4]" />
-                <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#00f5d4]/60">
-                  ARENA ONLINE
+              <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-none text-center sm:text-left">
+                <span className="bg-gradient-to-r from-[#00f5d4] via-[#ff007f] to-[#ffaa00] bg-clip-text text-transparent filter drop-shadow-[0_0_35px_rgba(0,245,212,0.4)]">
+                  SLINK
                 </span>
-              </div>
-
-              <div className="mt-1 font-mono text-[8px] uppercase tracking-[0.15em] text-[#83948f]/60">
-                Worm activity detected
-              </div>
+              </h1>
             </div>
-          </div>
 
-          {/* Right floating HUD */}
-          <div className="absolute right-5 bottom-6 hidden lg:block">
-            <div className="rounded-lg border border-[#f9bd22]/15 bg-[#081016]/60 px-3 py-2 text-right backdrop-blur-sm">
-              <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#f9bd22]/60">
-                LAST WORM STANDING
-              </div>
-
-              <div className="mt-1 font-mono text-[8px] uppercase tracking-[0.15em] text-[#83948f]/60">
-                Eat • Grow • Survive
-              </div>
-            </div>
-          </div>
-
-          {/* Decorative corner brackets */}
-          <div className="absolute left-3 top-3 h-8 w-8 border-l border-t border-[#00f5d4]/20" />
-          <div className="absolute right-3 top-3 h-8 w-8 border-r border-t border-[#00f5d4]/20" />
-          <div className="absolute left-3 bottom-3 h-8 w-8 border-b border-l border-[#f9bd22]/15" />
-          <div className="absolute right-3 bottom-3 h-8 w-8 border-b border-r border-[#f9bd22]/15" />
-
-        </div>
-
-        {/* =========================================================
-            MAIN CONTENT
-        ========================================================= */}
-
-        <div className="relative z-10 flex flex-col items-center text-center gap-6">
-
-          {/* Live Arena Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#00f5d4]/30 bg-[#0c1720]/85 px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#00f5d4] shadow-[inset_0_0_18px_rgba(0,245,212,0.06)] backdrop-blur-sm">
-            <Radio className="h-3.5 w-3.5" />
-
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#00f5d4] shadow-[0_0_8px_rgba(0,245,212,0.9)]" />
-
-            Live Worm Arena
-          </div>
-
-          {/* Title */}
-          <div className="space-y-3">
-
-            <h1 className="font-display text-4xl font-black uppercase leading-[0.9] tracking-[-0.065em] text-white sm:text-5xl lg:text-7xl">
-              NARKY
-            </h1>
-
-            <p className="mx-auto max-w-2xl font-display text-lg font-medium uppercase tracking-[0.12em] text-[#d7fff3] sm:text-2xl">
-              Eat. Grow. Wreck. Repeat.
+            <p className="font-display text-lg sm:text-2xl font-bold uppercase tracking-wide text-transparent bg-gradient-to-r from-cyan-200 via-white to-pink-200 bg-clip-text">
+              FEED ON LIGHT. CUT RIVAL TRAILS. DOMINATE THE ARENA.
             </p>
-
           </div>
 
-          {/* Description */}
-          <p className="max-w-2xl font-mono text-sm leading-relaxed text-[#b9cac4] sm:text-[15px]">
-            Enter the neon dirt. Outsmart rival worms, gobble your way to the
-            top, and survive long enough to become the biggest menace in the
-            arena.
+          {/* Subtitle Description */}
+          <p className="max-w-2xl font-mono text-sm sm:text-base leading-relaxed text-slate-300">
+            Steer your neon worm across a relentless cyber grid. Gobble luminous energy orbs,
+            trap opponents with your radiant light trail, and collect massive star bounties to crown the leaderboard.
           </p>
 
-          {/* Feature Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {features.map(({ label, icon: Icon, color }) => (
+          {/* Interactive Feature Highlights */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 w-full pt-2">
+            {highlights.map(({ label, icon: Icon, color, bg }) => (
               <div
                 key={label}
-                className="inline-flex items-center gap-2 rounded-full border border-[#3a4a46]/60 bg-[#101922]/90 px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#e9f3ef] shadow-[0_0_20px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-200 hover:border-[#00f5d4]/30 hover:bg-[#132029]"
+                className={`flex items-center gap-2.5 p-3 rounded-xl border backdrop-blur-md transition-all hover:scale-[1.02] ${bg}`}
               >
-                <Icon className={`h-3.5 w-3.5 ${color}`} />
-
-                <span>{label}</span>
+                <div className={`p-2 rounded-lg bg-black/40 ${color} shrink-0`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <span className="font-mono text-[11px] font-bold text-left text-slate-200 leading-tight">
+                  {label}
+                </span>
               </div>
             ))}
           </div>
 
-          {/* Bottom Status */}
-          <div className="flex items-center justify-center gap-2">
-
-            <Zap className="h-3 w-3 text-[#f9bd22]/70" />
-
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#83948f] text-center">
-              24/7 live arena • eat or get eaten • last worm standing
+          {/* Status strip */}
+          <div className="flex items-center justify-center gap-3 text-xs font-mono text-slate-400 pt-1">
+            <span className="flex items-center gap-1.5 text-cyan-300 font-semibold">
+              <Zap className="w-3.5 h-3.5 text-[#00f5d4]" />
+              Zero Lag Vector Physics
             </span>
-
-            <Zap className="h-3 w-3 text-[#00f5d4]/70" />
-
+            <span className="text-white/20">·</span>
+            <span className="text-pink-300 font-semibold">High-Stakes Multipliers</span>
+            <span className="text-white/20">·</span>
+            <span className="text-amber-300 font-semibold">Free to Play</span>
           </div>
-
         </div>
       </div>
     </section>

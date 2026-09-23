@@ -1,5 +1,5 @@
 /**
- * Standalone Web Audio API Synthesizer for NARKY
+ * Standalone Web Audio API Synthesizer for SLINK
  * Zero external audio files required, low latency, arcade cyber sounds.
  */
 

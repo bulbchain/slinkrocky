@@ -1,8 +1,8 @@
-import React from 'react';
-import { X, Volume2, VolumeX } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { ArenaCanvas } from './ArenaCanvas';
 import { sounds } from '../audio';
-import logo from '../asset/narkywbg.png';
+import slinkLogo from '../assets/images/slink_creature_logo_1790169607687.jpg';
 
 interface FullscreenArenaModalProps {
   isOpen: boolean;
@@ -25,24 +25,40 @@ export const FullscreenArenaModal: React.FC<FullscreenArenaModalProps> = ({
   soundMuted,
   onToggleSound,
 }) => {
+  // ESC key listener
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#07111a] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-[#060814] flex flex-col">
       {/* Top Thin HUD Command Bar */}
-      <div className="h-14 w-full bg-[#080f18]/90 border-b border-[#00f5d4]/20 px-4 sm:px-6 flex items-center justify-between z-20 backdrop-blur-md">
+      <div className="h-14 w-full bg-[#080c1e]/95 border-b border-cyan-500/25 px-4 sm:px-6 flex items-center justify-between z-20 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <img
-            src={logo}
-            alt="NARKY logo"
-            className="h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_14px_rgba(0,245,212,0.6)]"
-          />
+          <div className="relative">
+            <div className="absolute -inset-0.5 rounded-lg bg-gradient-to-r from-cyan-400 to-pink-500 opacity-70 blur-xs" />
+            <img
+              src={slinkLogo}
+              alt="SLINK logo"
+              referrerPolicy="no-referrer"
+              className="relative h-9 w-9 rounded-lg object-cover border border-white/20"
+            />
+          </div>
           <div className="flex items-center gap-2">
-            {/* <span className="font-display font-bold text-sm uppercase text-[#d7fff3] tracking-wider">
-              NARKY
-            </span> */}
-            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#19202a] text-[#00dfc1] border border-[#00dfc1]/30">
-              SECTOR-09 ACTIVE
+            <span className="font-display font-black text-base uppercase bg-gradient-to-r from-[#00f5d4] via-[#ff007f] to-[#ffaa00] bg-clip-text text-transparent">
+              SLINK ARENA
+            </span>
+            <span className="font-mono text-[9px] px-2 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-400/40 font-bold">
+              FULL IMMERSION
             </span>
           </div>
         </div>
@@ -52,9 +68,9 @@ export const FullscreenArenaModal: React.FC<FullscreenArenaModalProps> = ({
             type="button"
             onClick={onToggleSound}
             title={soundMuted ? 'Unmute sound' : 'Mute sound'}
-            className="p-1.5 rounded bg-[#151c26] text-[#b9cac4] hover:text-[#00f5d4] border border-[#3a4a46]/50 transition-colors"
+            className="p-2 rounded-lg bg-[#0c1026] text-slate-300 hover:text-[#00f5d4] border border-white/10 transition-colors cursor-pointer"
           >
-            {soundMuted ? <VolumeX className="w-4 h-4 text-[#ffb2b7]" /> : <Volume2 className="w-4 h-4 text-[#00f5d4]" />}
+            {soundMuted ? <VolumeX className="w-4 h-4 text-pink-400" /> : <Volume2 className="w-4 h-4 text-[#00f5d4]" />}
           </button>
 
           <button
@@ -63,16 +79,16 @@ export const FullscreenArenaModal: React.FC<FullscreenArenaModalProps> = ({
               sounds.playBeep(520);
               onClose();
             }}
-            className="px-3 py-1.5 rounded bg-[#242a34] hover:bg-[#ffb2b7] hover:text-[#00382f] text-[#dce3f0] font-mono text-xs font-bold uppercase transition-all flex items-center gap-1.5 border border-[#3a4a46]/50 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-pink-500/20 hover:bg-pink-500/40 text-pink-200 border border-pink-500/40 font-mono text-xs font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
           >
             <X className="w-4 h-4" />
-            <span>EXIT ARENA (ESC)</span>
+            <span>EXIT (ESC)</span>
           </button>
         </div>
       </div>
 
       {/* Main Full-Size Arena Area */}
-      <div className="flex-1 w-full h-full relative overflow-hidden">
+      <div className="flex-1 w-full h-full relative overflow-hidden bg-[#060814]">
         <ArenaCanvas
           callsign={callsign}
           wormColor={wormColor}

@@ -16,6 +16,16 @@ export type NavTab = 'play-now' | 'arenas-and-modes' | 'how-it-works' | 'leaderb
 
 export type ArenaMode = 'free' | 'staked';
 
+export interface WormSkin {
+  id: string;
+  name: string;
+  color: string;
+  coreColor: string;
+  accentColor: string;
+  pattern: 'neon' | 'cyber' | 'plasma' | 'solar' | 'radioactive' | 'void';
+  description: string;
+}
+
 export interface LeaderboardPilot {
   rank: string;
   rankNum: number;
@@ -44,7 +54,8 @@ export interface WalletState {
   walletName: string | null;
   address: string | null;
   solBalance: number;
-  narkyBalance: number;
+  slinkBalance: number;
+  narkyBalance?: number;
 }
 
 export interface GameStats {

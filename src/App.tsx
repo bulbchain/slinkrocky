@@ -25,7 +25,7 @@ import { sounds } from './audio';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('play-now');
-  const [callsign, setCallsign] = useState<string>('CYBER_GHOST');
+  const [callsign, setCallsign] = useState<string>('SLINK_VIPER');
   const [wormColor, setWormColor] = useState<string>('#00f5d4');
   const [arenaMode, setArenaMode] = useState<ArenaMode>('free');
 
@@ -46,6 +46,7 @@ export default function App() {
     address: null,
     isConnected: false,
     solBalance: 0,
+    slinkBalance: 0,
     narkyBalance: 0,
     walletName: null,
   });
@@ -72,6 +73,7 @@ export default function App() {
         address,
         isConnected: true,
         solBalance: 0,
+        slinkBalance: 0,
         narkyBalance: 0,
         walletName: 'Phantom',
       });
@@ -92,9 +94,10 @@ export default function App() {
     }
 
     setWallet({
-      address: '7xKpDr1ftL9zReap4UjT7kZ9sY2cSol8vQmW3aX',
+      address: '7xKpSL1nKvP3rG9zReap4UjT7kZ9sY2cSol8vQmW3aX',
       isConnected: true,
       solBalance: 2.45,
+      slinkBalance: 3200,
       narkyBalance: 3200,
       walletName,
     });
@@ -116,6 +119,7 @@ export default function App() {
       address: null,
       isConnected: false,
       solBalance: 0,
+      slinkBalance: 0,
       narkyBalance: 0,
       walletName: null,
     });
@@ -126,7 +130,8 @@ export default function App() {
     setWallet((prev) => ({
       ...prev,
       solBalance: Number((prev.solBalance + 0.5).toFixed(2)),
-      narkyBalance: prev.narkyBalance + 500,
+      slinkBalance: (prev.slinkBalance ?? 0) + 500,
+      narkyBalance: (prev.narkyBalance ?? 0) + 500,
     }));
   };
 
@@ -143,7 +148,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d141d] text-[#dce3f0] flex flex-col selection:bg-[#00f5d4] selection:text-[#00382f] overflow-x-hidden">
+    <div className="min-h-screen bg-[#060814] text-slate-100 flex flex-col selection:bg-[#00f5d4] selection:text-[#002820] overflow-x-hidden">
       {/* Top Tactical Navigation & Telemetry Bar */}
       <Navbar
         activeTab={activeTab}
