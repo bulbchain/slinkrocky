@@ -20,6 +20,7 @@ import {
   Flame,
   Sparkles,
 } from 'lucide-react';
+import { SlinkHungry, SlinkOops } from './RetroCartoonCharacters';
 
 interface ArenaCanvasProps {
   callsign: string;
@@ -46,6 +47,10 @@ interface ActivePowerUp {
   maxDuration: number;
 }
 
+export type FoodType = 'orange' | 'strawberry' | 'plum' | 'apple';
+export type SoilCreatureType = 'centipede' | 'snake' | 'slug' | 'worm';
+export type DifficultyLevel = 'easy' | 'medium' | 'hard';
+
 interface Orb {
   x: number;
   y: number;
@@ -56,7 +61,7 @@ interface Orb {
   vy: number;
   value: number;
   isLoot?: boolean;
-  type?: 'standard' | 'super' | 'star';
+  foodType: FoodType;
 }
 
 interface Spark {
@@ -80,6 +85,20 @@ interface FloatingText {
   scale?: number;
 }
 
+interface ComicBurst {
+  x: number;
+  y: number;
+  text: 'POW!' | 'ZAP!';
+  color: string;
+  textColor: string;
+  life: number;
+  decay: number;
+  rotation: number;
+  points: number;
+  innerR: number;
+  outerR: number;
+}
+
 interface TrailPoint {
   x: number;
   y: number;
@@ -101,21 +120,24 @@ interface BotCraft {
   score: number;
   skinName: string;
   isFastPasser?: boolean;
+  creatureType: SoilCreatureType;
+  isHunting?: boolean;
+  isBotBoosting?: boolean;
+  boostTimer?: number;
 }
 
 const ORB_PALETTE = [
-  '#00f5d4', // Neon Cyan
-  '#ff007f', // Hot Magenta
-  '#00ff88', // Hyper Lime
-  '#ffaa00', // Radiant Gold
-  '#a855f7', // Electric Violet
-  '#38bdf8', // Ice Blue
-  '#ffffff', // Pure Star
+  '#FA824C', // Tangerine Orange
+  '#FFD13B', // Sunny Yellow
+  '#78C0E0', // Sky Blue
+  '#70A288', // Muted Grass Green
+  '#E63946', // Cartoon Red Apple
+  '#5C3D2E', // Chocolate Brown
 ];
 
 export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
   callsign,
-  wormColor = '#00f5d4',
+  wormColor = '#FA824C',
   onKillsUpdate,
   onScoreUpdate,
   isFullscreen = false,
@@ -128,6 +150,18 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
   const [lastScore, setLastScore] = useState<number | null>(null);
   const [showDeathModal, setShowDeathModal] = useState(false);
   const [isPaused, setIsPaused] = useState(true);
+
+  // Active Comic Chomp Overlay ('POW!' or 'ZAP!')
+  const [chompOverlay, setChompOverlay] = useState<{
+    id: number;
+    text: 'POW!' | 'ZAP!';
+    color: string;
+    textColor: string;
+    screenX: number;
+    screenY: number;
+    rotation: number;
+  } | null>(null);
+  const chompTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const playGame = () => {
     sounds.playBeep(700);
@@ -171,6 +205,10 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
   });
 
   // HUD & Game State
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>('medium');
+  const difficultyRef = useRef<DifficultyLevel>('medium');
+  difficultyRef.current = difficulty;
+
   const [score, setScore] = useState<number>(0);
   const [kills, setKills] = useState<number>(0);
   const [bestToday, setBestToday] = useState<number>(6420);
@@ -182,12 +220,12 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
   const [hintVisible, setHintVisible] = useState<boolean>(true);
 
   const [roster, setRoster] = useState<{ name: string; score: number; isPlayer?: boolean; color?: string }[]>([
-    { name: 'VIPER_PRIME', score: 8420, color: '#ff007f' },
-    { name: 'NEON_HYDRA', score: 6810, color: '#00ff88' },
-    { name: 'SOLAR_COIL', score: 5320, color: '#ffaa00' },
-    { name: 'VOID_REAPER', score: 4190, color: '#a855f7' },
-    { name: 'CYBER_WORM', score: 3250, color: '#38bdf8' },
-    { name: callsign || 'SLINK_VIPER', score: 450, isPlayer: true, color: wormColor },
+    { name: '🐛 CENTI_SPEED', score: 8420, color: '#D62828' },
+    { name: '🐍 JADE_MAMBA', score: 6810, color: '#2A9D8F' },
+    { name: '🐌 BANANA_SLUG', score: 5320, color: '#FFD13B' },
+    { name: '🐛 SCUTTLE_REX', score: 4190, color: '#F77F00' },
+    { name: '🪱 WOBBLY_EARTH', score: 3250, color: '#FA824C' },
+    { name: callsign || '🪱 SLINK_VIPER', score: 450, isPlayer: true, color: wormColor },
   ]);
 
   useEffect(() => {
@@ -242,22 +280,38 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         orbY = ARENA_CENTER_Y + Math.sin(angle) * r;
       }
 
-      const isStar = isLoot && Math.random() < 0.35;
-      const orbColor = isLoot
-        ? isStar ? '#ffffff' : Math.random() < 0.5 ? '#ff007f' : '#ffaa00'
-        : ORB_PALETTE[Math.floor(Math.random() * ORB_PALETTE.length)];
+      // User requested fruit types: orange, strawberry, plum (and classic apples)
+      let foodType: FoodType;
+      if (isLoot) {
+        const lootFruits: FoodType[] = ['strawberry', 'orange', 'plum'];
+        foodType = lootFruits[Math.floor(Math.random() * lootFruits.length)];
+      } else {
+        const fruitPool: FoodType[] = ['orange', 'strawberry', 'plum', 'apple'];
+        foodType = fruitPool[Math.floor(Math.random() * fruitPool.length)];
+      }
+
+      const foodMeta: Record<FoodType, { color: string; baseR: number; baseVal: number }> = {
+        orange: { color: '#FA824C', baseR: 5.6, baseVal: 45 },
+        strawberry: { color: '#E63946', baseR: 6.0, baseVal: 55 },
+        plum: { color: '#7B2CBF', baseR: 5.8, baseVal: 65 },
+        apple: { color: '#D90429', baseR: 5.4, baseVal: 35 },
+      };
+
+      const meta = foodMeta[foodType];
+      const radius = isLoot ? meta.baseR * 1.35 : meta.baseR + (Math.random() * 1.2 - 0.6);
+      const value = isLoot ? Math.floor(lootValue * (meta.baseVal / 45)) : meta.baseVal;
 
       return {
         x: orbX,
         y: orbY,
-        radius: isLoot ? (isStar ? 6.5 : 5.0) : Math.random() * 2.2 + 2.5,
-        color: orbColor,
+        radius,
+        color: meta.color,
         pulse: Math.random() * Math.PI * 2,
         vx: (Math.random() - 0.5) * (isLoot ? 3.5 : 0.4),
         vy: (Math.random() - 0.5) * (isLoot ? 3.5 : 0.4),
-        value: isLoot ? (isStar ? lootValue * 1.5 : lootValue) : Math.random() > 0.8 ? 60 : 30,
+        value,
         isLoot,
-        type: isStar ? 'star' : isLoot ? 'super' : 'standard',
+        foodType,
       };
     };
 
@@ -283,6 +337,59 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
     let particles: Spark[] = [];
     let floatingTexts: FloatingText[] = [];
+    const comicBursts: ComicBurst[] = [];
+
+    const drawBurstPolygon = (
+      context: CanvasRenderingContext2D,
+      cx: number,
+      cy: number,
+      points: number,
+      outerRadius: number,
+      innerRadius: number
+    ) => {
+      let rot = (Math.PI / 2) * 3;
+      const step = Math.PI / points;
+      context.beginPath();
+      context.moveTo(cx, cy - outerRadius);
+      for (let p = 0; p < points; p++) {
+        let x = cx + Math.cos(rot) * outerRadius;
+        let y = cy + Math.sin(rot) * outerRadius;
+        context.lineTo(x, y);
+        rot += step;
+
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        context.lineTo(x, y);
+        rot += step;
+      }
+      context.lineTo(cx, cy - outerRadius);
+      context.closePath();
+    };
+
+    const triggerChompOverlay = (
+      text: 'POW!' | 'ZAP!',
+      color: string,
+      textColor: string,
+      screenX: number,
+      screenY: number
+    ) => {
+      if (chompTimeoutRef.current) {
+        clearTimeout(chompTimeoutRef.current);
+      }
+      const rotation = (Math.random() - 0.5) * 16;
+      setChompOverlay({
+        id: Date.now() + Math.random(),
+        text,
+        color,
+        textColor,
+        screenX,
+        screenY,
+        rotation,
+      });
+      chompTimeoutRef.current = setTimeout(() => {
+        setChompOverlay(null);
+      }, 550);
+    };
     let screenShake = 0;
 
     const emitSparks = (x: number, y: number, color: string, count = 12, speedMult = 1) => {
@@ -336,18 +443,50 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       player.trail.push({ x: player.x, y: player.y + i * 3 });
     }
 
-    const botSkins = [
-      { name: 'CYBER_DRAGON', color: '#ff007f', coreColor: '#ffffff', eyeColor: '#ffff00', thickness: 9.0, speedMult: 1.05 },
-      { name: 'ACID_SERPENT', color: '#00ff88', coreColor: '#e0ffe8', eyeColor: '#003820', thickness: 8.5, speedMult: 1.1 },
-      { name: 'SOLAR_FLARE', color: '#ffaa00', coreColor: '#ffffff', eyeColor: '#ff0055', thickness: 9.5, speedMult: 0.95 },
-      { name: 'VOID_COIL', color: '#a855f7', coreColor: '#f3e8ff', eyeColor: '#00f5d4', thickness: 9.0, speedMult: 1.0 },
-      { name: 'GLACIER_SLINK', color: '#38bdf8', coreColor: '#ffffff', eyeColor: '#ffffff', thickness: 8.5, speedMult: 1.0 },
-      { name: 'NEON_VIPER', color: '#00f5d4', coreColor: '#ffffff', eyeColor: '#002820', thickness: 9.0, speedMult: 1.05 },
+    interface SoilCreatureSkin {
+      name: string;
+      creatureType: SoilCreatureType;
+      color: string;
+      coreColor: string;
+      eyeColor: string;
+      thickness: number;
+      baseSpeed: number;
+      turnRate: number;
+      namePrefix: string;
+    }
+
+    const creatureSkins: SoilCreatureSkin[] = [
+      // 1. FAST CENTIPEDES (Multi-legged, quick scurrying soil predators)
+      { name: 'CRIMSON_CENTIPEDE', creatureType: 'centipede', color: '#D62828', coreColor: '#FA824C', eyeColor: '#FFD13B', thickness: 8.5, baseSpeed: 5.2, turnRate: 0.065, namePrefix: '🐛 CENTI' },
+      { name: 'JADE_CENTIPEDE', creatureType: 'centipede', color: '#2A9D8F', coreColor: '#E76F51', eyeColor: '#E9C46A', thickness: 8.0, baseSpeed: 5.0, turnRate: 0.060, namePrefix: '🐛 SCUTTLE' },
+      { name: 'AMBER_CENTIPEDE', creatureType: 'centipede', color: '#F77F00', coreColor: '#FCBF49', eyeColor: '#003049', thickness: 9.0, baseSpeed: 5.4, turnRate: 0.070, namePrefix: '🐛 DART' },
+      { name: 'VOID_CENTIPEDE', creatureType: 'centipede', color: '#7209B7', coreColor: '#4CC9F0', eyeColor: '#F72585', thickness: 8.5, baseSpeed: 5.3, turnRate: 0.065, namePrefix: '🐛 CENTI' },
+
+      // 2. SNAKES (Sleek, sinuous, diamond backed with flickering forked tongue)
+      { name: 'COPPER_VIPER', creatureType: 'snake', color: '#BC6C25', coreColor: '#DDA15E', eyeColor: '#1E1B18', thickness: 9.0, baseSpeed: 4.2, turnRate: 0.045, namePrefix: '🐍 VIPER' },
+      { name: 'CORAL_SNAKE', creatureType: 'snake', color: '#E63946', coreColor: '#FFD13B', eyeColor: '#1E1B18', thickness: 8.5, baseSpeed: 4.4, turnRate: 0.048, namePrefix: '🐍 CORAL' },
+      { name: 'EMERALD_MAMBA', creatureType: 'snake', color: '#38B000', coreColor: '#CCFF33', eyeColor: '#1E1B18', thickness: 9.0, baseSpeed: 4.6, turnRate: 0.050, namePrefix: '🐍 MAMBA' },
+      { name: 'DIAMOND_COIL', creatureType: 'snake', color: '#1D3557', coreColor: '#A8DADC', eyeColor: '#E63946', thickness: 9.2, baseSpeed: 4.1, turnRate: 0.044, namePrefix: '🐍 COBRA' },
+
+      // 3. SLUGS (Chubby, squishy, eye stalks on head, glistening slime trail)
+      { name: 'BANANA_SLUG', creatureType: 'slug', color: '#FFD13B', coreColor: '#FFFDF8', eyeColor: '#1E1B18', thickness: 13.0, baseSpeed: 2.5, turnRate: 0.038, namePrefix: '🐌 SLUG' },
+      { name: 'GARDEN_SLUG', creatureType: 'slug', color: '#70A288', coreColor: '#B7E4C7', eyeColor: '#1E1B18', thickness: 13.5, baseSpeed: 2.4, turnRate: 0.035, namePrefix: '🐌 SLIME' },
+      { name: 'MUD_SLUG', creatureType: 'slug', color: '#6C584C', coreColor: '#DDBEA9', eyeColor: '#1E1B18', thickness: 12.8, baseSpeed: 2.3, turnRate: 0.036, namePrefix: '🐌 MUD' },
+
+      // 4. WORMS (Classic cheerful earthworms with ribbed segments)
+      { name: 'EARTH_WORM', creatureType: 'worm', color: '#FA824C', coreColor: '#FFF0D6', eyeColor: '#1E1B18', thickness: 9.0, baseSpeed: 3.2, turnRate: 0.045, namePrefix: '🪱 SLINK' },
+      { name: 'ROSY_WOBBLER', creatureType: 'worm', color: '#FF85A1', coreColor: '#FFE5EC', eyeColor: '#1E1B18', thickness: 8.5, baseSpeed: 3.4, turnRate: 0.048, namePrefix: '🪱 WOBBLE' },
+      { name: 'NIGHTCRAWLER', creatureType: 'worm', color: '#6D597A', coreColor: '#B56576', eyeColor: '#1E1B18', thickness: 9.5, baseSpeed: 3.1, turnRate: 0.042, namePrefix: '🪱 CRAWL' },
     ];
 
     const createSingleBot = (index: number): BotCraft => {
-      const skin = botSkins[Math.floor(Math.random() * botSkins.length)];
-      const isFastPasser = Math.random() < 0.2;
+      const skin = creatureSkins[Math.floor(Math.random() * creatureSkins.length)];
+      // Centipedes have high probability of being turbo runners; snakes also have fast variants
+      const isFastPasser = skin.creatureType === 'centipede'
+        ? Math.random() < 0.65
+        : skin.creatureType === 'snake'
+        ? Math.random() < 0.35
+        : Math.random() < 0.15;
 
       const angle = Math.random() * Math.PI * 2;
       const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 120);
@@ -355,37 +494,45 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       const by = ARENA_CENTER_Y + Math.sin(angle) * r;
 
       const bTrail: TrailPoint[] = [];
-      const trailLen = isFastPasser ? 50 : Math.floor(Math.random() * 20 + 28);
+      const trailLen = isFastPasser ? 48 : Math.floor(Math.random() * 20 + 26);
       for (let j = 0; j < 20; j++) {
         bTrail.push({ x: bx - j * 2.5, y: by - j * 2.5 });
       }
 
-      const botNames = [
-        'VIPER_X', 'COIL_QUEEN', 'NEON_HYDRA', 'TURBO_FANG',
-        'SOLAR_SLINK', 'CYBER_MUD', 'APEX_HUNTER', 'WORM_9',
-        'PHANTOM_TAIL', 'VORTEX_DEVOURER', 'HYPER_VIPER'
+      const botSurnames = [
+        'MAX', 'DASH', 'FANG', 'STRIDE', 'CHOMP', 'SPEEDY', 'COIL', 'BLAZE', 'VIPER', 'SWIFT'
       ];
-
+      const surname = botSurnames[Math.floor(Math.random() * botSurnames.length)];
       const botName = isFastPasser
-        ? `FAST_${botNames[Math.floor(Math.random() * botNames.length)]}`
-        : `${botNames[Math.floor(Math.random() * botNames.length)]}_${Math.floor(Math.random() * 89 + 10)}`;
+        ? `⚡${skin.namePrefix}_${surname}`
+        : `${skin.namePrefix}_${surname}_${Math.floor(Math.random() * 89 + 10)}`;
+
+      // Calculate speed: Centipedes and fast variants are notably swift
+      let speed = skin.baseSpeed + (Math.random() * 0.6 - 0.3);
+      if (isFastPasser) {
+        speed = Math.max(speed, 5.4 + Math.random() * 1.0);
+      }
 
       return {
         name: botName,
-        color: isFastPasser ? '#ff0055' : skin.color,
-        coreColor: isFastPasser ? '#ffff00' : skin.coreColor,
-        eyeColor: isFastPasser ? '#ffffff' : skin.eyeColor,
+        color: skin.color,
+        coreColor: skin.coreColor,
+        eyeColor: skin.eyeColor,
         x: bx,
         y: by,
         angle: Math.random() * Math.PI * 2,
-        speed: (isFastPasser ? 4.8 + Math.random() * 1.4 : (1.9 + Math.random() * 0.7)) * skin.speedMult,
+        speed,
         trail: bTrail,
         maxTrail: trailLen,
         thickness: skin.thickness,
-        turnRate: isFastPasser ? 0.018 : (0.045 + Math.random() * 0.015),
+        turnRate: isFastPasser ? Math.max(skin.turnRate, 0.055) : skin.turnRate,
         score: isFastPasser ? 850 : Math.floor(Math.random() * 600 + 150),
         skinName: skin.name,
         isFastPasser,
+        creatureType: skin.creatureType,
+        isHunting: false,
+        isBotBoosting: false,
+        boostTimer: 0,
       };
     };
 
@@ -419,6 +566,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       currentCombo = 0;
       comboTimer = 0;
       setComboCount(0);
+      comicBursts.length = 0;
+      setChompOverlay(null);
       activePowerUps.clear();
 
       player.x = ARENA_CENTER_X;
@@ -519,187 +668,717 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
-    // DRAW CYBER ARENA GRID & AMBIENT GLOW
+    // DRAW RETRO CARTOON MEADOW GRID & DOTS
     const drawGrid = () => {
       ctx.save();
-      ctx.strokeStyle = 'rgba(0, 245, 212, 0.07)';
-      ctx.lineWidth = 1.0;
+      // Cream meadow ground
+      ctx.fillStyle = '#FFF8ED';
+      ctx.fillRect(camera.x, camera.y, width, height);
 
-      const gridSize = 48;
-      const startX = Math.floor(camera.x / gridSize) * gridSize;
-      const endX = camera.x + width + gridSize;
-      const startY = Math.floor(camera.y / gridSize) * gridSize;
-      const endY = camera.y + height + gridSize;
+      // Vintage comic halftone dots
+      ctx.fillStyle = '#E8D8BF';
+      const dotSpacing = 36;
+      const startX = Math.floor(camera.x / dotSpacing) * dotSpacing;
+      const endX = camera.x + width + dotSpacing;
+      const startY = Math.floor(camera.y / dotSpacing) * dotSpacing;
+      const endY = camera.y + height + dotSpacing;
 
-      ctx.beginPath();
-      for (let x = startX; x <= endX; x += gridSize) {
-        ctx.moveTo(x, camera.y);
-        ctx.lineTo(x, camera.y + height);
-      }
-      for (let y = startY; y <= endY; y += gridSize) {
-        ctx.moveTo(camera.x, y);
-        ctx.lineTo(camera.x + width, y);
-      }
-      ctx.stroke();
-
-      // Soft Hexagonal nodes
-      ctx.fillStyle = 'rgba(255, 0, 127, 0.04)';
-      for (let x = startX; x <= endX; x += gridSize * 2) {
-        for (let y = startY; y <= endY; y += gridSize * 2) {
+      for (let x = startX; x <= endX; x += dotSpacing) {
+        for (let y = startY; y <= endY; y += dotSpacing) {
           ctx.beginPath();
-          ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+          ctx.arc(x, y, 1.8, 0, Math.PI * 2);
           ctx.fill();
         }
       }
       ctx.restore();
     };
 
-    // DRAW VIBRANT SEGMENTED WORM
-    const drawSlinkWorm = (
+    // DRAW CARTOON SOIL FRUITS: ORANGES, STRAWBERRIES, PLUMS, AND APPLES
+    const drawFruit = (
+      x: number,
+      y: number,
+      r: number,
+      foodType: FoodType,
+      _pulse: number
+    ) => {
+      ctx.save();
+      ctx.translate(x, y);
+
+      if (foodType === 'orange') {
+        // 🍊 ORANGE
+        // Shadow
+        ctx.fillStyle = '#1E1B18';
+        ctx.beginPath();
+        ctx.ellipse(1, r * 0.92, r * 0.8, r * 0.35, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Plump Orange sphere
+        ctx.fillStyle = '#FA824C';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Peel texture specks
+        ctx.fillStyle = '#D65D1E';
+        ctx.beginPath();
+        ctx.arc(-r * 0.35, -r * 0.1, 0.8, 0, Math.PI * 2);
+        ctx.arc(r * 0.25, r * 0.25, 0.9, 0, Math.PI * 2);
+        ctx.arc(-r * 0.1, r * 0.4, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // White crescent shine
+        ctx.fillStyle = '#FFFDF8';
+        ctx.beginPath();
+        ctx.arc(-r * 0.32, -r * 0.32, r * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Green leaf
+        ctx.fillStyle = '#70A288';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(r * 0.4, -r * 0.95, r * 0.5, r * 0.25, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Brown stem
+        ctx.strokeStyle = '#5C3D2E';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.8);
+        ctx.lineTo(r * 0.1, -r * 1.15);
+        ctx.stroke();
+      } else if (foodType === 'strawberry') {
+        // 🍓 STRAWBERRY
+        // Shadow
+        ctx.fillStyle = '#1E1B18';
+        ctx.beginPath();
+        ctx.ellipse(1, r * 1.05, r * 0.72, r * 0.3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Heart/Cone Strawberry body
+        ctx.fillStyle = '#E63946';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.6);
+        ctx.bezierCurveTo(r * 1.1, -r * 0.6, r * 0.9, r * 0.3, 0, r * 1.1);
+        ctx.bezierCurveTo(-r * 0.9, r * 0.3, -r * 1.1, -r * 0.6, 0, -r * 0.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Golden seed dots
+        ctx.fillStyle = '#FFD13B';
+        const seeds = [
+          { x: -r * 0.42, y: -r * 0.1 },
+          { x: 0, y: -r * 0.2 },
+          { x: r * 0.42, y: -r * 0.1 },
+          { x: -r * 0.25, y: r * 0.25 },
+          { x: r * 0.25, y: r * 0.25 },
+          { x: 0, y: r * 0.55 },
+        ];
+        seeds.forEach((s) => {
+          ctx.beginPath();
+          ctx.ellipse(s.x, s.y, 0.9, 1.3, 0.2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Juicy highlight
+        ctx.fillStyle = '#FFFDF8';
+        ctx.beginPath();
+        ctx.ellipse(-r * 0.35, -r * 0.35, r * 0.25, r * 0.15, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3-leaf calyx crown
+        ctx.fillStyle = '#70A288';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.5);
+        ctx.lineTo(r * 0.65, -r * 0.85);
+        ctx.lineTo(r * 0.15, -r * 0.65);
+        ctx.lineTo(0, -r * 1.05);
+        ctx.lineTo(-r * 0.15, -r * 0.65);
+        ctx.lineTo(-r * 0.65, -r * 0.85);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (foodType === 'plum') {
+        // 🫐/🍑 PLUM
+        // Shadow
+        ctx.fillStyle = '#1E1B18';
+        ctx.beginPath();
+        ctx.ellipse(1, r * 0.95, r * 0.75, r * 0.32, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Velvety Plum oval
+        ctx.fillStyle = '#7209B7';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 0.92, r, 0.08, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Plum cleft / crease line
+        ctx.strokeStyle = '#3C096C';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(r * 0.12, 0, r * 0.78, 1.3 * Math.PI, 0.7 * Math.PI);
+        ctx.stroke();
+
+        // Velvety bloom highlight
+        ctx.fillStyle = '#B5179E';
+        ctx.beginPath();
+        ctx.ellipse(-r * 0.3, -r * 0.3, r * 0.35, r * 0.2, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFDF8';
+        ctx.beginPath();
+        ctx.arc(-r * 0.35, -r * 0.35, r * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stem & leaf
+        ctx.fillStyle = '#70A288';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(r * 0.35, -r * 0.95, r * 0.45, r * 0.22, -0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#5C3D2E';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.85);
+        ctx.lineTo(r * 0.05, -r * 1.15);
+        ctx.stroke();
+      } else {
+        // 🍎 APPLE
+        ctx.fillStyle = '#1E1B18';
+        ctx.beginPath();
+        ctx.ellipse(1, r * 0.9, r * 0.8, r * 0.35, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#D90429';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFFDF8';
+        ctx.beginPath();
+        ctx.arc(-r * 0.35, -r * 0.35, r * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#5C3D2E';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.8);
+        ctx.lineTo(r * 0.05, -r * 1.15);
+        ctx.stroke();
+
+        ctx.fillStyle = '#70A288';
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(r * 0.35, -r * 0.95, r * 0.45, r * 0.22, -0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    };
+
+    // DRAW SOIL CREATURES: CENTIPEDE, SNAKE, SLUG, WORM
+    const drawSoilCreature = (
       points: TrailPoint[],
       headX: number,
       headY: number,
       angle: number,
       color: string,
       coreColor: string,
-      eyeColor: string,
+      _eyeColor: string,
       baseThickness: number,
       isPlayer = false,
       boosting = false,
-      hasPhaseShield = false
+      hasPhaseShield = false,
+      creatureType: SoilCreatureType = 'worm',
+      callsignTag = '',
+      frameCount = 0
     ) => {
       if (points.length < 2) return;
 
       ctx.save();
-
-      // 1. Outer Glow Aura
-      ctx.shadowBlur = boosting ? 26 : 14;
-      ctx.shadowColor = hasPhaseShield ? '#38bdf8' : color;
-
-      // 2. Segmented Body: Draw smooth tapered circles
       const segmentCount = points.length;
-      for (let i = segmentCount - 1; i >= 0; i--) {
-        const pt = points[i];
-        const progress = 1 - i / segmentCount; // 1 at head, 0 at tail
-        const segRadius = (baseThickness / 2) * (0.45 + progress * 0.55);
 
-        // Segment Outer Ring
-        ctx.fillStyle = hasPhaseShield ? 'rgba(56, 189, 248, 0.85)' : color;
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, segRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Inner glowing core
-        if (i % 2 === 0) {
-          ctx.fillStyle = coreColor;
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, Math.max(1, segRadius * 0.45), 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      // 3. Connective smooth line for seamless flow
+      // 1. Draw outer black comic outline for full body trail
       ctx.beginPath();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.strokeStyle = hasPhaseShield ? '#38bdf8' : color;
-      ctx.lineWidth = baseThickness;
+      ctx.strokeStyle = '#1E1B18';
+      ctx.lineWidth = (creatureType === 'slug' ? baseThickness * 1.25 : baseThickness) + 6;
       ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
         ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.stroke();
 
-      // Inner Core Line
-      ctx.strokeStyle = coreColor;
-      ctx.lineWidth = baseThickness * 0.35;
+      // 2. Draw colorful body fill
+      ctx.beginPath();
+      ctx.strokeStyle = hasPhaseShield ? '#78C0E0' : color;
+      ctx.lineWidth = creatureType === 'slug' ? baseThickness * 1.25 : baseThickness;
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
       ctx.stroke();
 
-      // 4. Expressive Worm Head
+      // 3. CENTIPEDE SCURRYING LEGS
+      if (creatureType === 'centipede') {
+        for (let i = 1; i < segmentCount - 1; i += 2) {
+          const pt = points[i];
+          const prev = points[i - 1];
+          const dx = prev.x - pt.x;
+          const dy = prev.y - pt.y;
+          const len = Math.hypot(dx, dy) || 1;
+          const nx = -dy / len;
+          const ny = dx / len;
+
+          const progress = 1 - i / segmentCount;
+          const segRadius = (baseThickness / 2) * (0.6 + progress * 0.4);
+          const legOsc = Math.sin(frameCount * 0.45 + i * 0.85);
+          const legLength = segRadius + 8;
+
+          // Left Leg
+          const lKneeX = pt.x + nx * (segRadius * 0.9) - (dx / len) * (legOsc * 3);
+          const lKneeY = pt.y + ny * (segRadius * 0.9) - (dy / len) * (legOsc * 3);
+          const lFootX = lKneeX + nx * legLength - (dx / len) * (legOsc * 4 + 2);
+          const lFootY = lKneeY + ny * legLength - (dy / len) * (legOsc * 4 + 2);
+
+          ctx.strokeStyle = '#1E1B18';
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(pt.x, pt.y);
+          ctx.lineTo(lKneeX, lKneeY);
+          ctx.lineTo(lFootX, lFootY);
+          ctx.stroke();
+
+          // Left claw tip
+          ctx.fillStyle = '#1E1B18';
+          ctx.beginPath();
+          ctx.arc(lFootX, lFootY, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Right Leg (opposite phase)
+          const rKneeX = pt.x - nx * (segRadius * 0.9) + (dx / len) * (legOsc * 3);
+          const rKneeY = pt.y - ny * (segRadius * 0.9) + (dy / len) * (legOsc * 3);
+          const rFootX = rKneeX - nx * legLength + (dx / len) * (legOsc * 4 - 2);
+          const rFootY = rKneeY - ny * legLength + (dy / len) * (legOsc * 4 - 2);
+
+          ctx.beginPath();
+          ctx.moveTo(pt.x, pt.y);
+          ctx.lineTo(rKneeX, rKneeY);
+          ctx.lineTo(rFootX, rFootY);
+          ctx.stroke();
+
+          // Right claw tip
+          ctx.fillStyle = '#1E1B18';
+          ctx.beginPath();
+          ctx.arc(rFootX, rFootY, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 4. Individual comic segments & patterns
+      for (let i = segmentCount - 1; i >= 0; i--) {
+        const pt = points[i];
+        const progress = 1 - i / segmentCount;
+        const widthMult = creatureType === 'slug' ? 0.75 : 0.55;
+        const segRadius = (baseThickness / 2) * (widthMult + progress * 0.45);
+
+        // Segment outline + fill
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 2.5;
+        ctx.fillStyle = i % 2 === 0 ? color : (coreColor || '#FFD13B');
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, segRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        if (creatureType === 'snake') {
+          // Snake Diamond back pattern
+          if (i % 2 === 1) {
+            ctx.fillStyle = coreColor || '#FFD13B';
+            ctx.strokeStyle = '#1E1B18';
+            ctx.lineWidth = 1.4;
+            const diaR = segRadius * 0.65;
+            ctx.beginPath();
+            ctx.moveTo(pt.x, pt.y - diaR);
+            ctx.lineTo(pt.x + diaR * 0.7, pt.y);
+            ctx.lineTo(pt.x, pt.y + diaR);
+            ctx.lineTo(pt.x - diaR * 0.7, pt.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          }
+        } else if (creatureType === 'slug') {
+          // Slug soft mantle spot
+          if (i % 3 === 0) {
+            ctx.fillStyle = '#FFFDF8';
+            ctx.beginPath();
+            ctx.ellipse(pt.x, pt.y, segRadius * 0.5, segRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (creatureType === 'centipede') {
+          // Centipede armored ridge plate
+          ctx.strokeStyle = '#1E1B18';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, segRadius * 0.8, -0.6 * Math.PI, 0.6 * Math.PI);
+          ctx.stroke();
+        } else {
+          // Worm Belly spot
+          if (i % 3 === 0) {
+            ctx.fillStyle = '#FFFDF8';
+            ctx.beginPath();
+            ctx.arc(pt.x - 1, pt.y - 1, Math.max(1, segRadius * 0.35), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // 5. Centipede Tail Cerci (streamers)
+      if (creatureType === 'centipede' && segmentCount > 2) {
+        const lastPt = points[segmentCount - 1];
+        const prevPt = points[segmentCount - 2];
+        const tdx = lastPt.x - prevPt.x;
+        const tdy = lastPt.y - prevPt.y;
+        const tlen = Math.hypot(tdx, tdy) || 1;
+        const tDirX = tdx / tlen;
+        const tDirY = tdy / tlen;
+        const tNormX = -tDirY;
+        const tNormY = tDirX;
+
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        // Left cercus
+        ctx.moveTo(lastPt.x, lastPt.y);
+        ctx.quadraticCurveTo(
+          lastPt.x + tNormX * 6 + tDirX * 8,
+          lastPt.y + tNormY * 6 + tDirY * 8,
+          lastPt.x + tNormX * 12 + tDirX * 16,
+          lastPt.y + tNormY * 12 + tDirY * 16
+        );
+        // Right cercus
+        ctx.moveTo(lastPt.x, lastPt.y);
+        ctx.quadraticCurveTo(
+          lastPt.x - tNormX * 6 + tDirX * 8,
+          lastPt.y - tNormY * 6 + tDirY * 8,
+          lastPt.x - tNormX * 12 + tDirX * 16,
+          lastPt.y - tNormY * 12 + tDirY * 16
+        );
+        ctx.stroke();
+      }
+
+      // 6. Expressive Head (Per Creature Type)
       ctx.save();
       ctx.translate(headX, headY);
       ctx.rotate(angle + Math.PI / 2);
 
-      const headRadius = baseThickness * 0.95;
+      const headRadius = baseThickness * (creatureType === 'slug' ? 1.25 : 1.05);
 
-      // Antennae / Horns
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.0;
-      ctx.beginPath();
-      ctx.moveTo(-headRadius * 0.5, -headRadius * 0.8);
-      ctx.lineTo(-headRadius * 0.9, -headRadius * 1.5);
-      ctx.moveTo(headRadius * 0.5, -headRadius * 0.8);
-      ctx.lineTo(headRadius * 0.9, -headRadius * 1.5);
-      ctx.stroke();
-
-      // Antenna glowing tip bulbs
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(-headRadius * 0.9, -headRadius * 1.5, 2.0, 0, Math.PI * 2);
-      ctx.arc(headRadius * 0.9, -headRadius * 1.5, 2.0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Main Head Dome
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Head Highlight
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.beginPath();
-      ctx.arc(0, -headRadius * 0.25, headRadius * 0.6, 0, Math.PI);
-      ctx.fill();
-
-      // Cute / Fierce Expressive Eyes
-      const eyeOffsetX = headRadius * 0.48;
-      const eyeOffsetY = -headRadius * 0.25;
-      const eyeRadius = headRadius * 0.32;
-      const pupilRadius = eyeRadius * 0.5;
-
-      [-eyeOffsetX, eyeOffsetX].forEach((ex) => {
-        // Eye White
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(ex, eyeOffsetY, eyeRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Eye Iris
-        ctx.fillStyle = eyeColor || '#002820';
-        ctx.beginPath();
-        ctx.arc(ex, eyeOffsetY - 0.8, pupilRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Glint
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(ex + 0.6, eyeOffsetY - 1.4, pupilRadius * 0.45, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Phase Shield Aura around Head
-      if (hasPhaseShield) {
-        ctx.strokeStyle = '#38bdf8';
+      if (creatureType === 'centipede') {
+        // --- CENTIPEDE HEAD ---
+        // Pincer mandibles at front
+        ctx.strokeStyle = '#1E1B18';
+        ctx.fillStyle = '#2B1810';
         ctx.lineWidth = 2.5;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#38bdf8';
+        // Left pincer
         ctx.beginPath();
-        ctx.arc(0, 0, headRadius * 1.8, 0, Math.PI * 2);
+        ctx.moveTo(-headRadius * 0.4, -headRadius * 0.4);
+        ctx.quadraticCurveTo(-headRadius * 1.1, -headRadius * 1.2, -headRadius * 0.1, -headRadius * 1.2);
         ctx.stroke();
+        // Right pincer
+        ctx.beginPath();
+        ctx.moveTo(headRadius * 0.4, -headRadius * 0.4);
+        ctx.quadraticCurveTo(headRadius * 1.1, -headRadius * 1.2, headRadius * 0.1, -headRadius * 1.2);
+        ctx.stroke();
+
+        // Twitching curved antennae
+        const antOsc = Math.sin(frameCount * 0.25) * 5;
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        // Left antenna
+        ctx.moveTo(-headRadius * 0.5, -headRadius * 0.6);
+        ctx.quadraticCurveTo(-headRadius * 1.3 + antOsc, -headRadius * 1.6, -headRadius * 1.6 + antOsc * 1.5, -headRadius * 2.2);
+        // Right antenna
+        ctx.moveTo(headRadius * 0.5, -headRadius * 0.6);
+        ctx.quadraticCurveTo(headRadius * 1.3 - antOsc, -headRadius * 1.6, headRadius * 1.6 - antOsc * 1.5, -headRadius * 2.2);
+        ctx.stroke();
+
+        // Antenna black tips
+        ctx.fillStyle = '#FFD13B';
+        ctx.beginPath();
+        ctx.arc(-headRadius * 1.6 + antOsc * 1.5, -headRadius * 2.2, 2.5, 0, Math.PI * 2);
+        ctx.arc(headRadius * 1.6 - antOsc * 1.5, -headRadius * 2.2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Armored head plate
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 3.5;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Forehead armor brow
+        ctx.fillStyle = coreColor || '#FA824C';
+        ctx.beginPath();
+        ctx.arc(0, -headRadius * 0.2, headRadius * 0.6, 0, Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+        // Bug Compound Eyes
+        const eyeOffset = headRadius * 0.55;
+        [-eyeOffset, eyeOffset].forEach((ex) => {
+          ctx.fillStyle = '#1E1B18';
+          ctx.beginPath();
+          ctx.arc(ex, -headRadius * 0.25, headRadius * 0.32, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#FFD13B';
+          ctx.beginPath();
+          ctx.arc(ex - 1, -headRadius * 0.3, 1.8, 0, Math.PI * 2);
+          ctx.arc(ex + 1, -headRadius * 0.2, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      } else if (creatureType === 'snake') {
+        // --- SNAKE HEAD (Viper shape + flickering forked tongue) ---
+        // Flickering forked tongue
+        const tongueWiggle = Math.sin(frameCount * 0.35) * 3;
+        ctx.strokeStyle = '#E63946';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(0, -headRadius * 0.9);
+        ctx.lineTo(tongueWiggle, -headRadius * 1.8);
+        // Fork left
+        ctx.lineTo(tongueWiggle - 4, -headRadius * 2.2);
+        ctx.moveTo(tongueWiggle, -headRadius * 1.8);
+        // Fork right
+        ctx.lineTo(tongueWiggle + 4, -headRadius * 2.2);
+        ctx.stroke();
+
+        // Triangular Viper Head
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 3.5;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(0, -headRadius * 1.15); // snout
+        ctx.lineTo(headRadius * 0.95, -headRadius * 0.1); // right jaw
+        ctx.lineTo(headRadius * 0.7, headRadius * 0.7); // right back
+        ctx.lineTo(-headRadius * 0.7, headRadius * 0.7); // left back
+        ctx.lineTo(-headRadius * 0.95, -headRadius * 0.1); // left jaw
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Diamond forehead scale
+        ctx.fillStyle = coreColor || '#FFD13B';
+        ctx.beginPath();
+        ctx.moveTo(0, -headRadius * 0.55);
+        ctx.lineTo(headRadius * 0.35, 0);
+        ctx.lineTo(0, headRadius * 0.45);
+        ctx.lineTo(-headRadius * 0.35, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Slit Viper Eyes
+        const eyeOffset = headRadius * 0.52;
+        [-eyeOffset, eyeOffset].forEach((ex) => {
+          ctx.fillStyle = '#FFD13B';
+          ctx.strokeStyle = '#1E1B18';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.ellipse(ex, -headRadius * 0.15, headRadius * 0.28, headRadius * 0.22, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Slit pupil
+          ctx.fillStyle = '#1E1B18';
+          ctx.beginPath();
+          ctx.ellipse(ex, -headRadius * 0.15, 1.2, headRadius * 0.18, 0, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      } else if (creatureType === 'slug') {
+        // --- SLUG HEAD (Soft rounded face + prominent eye stalks) ---
+        // Eye Stalks (Tentacles)
+        const stalkWobble = Math.sin(frameCount * 0.12) * 2;
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 3.2;
+        ctx.fillStyle = color;
+
+        // Left eye stalk
+        ctx.beginPath();
+        ctx.moveTo(-headRadius * 0.4, -headRadius * 0.3);
+        ctx.quadraticCurveTo(-headRadius * 0.7, -headRadius * 1.1 + stalkWobble, -headRadius * 0.6 + stalkWobble, -headRadius * 1.7);
+        ctx.stroke();
+
+        // Right eye stalk
+        ctx.beginPath();
+        ctx.moveTo(headRadius * 0.4, -headRadius * 0.3);
+        ctx.quadraticCurveTo(headRadius * 0.7, -headRadius * 1.1 - stalkWobble, headRadius * 0.6 - stalkWobble, -headRadius * 1.7);
+        ctx.stroke();
+
+        // Left eyeball at stalk tip
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 2.0;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(-headRadius * 0.6 + stalkWobble, -headRadius * 1.7, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#1E1B18';
+        ctx.beginPath();
+        ctx.arc(-headRadius * 0.6 + stalkWobble, -headRadius * 1.7 - 0.8, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Right eyeball at stalk tip
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(headRadius * 0.6 - stalkWobble, -headRadius * 1.7, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#1E1B18';
+        ctx.beginPath();
+        ctx.arc(headRadius * 0.6 - stalkWobble, -headRadius * 1.7 - 0.8, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Chubby rounded slug head
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 3.5;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Cheerful slug mouth
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.arc(0, headRadius * 0.25, headRadius * 0.25, 0.2 * Math.PI, 0.8 * Math.PI);
+        ctx.stroke();
+
+        // Lower sensory tentacles
+        ctx.fillStyle = coreColor || '#FA824C';
+        ctx.beginPath();
+        ctx.arc(-headRadius * 0.5, headRadius * 0.35, 2.5, 0, Math.PI * 2);
+        ctx.arc(headRadius * 0.5, headRadius * 0.35, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        // --- CLASSIC CARTOON WORM HEAD ---
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 3.5;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Forehead highlight
+        ctx.fillStyle = '#FFFDF8';
+        ctx.beginPath();
+        ctx.arc(0, -headRadius * 0.35, headRadius * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Rosy Cheeks
+        ctx.fillStyle = '#FF5964';
+        ctx.beginPath();
+        ctx.arc(-headRadius * 0.65, 0, headRadius * 0.2, 0, Math.PI * 2);
+        ctx.arc(headRadius * 0.65, 0, headRadius * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Googly Eyes
+        const eyeOffsetX = headRadius * 0.42;
+        const eyeOffsetY = -headRadius * 0.28;
+        const eyeRadius = headRadius * 0.35;
+        const pupilRadius = eyeRadius * 0.52;
+
+        [-eyeOffsetX, eyeOffsetX].forEach((ex) => {
+          ctx.strokeStyle = '#1E1B18';
+          ctx.lineWidth = 2.5;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(ex, eyeOffsetY, eyeRadius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#1E1B18';
+          ctx.beginPath();
+          ctx.arc(ex, eyeOffsetY - 1.2, pupilRadius, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(ex - 1, eyeOffsetY - 2.2, pupilRadius * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Smiling Mouth
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, headRadius * 0.2, headRadius * 0.35, 0.2 * Math.PI, 0.8 * Math.PI);
+        ctx.stroke();
+
+        // Tongue sticking out
+        if (isPlayer) {
+          ctx.fillStyle = '#FF5964';
+          ctx.beginPath();
+          ctx.arc(0, headRadius * 0.48, headRadius * 0.16, 0, Math.PI);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      // Bubble Shield Aura
+      if (hasPhaseShield) {
+        ctx.strokeStyle = '#78C0E0';
+        ctx.lineWidth = 3.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(0, 0, headRadius * 1.7, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
 
       ctx.restore();
 
-      // Boost exhaust sparks
-      if (boosting && frame % 2 === 0) {
-        emitSparks(headX - Math.cos(angle) * 12, headY - Math.sin(angle) * 12, color, 3, 1.8);
+      // Boost exhaust
+      if (boosting && frameCount % 3 === 0) {
+        emitSparks(headX - Math.cos(angle) * 14, headY - Math.sin(angle) * 14, '#FFFDF8', 2, 2.0);
       }
 
       // Callsign tag above head
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = isPlayer ? '#00f5d4' : color;
-      ctx.font = 'bold 10px "JetBrains Mono", monospace';
-      ctx.fillText(isPlayer ? callsign || 'SLINK_VIPER' : color, headX - 20, headY - headRadius - 10);
+      ctx.fillStyle = '#1E1B18';
+      ctx.font = 'bold 12px "Bangers", cursive, sans-serif';
+      const label = isPlayer ? callsignTag || 'WOBBLY_JOE' : callsignTag || color;
+      ctx.fillText(label, headX - 22, headY - headRadius - 8);
 
       ctx.restore();
     };
@@ -771,9 +1450,35 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         player.trail.unshift({ x: player.x, y: player.y });
         if (player.trail.length > player.maxTrail) player.trail.pop();
 
+        // Boost costs length and mass unless overclock is on
         if (boostActive && !hasOverclock) {
-          localScore = Math.max(10, localScore - 0.2);
-          if (frame % 4 === 0) emitSparks(player.x, player.y, player.color, 2, 1.2);
+          const diffSetting = difficultyRef.current;
+          const scoreBurnRate = diffSetting === 'hard' ? 0.45 : diffSetting === 'medium' ? 0.25 : 0.12;
+          localScore = Math.max(10, localScore - scoreBurnRate);
+
+          if (frame % 4 === 0) {
+            emitSparks(player.x, player.y, player.color, 2, 1.2);
+          }
+
+          // In hard or medium mode, sustained boosting sheds fruit mass behind the player
+          if (frame % 18 === 0 && player.maxTrail > 24) {
+            player.maxTrail = Math.max(22, player.maxTrail - 1);
+            if (orbs.length < 500) {
+              const dropFruit: FoodType = Math.random() < 0.5 ? 'strawberry' : 'orange';
+              orbs.push({
+                x: player.x - Math.cos(player.angle) * (player.thickness + 12),
+                y: player.y - Math.sin(player.angle) * (player.thickness + 12),
+                radius: 4.5,
+                color: dropFruit === 'strawberry' ? '#E63946' : '#FA824C',
+                pulse: Math.random() * Math.PI * 2,
+                vx: -Math.cos(player.angle) * 1.5 + (Math.random() - 0.5),
+                vy: -Math.sin(player.angle) * 1.5 + (Math.random() - 0.5),
+                value: 25,
+                isLoot: true,
+                foodType: dropFruit,
+              });
+            }
+          }
         }
       }
 
@@ -783,32 +1488,30 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
       // Clear & Pre-render Transform
       ctx.save();
-      ctx.fillStyle = '#060814';
+      ctx.fillStyle = '#FFF8ED';
       ctx.fillRect(0, 0, width, height);
 
       const shakeX = (Math.random() - 0.5) * screenShake;
       const shakeY = (Math.random() - 0.5) * screenShake;
       ctx.translate(-camera.x + shakeX, -camera.y + shakeY);
 
-      // Draw Cyber Arena Grid
+      // Draw Retro Cartoon Meadow Grid
       drawGrid();
 
-      // Draw Arena Energy Boundary
+      // Draw Retro Cartoon Arena Boundary
       ctx.save();
-      ctx.shadowBlur = 28;
-      ctx.shadowColor = '#00f5d4';
-      ctx.strokeStyle = '#00f5d4';
-      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#1E1B18';
+      ctx.lineWidth = 6;
       ctx.beginPath();
       ctx.arc(ARENA_CENTER_X, ARENA_CENTER_Y, ARENA_RADIUS, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Danger Zone Ring
-      ctx.strokeStyle = 'rgba(255, 0, 127, 0.4)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([8, 8]);
+      // Comic hazard ring
+      ctx.strokeStyle = '#FA824C';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([12, 10]);
       ctx.beginPath();
-      ctx.arc(ARENA_CENTER_X, ARENA_CENTER_Y, ARENA_RADIUS - 15, 0, Math.PI * 2);
+      ctx.arc(ARENA_CENTER_X, ARENA_CENTER_Y, ARENA_RADIUS - 12, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
 
@@ -910,24 +1613,9 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           }
         }
 
-        // Draw Orb
-        ctx.save();
-        ctx.shadowBlur = orb.isLoot ? 16 : 8;
-        ctx.shadowColor = orb.color;
-        ctx.fillStyle = orb.color;
-        ctx.beginPath();
-        const r = orb.radius + Math.sin(orb.pulse) * 0.8;
-        ctx.arc(orb.x, orb.y, Math.max(1.5, r), 0, Math.PI * 2);
-        ctx.fill();
-
-        // Star orb glint
-        if (orb.type === 'star') {
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(orb.x, orb.y, r * 0.4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.restore();
+        // Draw Cartoon Soil Fruits (Oranges, Strawberries, Plums, Apples)
+        const r = Math.max(3.5, orb.radius + Math.sin(orb.pulse) * 0.6);
+        drawFruit(orb.x, orb.y, r, orb.foodType, orb.pulse);
 
         // Player eats orb
         const dist = Math.hypot(player.x - orb.x, player.y - orb.y);
@@ -940,8 +1628,37 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
             player.maxTrail = Math.min(180, player.maxTrail + (orb.isLoot ? 2 : 1));
 
             emitSparks(orb.x, orb.y, orb.color, orb.isLoot ? 12 : 6, 1.2);
+
             addScorePopup(orb.x, orb.y - 10, `+${gainedScore}`, orb.color);
             sounds.playOrbChime(orb.value);
+
+            // Comic 'POW!' or 'ZAP!' animation burst on apple chomp
+            const burstWord: 'POW!' | 'ZAP!' = Math.random() > 0.5 ? 'POW!' : 'ZAP!';
+            const burstBg = burstWord === 'POW!' ? '#FFD13B' : '#78C0E0';
+            const burstText = '#1E1B18';
+
+            // 1. In-World Canvas Action Starburst (very small)
+            comicBursts.push({
+              x: orb.x,
+              y: orb.y,
+              text: burstWord,
+              color: burstBg,
+              textColor: burstText,
+              life: 1.0,
+              decay: 0.042,
+              rotation: (Math.random() - 0.5) * 0.35,
+              points: 10,
+              innerR: 6,
+              outerR: 13,
+            });
+
+            // 2. Crisp comic sound snap
+            sounds.playPowZapSound(burstWord === 'POW!' ? 'pow' : 'zap');
+
+            // 3. Viewport Screen Animation Overlay
+            const screenX = Math.max(65, Math.min(width - 65, orb.x - camera.x));
+            const screenY = Math.max(65, Math.min(height - 65, orb.y - camera.y));
+            triggerChompOverlay(burstWord, burstBg, burstText, screenX, screenY);
 
             if (orb.isLoot) {
               orbs.splice(i, 1);
@@ -957,37 +1674,90 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       }
 
       // BOT LOGIC & COMBAT
+      const currentDifficulty = difficultyRef.current;
+      const huntingChance = currentDifficulty === 'hard' ? 0.75 : currentDifficulty === 'medium' ? 0.45 : 0.20;
+      const botSpeedMult = currentDifficulty === 'hard' ? 1.25 : currentDifficulty === 'medium' ? 1.05 : 0.88;
+
       bots.forEach((bot, bIdx) => {
         if (isPausedRef.current) return;
 
-        if (bot.isFastPasser && frame % 2 === 0) {
-          emitSparks(bot.x, bot.y, '#ff0055', 2, 2.0);
+        // Dynamic tactical AI: Centipedes and Snakes actively calculate intercept vectors
+        const distToPlayer = Math.hypot(player.x - bot.x, player.y - bot.y);
+        const isDangerousHunter = bot.creatureType === 'centipede' || bot.creatureType === 'snake' || bot.isFastPasser;
+
+        // Check if bot should trigger a tactical boost to cut off the player
+        if (isDangerousHunter && distToPlayer < 420 && Math.random() < huntingChance * 0.04) {
+          bot.isBotBoosting = true;
+          bot.boostTimer = Math.floor(Math.random() * 45 + 30);
         }
 
-        // Steer toward orbs
-        let closestOrb: Orb | null = null;
-        let minDist = 200;
+        if (bot.boostTimer && bot.boostTimer > 0) {
+          bot.boostTimer--;
+          if (bot.boostTimer <= 0) bot.isBotBoosting = false;
+        }
 
-        for (let i = 0; i < orbs.length; i += 2) {
-          const d = Math.hypot(orbs[i].x - bot.x, orbs[i].y - bot.y);
-          if (d < minDist) {
-            minDist = d;
-            closestOrb = orbs[i];
+        const effectiveSpeed = (bot.speed * botSpeedMult) * (bot.isBotBoosting ? 1.45 : 1.0);
+
+        if ((bot.isFastPasser || bot.isBotBoosting) && frame % 2 === 0) {
+          emitSparks(bot.x, bot.y, bot.isBotBoosting ? '#FFD13B' : '#ff0055', 2, 2.0);
+        }
+
+        let targetAngle = bot.angle;
+        let hasTarget = false;
+
+        // TACTICAL 1: Intercept & Cut Off Player Path
+        if (isDangerousHunter && distToPlayer < (currentDifficulty === 'hard' ? 520 : 360) && !hasPhase) {
+          // Calculate where the player will be in 25-45 frames
+          const leadFrames = currentDifficulty === 'hard' ? 32 : 20;
+          const futurePlayerX = player.x + Math.cos(player.angle) * (boostActive ? 8.5 : 4.5) * leadFrames;
+          const futurePlayerY = player.y + Math.sin(player.angle) * (boostActive ? 8.5 : 4.5) * leadFrames;
+
+          targetAngle = Math.atan2(futurePlayerY - bot.y, futurePlayerX - bot.x);
+          hasTarget = true;
+          bot.isHunting = true;
+        } else {
+          bot.isHunting = false;
+        }
+
+        // TACTICAL 2: Avoid crashing into other bots' trails or arena wall
+        const distToWall = ARENA_RADIUS - Math.hypot(bot.x - ARENA_CENTER_X, bot.y - ARENA_CENTER_Y);
+        if (distToWall < 90) {
+          // Steer inward toward center
+          targetAngle = Math.atan2(ARENA_CENTER_Y - bot.y, ARENA_CENTER_X - bot.x);
+          hasTarget = true;
+        }
+
+        // TACTICAL 3: Hunt orbs if not in aggressive combat
+        if (!hasTarget) {
+          let closestOrb: Orb | null = null;
+          let minDist = 220;
+
+          for (let i = 0; i < orbs.length; i += 2) {
+            const d = Math.hypot(orbs[i].x - bot.x, orbs[i].y - bot.y);
+            if (d < minDist) {
+              minDist = d;
+              closestOrb = orbs[i];
+            }
+          }
+
+          if (closestOrb) {
+            targetAngle = Math.atan2(closestOrb.y - bot.y, closestOrb.x - bot.x);
+            hasTarget = true;
           }
         }
 
-        if (!bot.isFastPasser && closestOrb) {
-          const targetAngle = Math.atan2(closestOrb.y - bot.y, closestOrb.x - bot.x);
+        if (hasTarget) {
           let diff = targetAngle - bot.angle;
           while (diff < -Math.PI) diff += Math.PI * 2;
           while (diff > Math.PI) diff -= Math.PI * 2;
-          bot.angle += diff * bot.turnRate;
+          const aggressiveTurn = bot.turnRate * (currentDifficulty === 'hard' ? 1.35 : 1.1);
+          bot.angle += diff * aggressiveTurn;
         } else {
-          bot.angle += (Math.random() - 0.5) * (bot.isFastPasser ? 0.02 : 0.08);
+          bot.angle += (Math.random() - 0.5) * (bot.isFastPasser ? 0.03 : 0.08);
         }
 
-        bot.x += Math.cos(bot.angle) * bot.speed;
-        bot.y += Math.sin(bot.angle) * bot.speed;
+        bot.x += Math.cos(bot.angle) * effectiveSpeed;
+        bot.y += Math.sin(bot.angle) * effectiveSpeed;
 
         const botDist = Math.hypot(bot.x - ARENA_CENTER_X, bot.y - ARENA_CENTER_Y);
         if (botDist >= ARENA_RADIUS - 15) {
@@ -1011,7 +1781,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         }
 
         // 1. PLAYER CUTS BOT (Player Victory)
-        for (let t = 6; t < player.trail.length; t++) {
+        // Safe offset to prevent accidental self-head collisions
+        for (let t = 8; t < player.trail.length; t++) {
           const td = Math.hypot(player.trail[t].x - bot.x, player.trail[t].y - bot.y);
           if (td < player.thickness + 6) {
             localKills += 1;
@@ -1051,7 +1822,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
         // 2. BOT CUTS PLAYER (Bot Victory unless Phase Shield active)
         if (!hasPhase) {
-          for (let t = 6; t < bot.trail.length; t++) {
+          for (let t = 5; t < bot.trail.length; t++) {
             const pd = Math.hypot(bot.trail[t].x - player.x, bot.trail[t].y - player.y);
             if (pd < player.thickness + 5) {
               screenShake = 18;
@@ -1092,9 +1863,9 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         }
       });
 
-      // DRAW BOT WORMS
+      // DRAW BOT SOIL CREATURES (Centipedes, Snakes, Slugs, Worms)
       bots.forEach((bot) => {
-        drawSlinkWorm(
+        drawSoilCreature(
           bot.trail,
           bot.x,
           bot.y,
@@ -1104,12 +1875,16 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           bot.eyeColor,
           bot.thickness,
           false,
-          bot.isFastPasser
+          bot.isFastPasser || false,
+          false,
+          bot.creatureType,
+          bot.name,
+          frame
         );
       });
 
       // DRAW PLAYER WORM
-      drawSlinkWorm(
+      drawSoilCreature(
         player.trail,
         player.x,
         player.y,
@@ -1120,7 +1895,10 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         player.thickness,
         true,
         boostActive,
-        hasPhase
+        hasPhase,
+        'worm',
+        callsign || 'WOBBLY_JOE',
+        frame
       );
 
       // PARTICLES
@@ -1168,6 +1946,87 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         ctx.restore();
       }
 
+      // COMIC ACTION BURSTS ('POW!' / 'ZAP!')
+      for (let i = comicBursts.length - 1; i >= 0; i--) {
+        const cb = comicBursts[i];
+        cb.life -= cb.decay;
+        if (cb.life <= 0) {
+          comicBursts.splice(i, 1);
+          continue;
+        }
+
+        const progress = 1 - cb.life;
+        let scale = 1.0;
+        if (progress < 0.25) {
+          scale = 0.4 + (progress / 0.25) * 0.65;
+        } else if (progress < 0.45) {
+          scale = 1.05 - ((progress - 0.25) / 0.2) * 0.05;
+        } else {
+          scale = 1.0 - (progress - 0.45) * 0.18;
+        }
+
+        cb.y -= 0.65; // gentle upward float
+
+        ctx.save();
+        ctx.translate(cb.x, cb.y);
+        ctx.rotate(cb.rotation);
+        ctx.scale(scale, scale);
+        ctx.globalAlpha = Math.min(1.0, cb.life * 1.5);
+
+        // 1. Comic hard black drop shadow (subtle, small)
+        ctx.save();
+        ctx.translate(1.5, 1.5);
+        ctx.fillStyle = '#1E1B18';
+        drawBurstPolygon(ctx, 0, 0, cb.points, cb.outerR, cb.innerR);
+        ctx.fill();
+        ctx.restore();
+
+        // 2. Starburst body fill + clean ink outline
+        ctx.fillStyle = cb.color;
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.8;
+        ctx.lineJoin = 'miter';
+        drawBurstPolygon(ctx, 0, 0, cb.points, cb.outerR, cb.innerR);
+        ctx.fill();
+        ctx.stroke();
+
+        // 3. Inner decorative highlight rim
+        ctx.strokeStyle = '#FFFDF8';
+        ctx.lineWidth = 0.9;
+        drawBurstPolygon(ctx, 0, 0, cb.points, cb.outerR * 0.72, cb.innerR * 0.72);
+        ctx.stroke();
+
+        // 4. Action Text: 'POW!' or 'ZAP!' (very small)
+        ctx.font = '900 9px "Bangers", cursive, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Ink outline
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 2.0;
+        ctx.strokeText(cb.text, 0, 0.5);
+
+        // Text fill
+        ctx.fillStyle = cb.textColor;
+        ctx.fillText(cb.text, 0, 0.5);
+
+        // 5. Comic Speed/Action Rays (tiny)
+        ctx.strokeStyle = '#1E1B18';
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
+        for (let s = 0; s < 4; s++) {
+          const rayAngle = (s * Math.PI) / 2 + 0.35;
+          const r1 = cb.outerR + 1.5;
+          const r2 = cb.outerR + 4.5;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(rayAngle) * r1, Math.sin(rayAngle) * r1);
+          ctx.lineTo(Math.cos(rayAngle) * r2, Math.sin(rayAngle) * r2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
       ctx.restore();
 
       // UPDATE LEADERBOARD ROSTER
@@ -1198,6 +2057,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     animFrameId = requestAnimationFrame(render);
 
     return () => {
+      if (chompTimeoutRef.current) clearTimeout(chompTimeoutRef.current);
       cancelAnimationFrame(animFrameId);
       observer.disconnect();
       container.removeEventListener('mousemove', onMouseMove);
@@ -1215,8 +2075,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     <div
       ref={containerRef}
       className={`
-        relative rounded-2xl bg-[#060814] border border-cyan-500/30
-        shadow-[0_0_40px_rgba(0,245,212,0.15),0_12px_45px_rgba(0,0,0,0.8)]
+        relative rounded-xl bg-[#FFF8ED] border-3 border-[#1E1B18]
+        shadow-[5px_5px_0px_#1E1B18]
         ${isFullscreen ? 'overflow-visible' : 'overflow-hidden'}
         flex flex-col justify-between p-4 select-none group/arena
         ${isFullscreen ? 'w-full h-full min-h-screen' : 'h-[min(78vh,620px)] min-h-[440px] sm:min-h-[500px] sm:h-[600px]'}
@@ -1224,23 +2084,150 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     >
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block cursor-crosshair z-0" />
 
+      {/* COMIC 'POW!' / 'ZAP!' CHOMP ANIMATION OVERLAY (VERY SMALL) */}
+      {chompOverlay && (
+        <div
+          key={chompOverlay.id}
+          className="absolute z-30 pointer-events-none animate-comic-burst"
+          style={
+            {
+              left: `${chompOverlay.screenX}px`,
+              top: `${chompOverlay.screenY}px`,
+              '--burst-rot': `${chompOverlay.rotation}deg`,
+            } as React.CSSProperties
+          }
+        >
+          <div className="relative flex items-center justify-center filter drop-shadow-[2px_2px_0px_#1E1B18]">
+            <svg
+              width="36"
+              height="30"
+              viewBox="0 0 120 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="overflow-visible"
+            >
+              <polygon
+                points="60,2 73,26 98,12 95,38 118,48 97,64 110,88 83,82 72,100 56,84 36,98 34,74 8,80 22,58 2,42 26,34 16,10 44,22"
+                fill={chompOverlay.color}
+                stroke="#1E1B18"
+                strokeWidth="5"
+                strokeLinejoin="miter"
+              />
+              <polygon
+                points="60,10 70,28 90,18 87,38 106,48 89,60 98,80 77,74 68,90 55,76 38,88 37,68 16,74 27,56 12,42 32,36 24,18 46,26"
+                fill="none"
+                stroke="#FFFDF8"
+                strokeWidth="2.5"
+                opacity="0.9"
+              />
+            </svg>
+
+            <span
+              className="absolute font-comic text-[11px] leading-none text-[#1E1B18] tracking-wider uppercase select-none"
+              style={{
+                WebkitTextStroke: '0.6px #1E1B18',
+                color: chompOverlay.textColor,
+              }}
+            >
+              {chompOverlay.text}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* START PLAY OVERLAY */}
       {isPaused && !showDeathModal && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/40 backdrop-blur-xs pointer-events-auto">
-          <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-cyan-500/30 bg-[#0c1026]/90 shadow-[0_0_40px_rgba(0,245,212,0.3)]">
-            <span className="font-mono text-xs text-cyan-300 font-bold uppercase tracking-widest">
-              SLINK ARENA ENGINE READY
-            </span>
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/30 backdrop-blur-xs pointer-events-auto">
+          <div className="flex flex-col items-center gap-2 p-6 rounded-xl border-3 border-[#1E1B18] bg-[#FFFDF8] shadow-[5px_5px_0px_#1E1B18] text-center max-w-sm">
+            <SlinkHungry size={84} className="mb-1 -rotate-3" color={wormColor} />
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+              <span
+                className="w-3.5 h-3.5 rounded-full border-2 border-[#1E1B18] inline-block shrink-0 shadow-xs"
+                style={{ backgroundColor: wormColor }}
+              />
+              <span className="font-comic text-xs uppercase text-[#1E1B18] tracking-wider font-bold">
+                {callsign || 'SLINK_VIPER'}
+              </span>
+            </div>
+            <h3
+              className="font-comic text-3xl uppercase tracking-wider drop-shadow-[2px_2px_0px_#1E1B18]"
+              style={{
+                color: wormColor,
+                WebkitTextStroke: '0.8px #1E1B18',
+              }}
+            >
+              READY TO SLITHER?
+            </h3>
+            <p className="font-body text-xs text-[#5C3D2E] font-semibold mb-1">
+              Chomp juicy oranges, strawberries, plums &amp; apples! Dodge fast centipedes, swift snakes &amp; chubby slugs!
+            </p>
+
+            {/* DIFFICULTY SELECTOR */}
+            <div className="w-full my-2 p-2 rounded-lg bg-white border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] flex flex-col gap-1.5">
+              <span className="font-comic text-[11px] uppercase tracking-wider text-[#1E1B18] font-bold text-left">
+                SELECT DIFFICULTY:
+              </span>
+              <div className="grid grid-cols-3 gap-1.5 w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playBeep(450);
+                    setDifficulty('easy');
+                  }}
+                  className={`py-1 px-1.5 rounded text-xs font-comic uppercase font-bold border-2 border-[#1E1B18] transition-all cursor-pointer ${
+                    difficulty === 'easy'
+                      ? 'bg-[#70A288] text-white shadow-[2px_2px_0px_#1E1B18]'
+                      : 'bg-[#FFF8ED] text-[#1E1B18] hover:bg-[#FFF0D6]'
+                  }`}
+                >
+                  🌱 CASUAL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playBeep(600);
+                    setDifficulty('medium');
+                  }}
+                  className={`py-1 px-1.5 rounded text-xs font-comic uppercase font-bold border-2 border-[#1E1B18] transition-all cursor-pointer ${
+                    difficulty === 'medium'
+                      ? 'bg-[#FFD13B] text-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]'
+                      : 'bg-[#FFF8ED] text-[#1E1B18] hover:bg-[#FFF0D6]'
+                  }`}
+                >
+                  ⚡ HUNTER
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playBeep(750);
+                    setDifficulty('hard');
+                  }}
+                  className={`py-1 px-1.5 rounded text-xs font-comic uppercase font-bold border-2 border-[#1E1B18] transition-all cursor-pointer ${
+                    difficulty === 'hard'
+                      ? 'bg-[#E63946] text-white shadow-[2px_2px_0px_#1E1B18]'
+                      : 'bg-[#FFF8ED] text-[#1E1B18] hover:bg-[#FFF0D6]'
+                  }`}
+                >
+                  🔥 CARNAGE
+                </button>
+              </div>
+              <span className="text-[10px] font-body text-[#5C3D2E] font-medium text-left">
+                {difficulty === 'easy' && 'Slow opponents, gentle cutoffs & easy grazing.'}
+                {difficulty === 'medium' && 'Smart intercepting predators + mass loss on boost.'}
+                {difficulty === 'hard' && 'Hyper predators, turbo cutoffs & relentless hunting!'}
+              </span>
+            </div>
+
             <button
               type="button"
               onClick={playGame}
-              className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#00f5d4] via-[#00ff88] to-[#00f5d4] px-8 py-3.5 font-display text-sm font-black tracking-widest text-[#002820] uppercase shadow-[0_0_25px_rgba(0,245,212,0.6)] hover:scale-105 transition-all cursor-pointer"
+              className="comic-btn w-full bg-[#FFD13B] hover:bg-[#FFE066] text-[#1E1B18] text-xl py-3 px-6 cursor-pointer mt-1"
             >
-              <Play className="h-4 w-4 fill-current" />
-              SLITHER TO PLAY
+              <Play className="h-5 w-5 fill-current mr-2 inline" />
+              SLITHER IN! GO!
             </button>
-            <span className="font-mono text-[10px] text-slate-400">
-              Steer: Move cursor · Boost: Hold Click
+            <span className="font-hand text-xs font-bold text-[#1E1B18] mt-1">
+              Mouse / Touch to Steer · Hold Space to Boost
             </span>
           </div>
         </div>
@@ -1251,15 +2238,15 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         {activeBuffs.map((buff) => (
           <div
             key={buff.type}
-            className="flex items-center gap-2 bg-[#0c1026]/90 border border-white/20 px-3 py-1.5 rounded-lg backdrop-blur-md shadow-lg"
+            className="flex items-center gap-2 bg-white border-2 border-[#1E1B18] px-3 py-1.5 rounded-lg shadow-[2px_2px_0px_#1E1B18]"
           >
-            {buff.type === 'magnet' && <Magnet className="w-4 h-4 text-purple-400 animate-pulse" />}
-            {buff.type === 'phase' && <Shield className="w-4 h-4 text-cyan-400 animate-pulse" />}
-            {buff.type === 'overclock' && <Zap className="w-4 h-4 text-amber-400 animate-pulse" />}
-            <span className="font-mono text-[10px] text-white font-bold uppercase">{buff.type}</span>
-            <div className="w-14 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            {buff.type === 'magnet' && <Magnet className="w-4 h-4 text-[#E63946]" />}
+            {buff.type === 'phase' && <Shield className="w-4 h-4 text-[#78C0E0]" />}
+            {buff.type === 'overclock' && <Zap className="w-4 h-4 text-[#FFD13B]" />}
+            <span className="font-comic text-xs text-[#1E1B18] uppercase">{buff.type}</span>
+            <div className="w-14 h-2 bg-[#FFF0D6] border border-[#1E1B18] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cyan-400 to-pink-500 transition-all duration-75"
+                className="h-full bg-[#FA824C] transition-all duration-75"
                 style={{ width: `${buff.percent}%` }}
               />
             </div>
@@ -1270,156 +2257,158 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       {/* MULTI-KILL COMBO OVERLAY */}
       {comboCount > 1 && (
         <div className="absolute top-20 right-1/2 translate-x-1/2 z-20 pointer-events-none animate-bounce">
-          <div className="bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 text-white font-mono text-xs md:text-sm font-black px-5 py-1.5 rounded-full shadow-[0_0_25px_rgba(255,0,127,0.8)] border border-white/40 tracking-widest uppercase">
-            🔥 {comboCount}X SLINK STREAK! 🔥
+          <div className="bg-[#FFD13B] text-[#1E1B18] font-comic text-sm md:text-base font-bold px-4 py-1 rounded-lg shadow-[3px_3px_0px_#1E1B18] border-2 border-[#1E1B18] tracking-wider uppercase -rotate-2">
+            ★ {comboCount}X COMBO SLURP! ★
           </div>
         </div>
       )}
 
-      {/* MOBILE CONTROLLER */}
-      <div
-        className={`absolute inset-x-0 z-30 pointer-events-none px-4 ${isFullscreen ? 'bottom-12 md:bottom-12' : 'bottom-0 md:bottom-2'}`}
-        style={{ paddingBottom: isFullscreen ? 'calc(48px + env(safe-area-inset-bottom))' : 'calc(18px + env(safe-area-inset-bottom))' }}
-      >
-        <div className="relative w-full h-[104px]">
-          <button
-            data-mobile-control="true"
-            type="button"
-            className="absolute left-0 bottom-3 w-[78px] h-[78px] rounded-full border border-amber-400/60 bg-[#1b1913]/90 text-amber-300 font-mono text-[10px] font-bold tracking-widest shadow-[0_0_20px_rgba(255,170,0,0.3)] active:scale-95 active:bg-[#2b2216] touch-none select-none flex items-center justify-center z-40 cursor-pointer pointer-events-auto"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
-              if (!mobileInputRef.current.boost) sounds.playBoostSound();
-              mobileInputRef.current.boost = true;
-            }}
-            onPointerUp={(e) => {
-              e.preventDefault();
-              mobileInputRef.current.boost = false;
-              try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
-            }}
-            onPointerCancel={() => { mobileInputRef.current.boost = false; }}
-          >
-            BOOST
-          </button>
+      {/* MOBILE CONTROLLER (Only visible when active in game) */}
+      {!isPaused && !showDeathModal && (
+        <div
+          className={`absolute inset-x-0 z-30 pointer-events-none px-4 ${isFullscreen ? 'bottom-12 md:bottom-12' : 'bottom-0 md:bottom-2'}`}
+          style={{ paddingBottom: isFullscreen ? 'calc(48px + env(safe-area-inset-bottom))' : 'calc(18px + env(safe-area-inset-bottom))' }}
+        >
+          <div className="relative w-full h-[104px]">
+            <button
+              data-mobile-control="true"
+              type="button"
+              className="absolute left-0 bottom-3 w-[74px] h-[74px] rounded-full border-3 border-[#1E1B18] bg-[#FA824C] text-[#FFF8ED] font-comic text-sm tracking-wider shadow-[3px_3px_0px_#1E1B18] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#1E1B18] touch-none select-none flex items-center justify-center z-40 cursor-pointer pointer-events-auto"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+                if (!mobileInputRef.current.boost) sounds.playBoostSound();
+                mobileInputRef.current.boost = true;
+              }}
+              onPointerUp={(e) => {
+                e.preventDefault();
+                mobileInputRef.current.boost = false;
+                try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
+              }}
+              onPointerCancel={() => { mobileInputRef.current.boost = false; }}
+            >
+              BOOST!
+            </button>
 
-          <div
-            data-mobile-control="true"
-            className="absolute right-0 bottom-0 w-[104px] h-[104px] rounded-full border border-cyan-400/40 bg-[#060814]/85 backdrop-blur-sm shadow-[0_0_25px_rgba(0,245,212,0.2)] pointer-events-auto touch-none select-none z-40"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.currentTarget.setPointerCapture(e.pointerId);
+            <div
+              data-mobile-control="true"
+              className="absolute right-0 bottom-0 w-[100px] h-[100px] rounded-full border-3 border-[#1E1B18] bg-[#FFFDF8] shadow-[3px_3px_0px_#1E1B18] pointer-events-auto touch-none select-none z-40"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.setPointerCapture(e.pointerId);
 
-              const el = e.currentTarget;
-              const r = el.getBoundingClientRect();
+                const el = e.currentTarget;
+                const r = el.getBoundingClientRect();
 
-              const updateJoystick = (clientX: number, clientY: number) => {
+                const updateJoystick = (clientX: number, clientY: number) => {
+                  const cx = r.left + r.width / 2;
+                  const cy = r.top + r.height / 2;
+                  const max = r.width * 0.36;
+
+                  let dx = clientX - cx;
+                  let dy = clientY - cy;
+                  const len = Math.hypot(dx, dy) || 1;
+                  const amount = Math.min(1, len / max);
+
+                  mobileInputRef.current.active = amount > 0.05;
+                  mobileInputRef.current.dx = (dx / len) * amount;
+                  mobileInputRef.current.dy = (dy / len) * amount;
+                };
+
+                updateJoystick(e.clientX, e.clientY);
+                setHintVisible(false);
+              }}
+              onPointerMove={(e) => {
+                if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+                const r = e.currentTarget.getBoundingClientRect();
                 const cx = r.left + r.width / 2;
                 const cy = r.top + r.height / 2;
                 const max = r.width * 0.36;
 
-                let dx = clientX - cx;
-                let dy = clientY - cy;
+                let dx = e.clientX - cx;
+                let dy = e.clientY - cy;
                 const len = Math.hypot(dx, dy) || 1;
                 const amount = Math.min(1, len / max);
 
                 mobileInputRef.current.active = amount > 0.05;
                 mobileInputRef.current.dx = (dx / len) * amount;
                 mobileInputRef.current.dy = (dy / len) * amount;
-              };
-
-              updateJoystick(e.clientX, e.clientY);
-              setHintVisible(false);
-            }}
-            onPointerMove={(e) => {
-              if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
-              const r = e.currentTarget.getBoundingClientRect();
-              const cx = r.left + r.width / 2;
-              const cy = r.top + r.height / 2;
-              const max = r.width * 0.36;
-
-              let dx = e.clientX - cx;
-              let dy = e.clientY - cy;
-              const len = Math.hypot(dx, dy) || 1;
-              const amount = Math.min(1, len / max);
-
-              mobileInputRef.current.active = amount > 0.05;
-              mobileInputRef.current.dx = (dx / len) * amount;
-              mobileInputRef.current.dy = (dy / len) * amount;
-            }}
-            onPointerUp={(e) => {
-              e.preventDefault();
-              mobileInputRef.current.active = false;
-              mobileInputRef.current.dx = 0;
-              mobileInputRef.current.dy = -1;
-              try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
-            }}
-            onPointerCancel={() => {
-              mobileInputRef.current.active = false;
-              mobileInputRef.current.dx = 0;
-              mobileInputRef.current.dy = -1;
-            }}
-          >
-            <div className="absolute inset-2 rounded-full border border-cyan-400/20" />
-            <div className="absolute inset-5 rounded-full border border-cyan-400/10" />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-cyan-400/80 bg-cyan-950/90 shadow-[0_0_15px_rgba(0,245,212,0.3)] flex items-center justify-center">
-              <span className="text-[9px] font-mono font-bold tracking-widest text-cyan-300">MOVE</span>
+              }}
+              onPointerUp={(e) => {
+                e.preventDefault();
+                mobileInputRef.current.active = false;
+                mobileInputRef.current.dx = 0;
+                mobileInputRef.current.dy = -1;
+                try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
+              }}
+              onPointerCancel={() => {
+                mobileInputRef.current.active = false;
+                mobileInputRef.current.dx = 0;
+                mobileInputRef.current.dy = -1;
+              }}
+            >
+              <div className="absolute inset-2 rounded-full border-2 border-dashed border-[#1E1B18]/30" />
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full border-2 border-[#1E1B18] bg-[#FFD13B] shadow-[2px_2px_0px_#1E1B18] flex items-center justify-center">
+                <span className="text-[10px] font-comic font-bold text-[#1E1B18]">STEER</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {hintVisible && (
+      {hintVisible && !isPaused && !showDeathModal && (
         <div className="absolute bottom-[125px] left-1/2 -translate-x-1/2 z-20 pointer-events-none whitespace-nowrap">
-          <span className="font-mono text-[9px] tracking-widest text-[#00f5d4] uppercase px-3 py-1.5 rounded-lg bg-[#060814]/90 border border-cyan-400/40 shadow-md">
-            MOVE CURSOR TO STEER · HOLD BOOST TO DASH
+          <span className="font-comic text-xs uppercase px-3 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] text-[#1E1B18]">
+            MOVE CURSOR TO STEER · HOLD CLICK TO BOOST!
           </span>
         </div>
       )}
 
-      {/* DEATH MODAL */}
+      {/* DEATH MODAL: PHYSICAL RETRO COMIC PANEL */}
       {showDeathModal && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-md">
-          <div className="w-[340px] rounded-3xl border border-cyan-500/40 bg-[#0c1026]/95 p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(0,245,212,0.2)]">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-300 font-mono text-[10px] font-bold uppercase tracking-wider mb-2">
-              <Flame className="w-3.5 h-3.5 text-pink-400" />
-              WORM SHATTERED
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-xs">
+          <div className="w-[340px] sm:w-[380px] rounded-xl border-3 border-[#1E1B18] bg-[#FFF8ED] p-6 text-center shadow-[6px_6px_0px_#1E1B18]">
+            <div className="inline-block px-3 py-0.5 rounded bg-[#E63946] border-2 border-[#1E1B18] text-white font-comic text-sm uppercase -rotate-2 shadow-[2px_2px_0px_#1E1B18]">
+              ZOIKS! TAIL BUMP!
             </div>
 
-            <div className="font-display text-2xl font-black uppercase tracking-tight text-white">
-              ROUND COMPLETE
+            <SlinkOops size={90} className="mx-auto my-1" color={wormColor} />
+
+            <div className="font-comic text-3xl uppercase tracking-wide text-[#1E1B18]">
+              ROUND FINISHED!
             </div>
 
-            <div className="my-4 p-4 rounded-xl bg-[#060814] border border-white/10 flex flex-col gap-2">
-              <div className="flex justify-between items-center font-mono text-xs">
-                <span className="text-slate-400">Final Score:</span>
-                <span className="text-cyan-300 font-black text-base">{lastScore?.toLocaleString() || 0}</span>
+            <div className="my-3 p-3.5 rounded-lg bg-white border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] flex flex-col gap-1.5">
+              <div className="flex justify-between items-center font-comic text-base">
+                <span className="text-[#5C3D2E]">SCORE:</span>
+                <span className="text-[#FA824C] text-xl font-bold">{lastScore?.toLocaleString() || 0}</span>
               </div>
-              <div className="flex justify-between items-center font-mono text-xs">
-                <span className="text-slate-400">Rivals Shattered:</span>
-                <span className="text-pink-300 font-bold">{kills}</span>
+              <div className="flex justify-between items-center font-comic text-sm">
+                <span className="text-[#5C3D2E]">RIVALS OUTSMARTED:</span>
+                <span className="text-[#1E1B18] font-bold">{kills}</span>
               </div>
-              <div className="flex justify-between items-center font-mono text-xs border-t border-white/10 pt-2">
-                <span className="text-slate-400">Best Today:</span>
-                <span className="text-amber-300 font-bold">{bestToday.toLocaleString()}</span>
+              <div className="flex justify-between items-center font-comic text-sm border-t border-[#1E1B18]/20 pt-1.5 mt-0.5">
+                <span className="text-[#5C3D2E]">BEST RECORD:</span>
+                <span className="text-[#70A288] font-bold">{bestToday.toLocaleString()}</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-3 mt-2">
               <button
                 onClick={shareThenRestart}
-                className="flex items-center gap-2 rounded-xl border border-sky-400/60 bg-sky-500/20 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wide text-white hover:bg-sky-500/40 transition-all cursor-pointer"
+                className="comic-btn bg-[#78C0E0] hover:bg-[#59B4D1] text-[#1E1B18] px-4 py-2 text-base uppercase"
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-4 w-4 mr-1.5 inline" />
                 Share
               </button>
               <button
                 onClick={playAgain}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00f5d4] via-[#00ff88] to-[#00f5d4] px-5 py-2.5 font-mono text-xs font-black uppercase tracking-wide text-[#002820] hover:scale-105 shadow-[0_0_20px_rgba(0,245,212,0.5)] transition-all cursor-pointer"
+                className="comic-btn bg-[#FFD13B] hover:bg-[#FFE066] text-[#1E1B18] px-5 py-2 text-base uppercase"
               >
-                <RotateCcw className="h-4 w-4" />
-                Play Again
+                <RotateCcw className="h-4 w-4 mr-1.5 inline" />
+                Play Again!
               </button>
             </div>
           </div>
@@ -1429,20 +2418,33 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       {/* TOP HUD */}
       <div className="relative z-10 w-full flex items-start justify-between gap-4 pointer-events-none">
         {/* Score Card */}
-        <div className="pointer-events-auto bg-[#0c1026]/90 border border-cyan-400/40 rounded-xl p-3 shadow-[0_0_20px_rgba(0,245,212,0.15)] flex flex-col min-w-[110px] md:min-w-[140px] backdrop-blur-md">
-          <span className="font-mono text-[9px] text-cyan-400/80 tracking-widest uppercase font-bold">
-            SLINK SCORE
-          </span>
-          <span className="font-display text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-[0_0_10px_rgba(0,245,212,0.5)]">
+        <div className="pointer-events-auto bg-white border-2 border-[#1E1B18] rounded-lg p-2.5 shadow-[3px_3px_0px_#1E1B18] flex flex-col min-w-[110px] md:min-w-[130px]">
+          <div className="flex items-center justify-between gap-1 pb-1 mb-0.5 border-b border-[#1E1B18]/15">
+            <span className="font-comic text-xs text-[#5C3D2E] tracking-wider uppercase">
+              YOUR SCORE
+            </span>
+            <span
+              className={`text-[9px] font-comic uppercase font-bold px-1.5 py-0.2 rounded border ${
+                difficulty === 'hard'
+                  ? 'bg-[#E63946] text-white border-[#1E1B18]'
+                  : difficulty === 'medium'
+                  ? 'bg-[#FFD13B] text-[#1E1B18] border-[#1E1B18]'
+                  : 'bg-[#70A288] text-white border-[#1E1B18]'
+              }`}
+            >
+              {difficulty === 'hard' ? '🔥 CARNAGE' : difficulty === 'medium' ? '⚡ HUNTER' : '🌱 CASUAL'}
+            </span>
+          </div>
+          <span className="font-comic text-3xl text-[#FA824C] leading-none">
             {score.toLocaleString()}
           </span>
-          <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 pt-1 border-t border-white/10 mt-1">
-            <span>KILLS</span>
-            <span className="text-pink-400 font-bold">{kills}</span>
+          <div className="flex items-center justify-between text-xs font-body font-bold text-[#1E1B18] pt-1 border-t border-[#1E1B18]/15 mt-1">
+            <span>CHOMPS</span>
+            <span className="text-[#E63946]">{kills}</span>
           </div>
-          <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 mt-0.5">
+          <div className="flex items-center justify-between text-xs font-body font-bold text-[#5C3D2E]">
             <span>RECORD</span>
-            <span className="text-amber-400 font-bold">{bestToday.toLocaleString()}</span>
+            <span className="text-[#70A288]">{bestToday.toLocaleString()}</span>
           </div>
         </div>
 
@@ -1455,48 +2457,37 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
                   sounds.playBeep(600);
                   onToggleFullscreen();
                 }}
-                className="text-slate-300 hover:text-[#00f5d4] transition-colors cursor-pointer p-1.5 rounded-lg bg-[#0c1026]/80 border border-white/10 hover:border-cyan-400/50"
+                className="p-1.5 rounded-lg bg-white border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] text-[#1E1B18] hover:bg-[#FFD13B] cursor-pointer"
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
             )}
           </div>
 
-          {/* Alert Status Pill */}
-          <div
-            className="hidden md:flex bg-[#0c1026]/90 border rounded-full px-3 py-1 items-center gap-1.5 shadow-[0_0_12px_rgba(0,245,212,0.2)] backdrop-blur-md"
-            style={{ borderColor: alertColor + '70' }}
-          >
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: alertColor }} />
-            <span className="font-mono text-[9px] font-bold tracking-wider uppercase" style={{ color: alertColor }}>
-              {alertText}
-            </span>
-          </div>
-
           {/* Mini Roster */}
-          <div className="hidden md:flex relative bg-[#0c1026]/90 border border-cyan-400/30 rounded-xl p-3 shadow-[0_0_20px_rgba(0,0,0,0.6)] min-w-[170px] flex-col backdrop-blur-md">
-            <div className="flex items-center justify-between text-[9px] font-mono text-slate-300 uppercase pb-1 mb-1 border-b border-white/10">
-              <span className="tracking-wider flex items-center gap-1 font-bold text-cyan-300">
-                <Trophy className="w-3 h-3 text-amber-400" /> TOP SLINKS
+          <div className="hidden md:flex relative bg-white border-2 border-[#1E1B18] rounded-lg p-2.5 shadow-[3px_3px_0px_#1E1B18] min-w-[160px] flex-col">
+            <div className="flex items-center justify-between text-xs font-comic text-[#1E1B18] uppercase pb-1 mb-1 border-b border-[#1E1B18]/20">
+              <span className="tracking-wider flex items-center gap-1 font-bold">
+                <Trophy className="w-3.5 h-3.5 text-[#FFD13B]" /> TOP SLINKS
               </span>
             </div>
-            <div className="flex flex-col gap-1 font-mono text-[10px]">
+            <div className="flex flex-col gap-1 font-body text-xs font-semibold">
               {roster.map((item, idx) => (
                 <div
                   key={idx}
                   className={`flex items-center justify-between ${
                     item.isPlayer
-                      ? 'text-[#00f5d4] font-bold py-0.5 px-1 rounded bg-cyan-500/15 border border-cyan-400/30'
-                      : 'text-slate-300'
+                      ? 'text-[#FA824C] font-bold py-0.5 px-1 rounded bg-[#FFF0D6] border border-[#1E1B18]'
+                      : 'text-[#1E1B18]'
                   }`}
                 >
-                  <span className="truncate max-w-[100px] flex items-center gap-1">
-                    <span className={idx === 0 ? 'text-amber-400 font-black' : 'text-slate-500'}>
+                  <span className="truncate max-w-[95px] flex items-center gap-1">
+                    <span className="font-comic text-xs text-[#5C3D2E]">
                       {idx + 1}.
                     </span>{' '}
                     {item.name}
                   </span>
-                  <span className={item.isPlayer ? 'text-[#00f5d4]' : 'text-slate-200 font-bold'}>
+                  <span className="font-comic text-xs">
                     {item.score}
                   </span>
                 </div>

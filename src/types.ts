@@ -12,7 +12,14 @@ declare global {
   }
 }
 
-export type NavTab = 'play-now' | 'arenas-and-modes' | 'how-it-works' | 'leaderboard' | 'token-and-rewards';
+export type NavTab =
+  | 'play-now'
+  | 'arenas'
+  | 'arenas-and-modes'
+  | 'how-it-works'
+  | 'leaderboard'
+  | 'token-rewards'
+  | 'token-and-rewards';
 
 export type ArenaMode = 'free' | 'staked';
 

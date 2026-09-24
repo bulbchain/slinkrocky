@@ -1,22 +1,27 @@
 import React from 'react';
-import { UserCheck, Infinity as InfinityIcon, Trophy, Sparkles } from 'lucide-react';
 import { sounds } from '../audio';
+import {
+  SlinkPeeking,
+  SlinkHungry,
+  SlinkChampion,
+  SoundBurst,
+} from './RetroCartoonCharacters';
 
 export const EngagementLoop: React.FC = () => {
   return (
-    <section className="w-full py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-10">
+    <section className="w-full py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-8">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
-        <span className="font-mono text-xs text-[#00f5d4] uppercase tracking-widest font-bold">
-          SLINK TACTICAL PROTOCOL
-        </span>
+        <div className="inline-block px-3 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] text-[#1E1B18] font-comic text-xs uppercase tracking-wider mb-2">
+          THE ROAD TO GLORY
+        </div>
 
-        <h2 className="font-display text-3xl sm:text-4xl uppercase text-white font-black mt-2 tracking-tight">
+        <h2 className="font-comic text-4xl sm:text-5xl uppercase text-[#1E1B18] tracking-wide">
           THE 3-STEP ASCENSION LOOP
         </h2>
 
-        <p className="font-mono text-sm text-slate-300 mt-2">
-          From a tiny glowing seedling to the apex cyber titan dominating the perimeter.
+        <p className="font-body text-base text-[#5C3D2E] font-medium mt-1">
+          From a tiny hungry wiggle to the undisputed king of the Sunday funny pages!
         </p>
       </div>
 
@@ -25,81 +30,93 @@ export const EngagementLoop: React.FC = () => {
         {/* STEP 1 */}
         <div
           onMouseEnter={() => sounds.playBeep(580)}
-          className="p-6 sm:p-8 rounded-2xl bg-[#0c1026]/90 border border-cyan-500/25 flex flex-col gap-4 shadow-xl hover:bg-[#111736] hover:border-cyan-400 transition-all hover:-translate-y-1"
+          className="comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden"
         >
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-400/40 flex items-center justify-center text-[#00f5d4] shadow-[0_0_15px_rgba(0,245,212,0.3)]">
-              <UserCheck className="w-6 h-6" />
+            <div className="p-2 rounded-xl bg-[#78C0E0] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+              <SlinkPeeking size={46} />
             </div>
 
-            <span className="font-display text-3xl text-cyan-400/30 font-black">
+            <span className="font-comic text-4xl text-[#78C0E0] select-none">
               01
             </span>
           </div>
 
           <div>
-            <h3 className="font-display text-xl uppercase text-white font-bold tracking-wide">
-              CUSTOMIZE &amp; DROP
+            <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide">
+              1. PICK A SILLY LOOK
             </h3>
 
-            <p className="font-mono text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-              Equip your preferred vibrant skin, name your worm, and drop into the matrix.
-              Every Slink starts agile and fast — keep moving to secure your first food territory.
+            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
+              Name your worm something hilarious, select bright cartoon colors (Tangerine, Sunny, Sky, Clover), and wriggle straight onto the meadow grass!
             </p>
+          </div>
+
+          <div className="mt-auto pt-3 border-t-2 border-[#1E1B18]/15 flex items-center justify-between">
+            <span className="font-comic text-xs text-[#1E1B18]">STEP: START</span>
+            <SoundBurst text="READY!" color="#FFD13B" className="text-xs" />
           </div>
         </div>
 
         {/* STEP 2 */}
         <div
           onMouseEnter={() => sounds.playBeep(680)}
-          className="p-6 sm:p-8 rounded-2xl bg-[#0c1026]/90 border border-pink-500/25 flex flex-col gap-4 shadow-xl hover:bg-[#111736] hover:border-pink-400 transition-all hover:-translate-y-1"
+          className="comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden"
         >
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 rounded-xl bg-pink-950/80 border border-pink-400/40 flex items-center justify-center text-[#ff007f] shadow-[0_0_15px_rgba(255,0,127,0.3)]">
-              <InfinityIcon className="w-6 h-6" />
+            <div className="p-2 rounded-xl bg-[#FA824C] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+              <SlinkHungry size={46} />
             </div>
 
-            <span className="font-display text-3xl text-pink-400/30 font-black">
+            <span className="font-comic text-4xl text-[#FA824C] select-none">
               02
             </span>
           </div>
 
           <div>
-            <h3 className="font-display text-xl uppercase text-white font-bold tracking-wide">
-              CONSUME &amp; EXPAND
+            <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide">
+              2. MUNCH &amp; GROW!
             </h3>
 
-            <p className="font-mono text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-              Vacuum radiant neon energy clusters. With each segment added, your radius expands,
-              turning your trailing body into a lethal kinetic wall.
+            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
+              Snack on juicy Honeycrisp apples, catch bubbly power-ups (Magnets, Bubble Shields, Nitro Rockets), and circle rivals until they get tangled up!
             </p>
+          </div>
+
+          <div className="mt-auto pt-3 border-t-2 border-[#1E1B18]/15 flex items-center justify-between">
+            <span className="font-comic text-xs text-[#1E1B18]">STEP: FEAST</span>
+            <SoundBurst text="CHOMP!" color="#FA824C" className="text-xs" />
           </div>
         </div>
 
         {/* STEP 3 */}
         <div
           onMouseEnter={() => sounds.playBeep(780)}
-          className="p-6 sm:p-8 rounded-2xl bg-[#0c1026]/90 border border-amber-500/25 flex flex-col gap-4 shadow-xl hover:bg-[#111736] hover:border-amber-400 transition-all hover:-translate-y-1"
+          className="comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden"
         >
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 rounded-xl bg-amber-950/80 border border-amber-400/40 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(255,170,0,0.3)]">
-              <Trophy className="w-6 h-6" />
+            <div className="p-2 rounded-xl bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+              <SlinkChampion size={46} />
             </div>
 
-            <span className="font-display text-3xl text-amber-400/30 font-black">
+            <span className="font-comic text-4xl text-[#FFD13B] select-none">
               03
             </span>
           </div>
 
           <div>
-            <h3 className="font-display text-xl uppercase text-white font-bold tracking-wide">
-              INTERCEPT &amp; CONQUER
+            <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide">
+              3. CLAIM THE PRIZE
             </h3>
 
-            <p className="font-mono text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-              Use tactical boost cuts to force rival worms into your tail. Absorb their Star Loot
-              and reign undefeated on the global Slink podium.
+            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
+              Conquer the #1 spot on the leaderboard! Earn shiny cartoon ribbons, glory in the Daily Slink Gazette, and collect $SLINK token payouts!
             </p>
+          </div>
+
+          <div className="mt-auto pt-3 border-t-2 border-[#1E1B18]/15 flex items-center justify-between">
+            <span className="font-comic text-xs text-[#1E1B18]">STEP: VICTORY</span>
+            <SoundBurst text="HOORAY!" color="#70A288" className="text-xs" />
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Gamepad2, Copy, Check, Sparkles, ExternalLink } from 'lucide-react';
+import { Gamepad2, Copy, Check, ExternalLink, Sparkles } from 'lucide-react';
 import { sounds } from '../audio';
+import { SlinkChampion, SoundBurst } from './RetroCartoonCharacters';
 import slinkLogo from '../assets/images/slink_creature_logo_1790169607687.jpg';
 
 interface ReadyToDriftCTAProps {
@@ -27,81 +28,88 @@ export const ReadyToDriftCTA: React.FC<ReadyToDriftCTAProps> = ({ onLaunchNow })
   };
 
   return (
-    <section className="relative w-full py-20 lg:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden flex flex-col items-center justify-center text-center">
-      {/* Ambient Arena Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] bg-[radial-gradient(ellipse_at_center,_rgba(0,245,212,0.25)_0%,_rgba(255,0,127,0.15)_40%,_transparent_75%)] blur-3xl rounded-full" />
-      </div>
-
-      <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
-        {/* Status */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0c1026] border border-cyan-400/40 text-[#00f5d4] shadow-[0_0_20px_rgba(0,245,212,0.2)]">
-          <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse shadow-[0_0_8px_#00ff88]" />
-          <span className="font-mono text-[11px] tracking-widest uppercase font-bold">
-            SLINK ARENA · SEASON 1 LIVE
-          </span>
+    <section className="relative w-full py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+      {/* Big Comic Poster Card */}
+      <div className="comic-card bg-[#FFD13B] border-4 border-[#1E1B18] shadow-[8px_8px_0px_#1E1B18] p-8 sm:p-12 text-center relative overflow-hidden flex flex-col items-center gap-5">
+        {/* Top Sound Bursts */}
+        <div className="absolute top-4 left-6 hidden sm:block -rotate-6">
+          <SoundBurst text="GO TIME!" color="#FA824C" />
+        </div>
+        <div className="absolute top-4 right-6 hidden sm:block rotate-6">
+          <SoundBurst text="YUMMY!" color="#70A288" />
         </div>
 
-        {/* Main heading */}
-        <h2 className="font-display text-4xl sm:text-6xl lg:text-7xl uppercase text-white font-black tracking-tight leading-none">
-          READY TO <span className="bg-gradient-to-r from-[#00f5d4] via-[#ff007f] to-[#ffaa00] bg-clip-text text-transparent">SLINK?</span>
-        </h2>
+        {/* Mascot */}
+        <div className="p-3 bg-white rounded-3xl border-3 border-[#1E1B18] shadow-[4px_4px_0px_#1E1B18]">
+          <SlinkChampion size={88} />
+        </div>
 
-        <p className="font-mono text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
-          Slither into the matrix. Consume radiant energy, outmaneuver rival worms with blistering speed boosts,
-          and harvest their star bounties to reign the global leaderboard.
-        </p>
+        {/* Headline */}
+        <div>
+          <span className="font-comic text-sm uppercase px-3 py-1 bg-white rounded border-2 border-[#1E1B18] text-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+            ★ SUNDAY EDITION · ISSUE #1 ★
+          </span>
+          <h2 className="font-comic text-4xl sm:text-6xl uppercase text-[#1E1B18] tracking-wide mt-3 drop-shadow-[2px_2px_0px_white]">
+            READY TO SLINK, WOBBLE &amp; WIN?
+          </h2>
+          <p className="font-body text-sm sm:text-base text-[#1E1B18] font-medium max-w-xl mx-auto mt-2">
+            The meadow grass is freshly mowed and the apples are crisp! Slither straight into the action — no download or sign-up needed!
+          </p>
+        </div>
 
-        {/* Main Actions */}
+        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-2 w-full sm:w-auto">
-          {/* Launch Game */}
           <button
             type="button"
             onClick={() => {
               sounds.playBoostSound();
               onLaunchNow();
             }}
-            className="w-full sm:w-auto px-10 py-4.5 rounded-xl bg-gradient-to-r from-[#00f5d4] via-[#00ff88] to-[#00f5d4] text-[#002820] font-display text-base font-black tracking-widest uppercase shadow-[0_0_35px_rgba(0,245,212,0.7)] hover:shadow-[0_0_50px_rgba(0,245,212,1)] hover:scale-105 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+            className="comic-btn w-full sm:w-auto bg-[#FA824C] hover:bg-[#FF9666] text-white text-2xl py-4 px-10 tracking-wider shadow-[5px_5px_0px_#1E1B18]"
           >
-            <Gamepad2 className="w-5 h-5" />
-            <span>ENTER THE ARENA NOW</span>
+            <Gamepad2 className="w-6 h-6 mr-2 inline" />
+            <span>PLAY FOR FREE NOW!</span>
           </button>
 
-          {/* X / Twitter */}
           <a
             href="https://x.com/play_slink"
             target="_blank"
             rel="noreferrer"
             onClick={() => sounds.playBeep(640)}
-            className="w-full sm:w-auto px-6 py-4.5 rounded-xl bg-[#0c1026] hover:bg-[#121838] border border-cyan-400/30 text-white hover:text-[#00f5d4] hover:border-cyan-400 font-mono text-xs font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-2"
+            className="comic-btn w-full sm:w-auto bg-white hover:bg-[#FFF8ED] text-[#1E1B18] text-base py-3.5 px-6 shadow-[4px_4px_0px_#1E1B18]"
           >
-            <span>FOLLOW @PLAY_SLINK</span>
-            <ExternalLink className="w-3.5 h-3.5" />
+            <span>JOIN THE COMIC CLUB @PLAY_SLINK</span>
+            <ExternalLink className="w-4 h-4 ml-1.5 inline" />
           </a>
         </div>
 
-        {/* Token Contract Strip */}
-        <div className="mt-4 flex flex-col items-center gap-2">
-          <span className="font-mono text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
-            OFFICIAL $SLINK TOKEN CONTRACT
+        {/* Contract Box */}
+        <div className="mt-4 flex flex-col items-center gap-1.5">
+          <span className="font-comic text-xs uppercase text-[#1E1B18] tracking-wider">
+            OFFICIAL $SLINK SOLANA CONTRACT
           </span>
 
-          <div className="flex items-center gap-2 rounded-xl bg-[#0c1026]/90 border border-white/10 px-4 py-2 shadow-inner">
-            <img src={slinkLogo} alt="SLINK" referrerPolicy="no-referrer" className="w-5 h-5 rounded-md object-cover" />
-            <span className="font-mono text-xs text-slate-300 font-bold tracking-wider">
+          <div className="flex items-center gap-2 rounded-lg bg-white border-2 border-[#1E1B18] px-3.5 py-1.5 shadow-[2px_2px_0px_#1E1B18]">
+            <img
+              src={slinkLogo}
+              alt="SLINK"
+              referrerPolicy="no-referrer"
+              className="w-5 h-5 rounded-full object-cover border border-[#1E1B18]"
+            />
+            <span className="font-mono text-xs text-[#1E1B18] font-bold">
               {SLINK_CONTRACT.slice(0, 8)}...{SLINK_CONTRACT.slice(-8)}
             </span>
             <button
               onClick={handleCopyContract}
               title="Copy Contract Address"
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-cyan-500/20 text-slate-300 hover:text-[#00f5d4] transition-colors cursor-pointer"
+              className="p-1 rounded bg-[#FFD13B] border border-[#1E1B18] hover:bg-[#FFE066] text-[#1E1B18] cursor-pointer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-[#00ff88]" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-[#70A288]" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           </div>
           {copied && (
-            <span className="font-mono text-[10px] text-[#00ff88] font-bold animate-pulse">
-              COPIED TO CLIPBOARD
+            <span className="font-comic text-xs text-[#70A288] font-bold">
+              COPIED TO CLIPBOARD!
             </span>
           )}
         </div>

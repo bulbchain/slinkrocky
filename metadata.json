@@ -1,6 +1,6 @@
 {
   "name": "SLINK — Vibrant Cyber-Worm Arena",
-  "description": "High-octane multiplayer cyber-worm arena. Slither, consume glowing energy orbs, outmaneuver rivals, and dominate the leaderboard in vibrant neon glory.",
+  "description": "Vibrant retro cartoon worm arena with flat colors, bold outlines, and Sunday comic humor. Slither, chomp juicy apples, out-wiggle rivals, and conquer the meadow leaderboard!",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

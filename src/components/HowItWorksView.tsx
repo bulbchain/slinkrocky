@@ -1,316 +1,235 @@
 import React, { useState } from 'react';
-import {
-  Zap,
-  Flame,
-  ShieldAlert,
-  Cpu,
-  Sparkles,
-  Skull,
-  CircleDot,
-  Crosshair,
-  Shield,
-  Magnet,
-} from 'lucide-react';
+import { Sparkles, Trophy, Zap, Shield, Magnet, Flame, HelpCircle } from 'lucide-react';
 import { sounds } from '../audio';
+import {
+  SlinkHungry,
+  SlinkSpeedy,
+  SlinkOops,
+  SlinkChampion,
+  SoundBurst,
+} from './RetroCartoonCharacters';
 
 export const HowItWorksView: React.FC = () => {
-  const [testMass, setTestMass] = useState(6500);
-  const [boostEngaged, setBoostEngaged] = useState(false);
+  const [appleCount, setAppleCount] = useState(18);
+  const [isBoosting, setIsBoosting] = useState(false);
 
-  // SLINK dynamic physics simulation values
-  const speed = boostEngaged ? 5.2 : 2.8;
-  const trailSegments = Math.floor(24 + testMass / 120);
-  const turnRate = Math.max(0.04, 0.12 - (testMass / 22000) * 0.05).toFixed(3);
-  const massBleed = Math.floor(testMass * 0.025);
-  const powerLevel = Math.min(99, Math.floor(40 + testMass / 400));
+  // Dynamic calculations for the fun interactive preview
+  const estimatedSegments = 6 + Math.floor(appleCount * 1.5);
+  const wiggleSpeed = isBoosting ? 'TURBO (9.5 MPH)' : 'CRUISING (4.2 MPH)';
+  const tummyStatus = appleCount > 35 ? 'SUPER CHUBBY!' : appleCount > 15 ? 'SATISFIED' : 'PECKISH';
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col gap-12">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
       {/* HEADER */}
       <div className="text-center max-w-4xl mx-auto flex flex-col gap-3">
-        <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-[#0c1026] border border-cyan-400/30 text-cyan-300 mx-auto shadow-[0_0_20px_rgba(0,245,212,0.15)]">
-          <Cpu className="w-3.5 h-3.5 text-[#00f5d4]" />
-          <span className="font-mono text-xs uppercase tracking-widest font-bold">
-            SLINK SURVIVAL &amp; COMBAT PROTOCOL
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] mx-auto">
+          <HelpCircle className="w-4 h-4 text-[#1E1B18]" />
+          <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
+            THE SUNDAY COMIC FIELD GUIDE
           </span>
         </div>
 
-        <h1 className="font-display text-4xl sm:text-6xl uppercase font-black text-white tracking-tight">
-          HOW TO PLAY &amp; WIN
+        <h1 className="font-comic text-4xl sm:text-6xl uppercase text-[#1E1B18] tracking-wide">
+          HOW TO PLAY &amp; WIN IN SLINK!
         </h1>
 
-        <p className="font-mono text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-          Scale your cyber worm. Master kinetic vector physics. Intercept rivals and convert
-          their star loot into unstoppable mass.
+        <p className="font-body text-base text-[#5C3D2E] font-medium leading-relaxed max-w-2xl mx-auto">
+          Wobble your way around the meadow, snap up juicy red apples, trick greedy rival worms, and build the longest wobbly tail ever printed!
         </p>
       </div>
 
-      {/* GAMEPLAY FLOW */}
+      {/* 3 CORE RULES: COMIC STRIP STYLE */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="group p-6 rounded-2xl bg-[#0c1026]/90 border border-cyan-500/30 hover:border-cyan-400 transition-all hover:-translate-y-1 shadow-xl">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-950/80 border border-cyan-400/40 flex items-center justify-center text-[#00f5d4]">
-              <CircleDot className="w-5 h-5" />
+        <div className="comic-card bg-[#FFFDF8] p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-2 border-b-2 border-[#1E1B18]/15 mb-3">
+              <span className="font-comic text-xs uppercase text-[#70A288]">STEP 01</span>
+              <SoundBurst text="CHOMP!" color="#FFD13B" className="text-[10px]" />
             </div>
-            <span className="font-mono text-xs font-bold tracking-widest text-[#00f5d4]">
-              01 · HARVEST
-            </span>
+            <div className="p-3 bg-[#FFF8ED] rounded-xl border-2 border-[#1E1B18] mb-3 inline-block">
+              <SlinkHungry size={56} />
+            </div>
+            <h3 className="font-comic text-2xl uppercase text-[#1E1B18]">
+              CHOMP CRISP FRUITS
+            </h3>
+            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
+              Steer with your mouse or finger. Roll over juicy oranges, strawberries, plums, and apples. With every bite, your worm sprouts an extra segment!
+            </p>
           </div>
-
-          <h3 className="font-display text-xl uppercase font-bold text-white">
-            Collect Neon Biomass
-          </h3>
-
-          <p className="font-mono text-xs text-slate-300 mt-2 leading-relaxed">
-            Vacuum luminous energy orbs strewn across the cyber grid to extend your segmented body,
-            increasing your turning leverage and lethal footprint.
-          </p>
+          <div className="mt-4 pt-3 border-t-2 border-[#1E1B18]/15 text-xs font-comic text-[#1E1B18]">
+            TIP: FRUITS = WEIGHT &amp; GLORY
+          </div>
         </div>
 
-        <div className="group p-6 rounded-2xl bg-[#0c1026]/90 border border-pink-500/30 hover:border-pink-400 transition-all hover:-translate-y-1 shadow-xl">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-pink-950/80 border border-pink-400/40 flex items-center justify-center text-[#ff007f]">
-              <Crosshair className="w-5 h-5" />
+        <div className="comic-card bg-[#FFFDF8] p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-2 border-b-2 border-[#1E1B18]/15 mb-3">
+              <span className="font-comic text-xs uppercase text-[#FA824C]">STEP 02</span>
+              <SoundBurst text="ZOOM!" color="#FA824C" className="text-[10px]" />
             </div>
-            <span className="font-mono text-xs font-bold tracking-widest text-[#ff007f]">
-              02 · CUT &amp; TRAP
-            </span>
+            <div className="p-3 bg-[#FFF8ED] rounded-xl border-2 border-[#1E1B18] mb-3 inline-block">
+              <SlinkSpeedy size={56} />
+            </div>
+            <h3 className="font-comic text-2xl uppercase text-[#1E1B18]">
+              OUT-WIGGLE CREATURES
+            </h3>
+            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
+              Hold the boost key (or click and hold) to burst ahead of fast centipedes, swift snakes, and slugs! If a creature smacks their nose into your side or tail, they pop!
+            </p>
           </div>
-
-          <h3 className="font-display text-xl uppercase font-bold text-white">
-            Intercept Rival Lines
-          </h3>
-
-          <p className="font-mono text-xs text-slate-300 mt-2 leading-relaxed">
-            Dash in front of rival worms so their head collides with your trailing body.
-            A successful cut shatters them instantly into massive star loot piles!
-          </p>
+          <div className="mt-4 pt-3 border-t-2 border-[#1E1B18]/15 text-xs font-comic text-[#1E1B18]">
+            TIP: NEVER BUMP YOUR OWN NOSE!
+          </div>
         </div>
 
-        <div className="group p-6 rounded-2xl bg-[#0c1026]/90 border border-amber-500/30 hover:border-amber-400 transition-all hover:-translate-y-1 shadow-xl">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-400/40 flex items-center justify-center text-amber-400">
-              <Skull className="w-5 h-5" />
+        <div className="comic-card bg-[#FFFDF8] p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-2 border-b-2 border-[#1E1B18]/15 mb-3">
+              <span className="font-comic text-xs uppercase text-[#78C0E0]">STEP 03</span>
+              <SoundBurst text="HOORAY!" color="#78C0E0" className="text-[10px]" />
             </div>
-            <span className="font-mono text-xs font-bold tracking-widest text-amber-400">
-              03 · APEX CROWN
-            </span>
+            <div className="p-3 bg-[#FFF8ED] rounded-xl border-2 border-[#1E1B18] mb-3 inline-block">
+              <SlinkChampion size={56} />
+            </div>
+            <h3 className="font-comic text-2xl uppercase text-[#1E1B18]">
+              FEAST ON RIPE FRUITS
+            </h3>
+            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
+              Poofed rivals burst into heaps of juicy Strawberries, Oranges, and Plums. Vacuum them all up to climb straight to #1 on the leaderboard!
+            </p>
           </div>
-
-          <h3 className="font-display text-xl uppercase font-bold text-white">
-            Dominate The Leaderboard
-          </h3>
-
-          <p className="font-mono text-xs text-slate-300 mt-2 leading-relaxed">
-            Coil around trapped worms to eliminate them one by one. Maintain your mass and claim
-            the #1 Apex position on the real-time global podium.
-          </p>
-        </div>
-      </div>
-
-      {/* INTERACTIVE TELEMETRY SIMULATOR */}
-      <div className="relative overflow-hidden rounded-3xl bg-[#0c1026]/95 border border-cyan-500/40 shadow-[0_0_50px_rgba(0,245,212,0.12)]">
-        <div className="relative p-6 sm:p-8 lg:p-10">
-          <div className="flex flex-col lg:flex-row gap-10">
-            {/* LEFT: CONTROLS */}
-            <div className="flex-1 flex flex-col gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88] animate-pulse" />
-                  <span className="font-mono text-xs text-cyan-300 uppercase tracking-widest font-bold">
-                    INTERACTIVE SLINK LAB
-                  </span>
-                </div>
-
-                <h2 className="font-display text-3xl uppercase font-black text-white">
-                  WORM PHYSICS SIMULATOR
-                </h2>
-
-                <p className="font-mono text-xs text-slate-300 mt-2 leading-relaxed">
-                  Adjust the mass slider below to observe how size dynamically affects speed,
-                  segment count, turning radius, and kinetic drag in the SLINK vector engine.
-                </p>
-              </div>
-
-              {/* MASS SLIDER */}
-              <div className="p-5 rounded-2xl bg-[#060814] border border-white/10">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono text-xs text-slate-400 uppercase tracking-wider font-bold">
-                    WORM MASS:
-                  </span>
-                  <span className="font-mono text-base font-black text-[#00f5d4]">
-                    {testMass.toLocaleString()} MASS
-                  </span>
-                </div>
-
-                <input
-                  type="range"
-                  min="500"
-                  max="25000"
-                  step="250"
-                  value={testMass}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-                    sounds.playBeep(450 + value / 50, 0.03);
-                    setTestMass(value);
-                  }}
-                  className="w-full accent-[#00f5d4] cursor-pointer"
-                />
-
-                <div className="flex justify-between mt-2 font-mono text-[10px] text-slate-500 font-bold">
-                  <span>AGILE SEEDLING (500)</span>
-                  <span>COLOSSAL APEX (25,000)</span>
-                </div>
-              </div>
-
-              {/* BOOST TOGGLE */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#060814] border border-white/10">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
-                      boostEngaged
-                        ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(255,170,0,0.5)]'
-                        : 'bg-white/5 border-white/10 text-slate-400'
-                    }`}
-                  >
-                    <Flame className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="font-mono text-xs font-bold text-white uppercase">
-                      NITRO BOOST DRIVE
-                    </div>
-                    <span className="font-mono text-[10px] text-slate-400">
-                      Speed: {speed.toFixed(1)}x · Bleed: ~{massBleed}/s
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    sounds.playBoostSound();
-                    setBoostEngaged(!boostEngaged);
-                  }}
-                  className={`px-4 py-2 rounded-xl font-mono text-xs font-bold uppercase transition-all cursor-pointer ${
-                    boostEngaged
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-[#1a0f00] shadow-[0_0_15px_rgba(255,170,0,0.5)]'
-                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
-                  }`}
-                >
-                  {boostEngaged ? 'ENGAGED' : 'DISENGAGED'}
-                </button>
-              </div>
-            </div>
-
-            {/* RIGHT: LIVE TELEMETRY DISPLAY */}
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              <div className="p-5 rounded-2xl bg-[#060814] border border-cyan-500/30 flex flex-col justify-between">
-                <span className="font-mono text-[10px] uppercase font-bold text-slate-400">
-                  SPEED VELOCITY
-                </span>
-                <span className="font-display text-3xl font-black text-[#00f5d4] my-2">
-                  {speed.toFixed(1)} <span className="text-sm font-mono text-slate-400">PTS/F</span>
-                </span>
-                <span className="font-mono text-[10px] text-cyan-300">
-                  {boostEngaged ? 'SUPERCHARGED DASH' : 'CRUISE VELOCITY'}
-                </span>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-[#060814] border border-pink-500/30 flex flex-col justify-between">
-                <span className="font-mono text-[10px] uppercase font-bold text-slate-400">
-                  TRAIL SEGMENTS
-                </span>
-                <span className="font-display text-3xl font-black text-[#ff007f] my-2">
-                  {trailSegments} <span className="text-sm font-mono text-slate-400">SEGS</span>
-                </span>
-                <span className="font-mono text-[10px] text-pink-300">
-                  LETHAL BODY SPAN
-                </span>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-[#060814] border border-amber-500/30 flex flex-col justify-between">
-                <span className="font-mono text-[10px] uppercase font-bold text-slate-400">
-                  TURN RATE
-                </span>
-                <span className="font-display text-3xl font-black text-amber-400 my-2">
-                  {turnRate} <span className="text-sm font-mono text-slate-400">RAD/F</span>
-                </span>
-                <span className="font-mono text-[10px] text-amber-300">
-                  {testMass > 15000 ? 'HEAVY ROTATION' : 'AGILE VECTORING'}
-                </span>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-[#060814] border border-purple-500/30 flex flex-col justify-between">
-                <span className="font-mono text-[10px] uppercase font-bold text-slate-400">
-                  ARENA THREAT LEVEL
-                </span>
-                <span className="font-display text-3xl font-black text-purple-400 my-2">
-                  {powerLevel}%
-                </span>
-                <span className="font-mono text-[10px] text-purple-300">
-                  DOMINANCE INDEX
-                </span>
-              </div>
-            </div>
+          <div className="mt-4 pt-3 border-t-2 border-[#1E1B18]/15 text-xs font-comic text-[#1E1B18]">
+            TIP: LUSCIOUS FRUITS = +50 TO +65 PTS EACH
           </div>
         </div>
       </div>
 
-      {/* POWER-UP GUIDE */}
-      <div>
-        <h2 className="font-display text-2xl sm:text-3xl uppercase font-black text-white mb-6">
-          TACTICAL POWER-UPS
+      {/* INTERACTIVE WOBBLE & MASS CALCULATOR */}
+      <div className="comic-card bg-[#FFFDF8] p-6 sm:p-8 flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#1E1B18] pb-4">
+          <div>
+            <span className="font-comic text-xs uppercase text-[#FA824C] tracking-wider">
+              INTERACTIVE MEADOW LAB
+            </span>
+            <h2 className="font-comic text-3xl uppercase text-[#1E1B18]">
+              TEST YOUR WORM'S WIGGLE STATS!
+            </h2>
+          </div>
+          <div className="font-comic text-base bg-[#FFD13B] px-3 py-1 rounded border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+            APPLES EATEN: <strong className="text-[#1E1B18] text-xl">{appleCount}</strong>
+          </div>
+        </div>
+
+        {/* Slider Controls */}
+        <div className="flex flex-col gap-4">
+          <label className="font-comic text-sm uppercase text-[#5C3D2E] flex justify-between">
+            <span>SLIDE TO FEED YOUR WORM APPLES:</span>
+            <span className="text-[#FA824C] font-bold">{appleCount} APPLES</span>
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="60"
+            value={appleCount}
+            onChange={(e) => {
+              setAppleCount(Number(e.target.value));
+              sounds.playBeep(400 + Number(e.target.value) * 10);
+            }}
+            className="w-full accent-[#FA824C] h-3 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] cursor-pointer"
+          />
+
+          <div className="flex items-center gap-4 mt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setIsBoosting(!isBoosting);
+                sounds.playBoostSound();
+              }}
+              className={`comic-btn py-2 px-5 text-sm uppercase ${
+                isBoosting ? 'bg-[#FA824C] text-white' : 'bg-[#FFD13B] text-[#1E1B18]'
+              }`}
+            >
+              {isBoosting ? 'TURBO BOOST ON (ACTIVE!)' : 'HOLD BOOST TO TEST'}
+            </button>
+            <span className="font-body text-xs text-[#5C3D2E]">
+              Speed consumes a tiny bit of tail length while zooming!
+            </span>
+          </div>
+        </div>
+
+        {/* Dynamic Result Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+          <div className="p-3 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[2px_2px_0px_#1E1B18]">
+            <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">LENGTH</span>
+            <span className="font-comic text-xl text-[#1E1B18]">{estimatedSegments} NODES</span>
+          </div>
+
+          <div className="p-3 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[2px_2px_0px_#1E1B18]">
+            <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">VELOCITY</span>
+            <span className="font-comic text-xl text-[#FA824C]">{wiggleSpeed}</span>
+          </div>
+
+          <div className="p-3 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[2px_2px_0px_#1E1B18]">
+            <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">TUMMY STATUS</span>
+            <span className="font-comic text-lg text-[#70A288]">{tummyStatus}</span>
+          </div>
+
+          <div className="p-3 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[2px_2px_0px_#1E1B18]">
+            <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">MEADOW DANGER</span>
+            <span className="font-comic text-xl text-[#E63946]">{appleCount > 30 ? 'HIGH THREAT' : 'PLAYFUL'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* POWER-UPS SHOWCASE */}
+      <div className="flex flex-col gap-6">
+        <h2 className="font-comic text-3xl uppercase text-[#1E1B18] text-center">
+          CARTOON POWER-UPS YOU CAN GRAB
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-[#0c1026]/90 border border-purple-500/30 flex flex-col gap-3">
-            <div className="w-12 h-12 rounded-xl bg-purple-950/80 border border-purple-400/40 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-              <Magnet className="w-6 h-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="comic-card bg-[#FFFDF8] p-5 flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+              <Magnet className="w-8 h-8 text-[#1E1B18]" />
             </div>
-            <h3 className="font-display text-lg uppercase font-bold text-white">MAGNET</h3>
-            <p className="font-mono text-xs text-slate-300 leading-relaxed">
-              Pulls all nearby food and Star Loot within 260px toward your head via luminous tractor beams.
-              Lasts for 7 seconds.
-            </p>
+            <div>
+              <h3 className="font-comic text-xl uppercase text-[#1E1B18]">
+                APPLE MAGNET
+              </h3>
+              <p className="font-body text-xs text-[#5C3D2E] mt-1">
+                Draws in all surrounding fruit and stars automatically for 8 hilarious seconds!
+              </p>
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#0c1026]/90 border border-cyan-500/30 flex flex-col gap-3">
-            <div className="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-400/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.3)]">
-              <Shield className="w-6 h-6" />
+          <div className="comic-card bg-[#FFFDF8] p-5 flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-[#78C0E0] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+              <Shield className="w-8 h-8 text-[#1E1B18]" />
             </div>
-            <h3 className="font-display text-lg uppercase font-bold text-white">PHASE SHIELD</h3>
-            <p className="font-mono text-xs text-slate-300 leading-relaxed">
-              Grants an impervious kinetic energy barrier that prevents death when touching rival bodies.
-              Lasts for 7 seconds.
-            </p>
+            <div>
+              <h3 className="font-comic text-xl uppercase text-[#1E1B18]">
+                BUBBLE SHIELD
+              </h3>
+              <p className="font-body text-xs text-[#5C3D2E] mt-1">
+                A giant soap bubble protects your head from one accidental bump or wall collision!
+              </p>
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#0c1026]/90 border border-amber-500/30 flex flex-col gap-3">
-            <div className="w-12 h-12 rounded-xl bg-amber-950/80 border border-amber-400/40 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(255,170,0,0.3)]">
-              <Zap className="w-6 h-6" />
+          <div className="comic-card bg-[#FFFDF8] p-5 flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-[#FA824C] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+              <Flame className="w-8 h-8 text-white" />
             </div>
-            <h3 className="font-display text-lg uppercase font-bold text-white">OVERCLOCK</h3>
-            <p className="font-mono text-xs text-slate-300 leading-relaxed">
-              Supercharges your speed by 130% without burning any mass score! Perfect for hunting down agile worms.
-              Lasts for 7 seconds.
-            </p>
+            <div>
+              <h3 className="font-comic text-xl uppercase text-[#1E1B18]">
+                NITRO ROCKET
+              </h3>
+              <p className="font-body text-xs text-[#5C3D2E] mt-1">
+                Gives your worm super-charged propulsion without losing any body length!
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* THE GOLDEN RULE */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0c1026] border border-pink-500/40 p-8 text-center shadow-xl">
-        <ShieldAlert className="w-10 h-10 text-pink-400 mx-auto mb-3 animate-pulse" />
-        <span className="font-mono text-xs text-pink-400 uppercase tracking-widest font-bold">
-          THE GOLDEN LAW OF THE ARENA
-        </span>
-        <h2 className="font-display text-3xl sm:text-5xl uppercase font-black text-white mt-2">
-          PROTECT YOUR HEAD AT ALL COSTS.
-        </h2>
-        <p className="font-mono text-xs sm:text-sm text-slate-300 max-w-xl mx-auto mt-3 leading-relaxed">
-          Your body and trail are indestructible weapons — but your head is fragile.
-          Trap rivals into colliding with your flanks and feast upon their starlit remains.
-        </p>
       </div>
     </div>
   );

@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
-import { Compass, Flame, Shield, Users, ArrowRight, Zap, CheckCircle2, Sparkles } from 'lucide-react';
+import { ArrowRight, Trophy, Sparkles, MapPin } from 'lucide-react';
 import { sounds } from '../audio';
+import {
+  SlinkHungry,
+  SlinkSpeedy,
+  SlinkChampion,
+  SoundBurst,
+} from './RetroCartoonCharacters';
 
 interface ArenasViewProps {
   onSelectArena: (mode: 'free' | 'staked') => void;
@@ -8,139 +14,148 @@ interface ArenasViewProps {
 
 const ARENA_SECTORS = [
   {
-    id: 'cyber-matrix',
-    name: 'GRID 01: CYBER MATRIX',
-    badge: 'FLAGSHIP ARENA',
-    badgeColor: '#00f5d4',
+    id: 'sunny-meadow',
+    name: 'MEADOW 01: SUNNY ORCHARD',
+    badge: 'SUNDAY CLASSIC',
+    badgeColor: '#70A288',
     type: 'free' as const,
-    pilots: 1420,
-    hazardRating: 'BALANCED (TIER 1)',
-    entryFee: '0.00 SOL (FREE)',
+    worms: 1420,
+    snackRating: 'APPLE FEAST',
+    entryFee: 'FREE (0 TOKENS)',
     respawn: 'INSTANT (<1s)',
-    description: 'The primary battleground for all cyber worms. Radiant biomass spawns continuously with low friction kinetic physics and full power-up availability.',
-    rules: ['Free-to-play with 0 gas fees', 'Instant one-click respawn', 'Power-ups: Magnet, Shield, Overclock active'],
-    active: true,
+    description: 'The beloved classic sunny meadow! Crisp Honeycrisp apples, soft green dandelion patches, and friendly bots. Ideal for wiggling, growing long, and having a blast.',
+    rules: ['100% Free — no wallet needed', 'Instant one-tap respawn', 'Active goodies: Magnets, Bubble Shields, Nitro Rockets'],
+    component: SlinkHungry,
   },
   {
-    id: 'bounty-crucible',
-    name: 'GRID 02: BOUNTY CRUCIBLE',
-    badge: 'HIGH STAKES',
-    badgeColor: '#ffaa00',
+    id: 'bounty-bowl',
+    name: 'MEADOW 02: THE BOUNTY BOWL',
+    badge: 'BIG PRIZES',
+    badgeColor: '#FA824C',
     type: 'staked' as const,
-    pilots: 685,
-    hazardRating: 'LETHAL (TIER 5)',
+    worms: 685,
+    snackRating: 'STAR LOOT',
     entryFee: '50 $SLINK',
-    respawn: 'RE-BUY REQUIRED',
-    description: 'Ruthless competitive arena where defeated worms forfeit their staked token bounty pool directly to the victor. Extra large Star Loot drops.',
-    rules: ['50 $SLINK entry stake', '85% direct killer bounty payout', 'Rare Star Loot drops on every shatter'],
-    active: true,
+    respawn: 'RE-ENTRY PASS',
+    description: 'The premier tournament stage for skilled wrigglers! Worms stake $SLINK tokens and drop glittering Star Loot upon poofing. Top worms take home the prize pot!',
+    rules: ['50 $SLINK entry stake', 'Winner reaps 85% of target bounty', 'Giant Golden Star drops on every pop'],
+    component: SlinkChampion,
   },
   {
-    id: 'neon-singularity',
-    name: 'GRID 03: NEON SINGULARITY',
-    badge: 'WARP ANOMALY',
-    badgeColor: '#ff007f',
+    id: 'wobble-woods',
+    name: 'MEADOW 03: WOBBLY WOODS',
+    badge: 'SILLY CHAOS',
+    badgeColor: '#78C0E0',
     type: 'free' as const,
-    pilots: 410,
-    hazardRating: 'CHAOTIC (TIER 3)',
-    entryFee: '0.00 SOL (FREE)',
+    worms: 410,
+    snackRating: 'BERRY BLITZ',
+    entryFee: 'FREE (0 TOKENS)',
     respawn: 'INSTANT (<1s)',
-    description: 'A gravitational singularity pulses in the arena center, sucking nearby mass towards the epicenter while orbiting worms battle for dominance.',
-    rules: ['Central gravitational pull', '+50% food cluster density', 'Perimeter magnetic repulsion fields'],
-    active: true,
+    description: 'A rambunctious forest patch filled with bouncy mushrooms, winding hedge fences, and double-speed berries! Pure cartoon mayhem from start to finish.',
+    rules: ['+50% more berry snacks', 'Bouncy mushroom bumpers', 'Double turbo boost pads'],
+    component: SlinkSpeedy,
   },
 ];
 
 export const ArenasView: React.FC<ArenasViewProps> = ({ onSelectArena }) => {
-  const [selectedId, setSelectedId] = useState('cyber-matrix');
+  const [selectedId, setSelectedId] = useState('sunny-meadow');
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
       {/* Header */}
       <div className="flex flex-col gap-3 text-center max-w-3xl mx-auto">
-        <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 mx-auto shadow-[0_0_20px_rgba(0,245,212,0.15)]">
-          <Compass className="w-3.5 h-3.5 text-[#00f5d4]" />
-          <span className="font-mono text-xs uppercase tracking-widest font-bold">
-            SLINK SECTOR NAVIGATION MATRIX
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] mx-auto">
+          <MapPin className="h-4 w-4 text-[#1E1B18]" />
+          <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
+            CHOOSE YOUR PLAYGROUND
           </span>
         </div>
-        <h1 className="font-display text-4xl sm:text-5xl uppercase font-black text-white tracking-tight">
-          CHOOSE COMBAT GRID
+
+        <h1 className="font-comic text-4xl sm:text-6xl uppercase text-[#1E1B18] tracking-wide">
+          SLINK MEADOW LOCATIONS
         </h1>
-        <p className="font-mono text-sm text-slate-300 leading-relaxed">
-          Select your battlefield. Each sector features unique gravitational mechanics, hazard ratings, and loot distributions.
+
+        <p className="font-body text-base text-[#5C3D2E] font-medium leading-relaxed">
+          From peaceful apple orchards to high-energy prize arenas, pick your favorite comic backdrop and start slithering!
         </p>
       </div>
 
-      {/* Grid of Sectors */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Grid of Arenas Styled like Comic Collector Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {ARENA_SECTORS.map((sector) => {
           const isSelected = selectedId === sector.id;
+          const CharacterComponent = sector.component;
+
           return (
             <div
               key={sector.id}
               onClick={() => {
-                sounds.playBeep(640);
                 setSelectedId(sector.id);
+                sounds.playBeep(640);
               }}
-              className={`relative rounded-2xl p-6 sm:p-7 bg-[#0c1026]/90 border flex flex-col justify-between transition-all cursor-pointer shadow-xl ${
+              className={`comic-card bg-[#FFFDF8] p-6 flex flex-col justify-between cursor-pointer transition-all hover:-translate-y-1 ${
                 isSelected
-                  ? 'border-cyan-400 shadow-[0_0_35px_rgba(0,245,212,0.25)] bg-[#101633]'
-                  : 'border-white/10 hover:border-cyan-400/40 hover:bg-[#0f1430]'
+                  ? 'border-4 border-[#1E1B18] shadow-[8px_8px_0px_#1E1B18] ring-4 ring-[#FFD13B]'
+                  : 'border-3 border-[#1E1B18] shadow-[4px_4px_0px_#1E1B18]'
               }`}
             >
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <span
-                    className="font-mono text-[10px] px-3 py-1 rounded-md border tracking-wider font-bold uppercase"
-                    style={{
-                      borderColor: sector.badgeColor + '60',
-                      color: sector.badgeColor,
-                      backgroundColor: '#060814',
-                    }}
+                    style={{ backgroundColor: sector.badgeColor }}
+                    className="font-comic text-xs uppercase text-white px-2.5 py-1 rounded border-2 border-[#1E1B18] shadow-[1px_1px_0px_#1E1B18]"
                   >
                     {sector.badge}
                   </span>
-                  <div className="flex items-center gap-1.5 font-mono text-xs text-slate-300 font-bold">
-                    <Users className="w-3.5 h-3.5 text-[#00ff88]" />
-                    <span>{sector.pilots} WORMS</span>
-                  </div>
-                </div>
 
-                <div>
-                  <h3 className="font-display text-2xl uppercase font-black text-white tracking-tight">
-                    {sector.name}
-                  </h3>
-                  <p className="font-mono text-xs text-slate-300 mt-2 leading-relaxed">
-                    {sector.description}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5 pt-2 font-mono text-xs">
-                  <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                    <span className="text-slate-400 text-[9px] uppercase font-bold">ENTRY FEE</span>
-                    <span className="text-[#00f5d4] font-black mt-0.5">{sector.entryFee}</span>
-                  </div>
-                  <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                    <span className="text-slate-400 text-[9px] uppercase font-bold">HAZARD TIER</span>
-                    <span className="text-amber-400 font-black mt-0.5">{sector.hazardRating}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-                  <span className="font-mono text-[10px] text-slate-400 uppercase tracking-wider font-bold">
-                    ZONE PROTOCOLS:
+                  <span className="font-comic text-xs text-[#1E1B18] bg-[#FFF8ED] px-2 py-0.5 rounded border border-[#1E1B18]">
+                    {sector.worms} WORMS IN PLAY
                   </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-[#FFF8ED] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+                    <CharacterComponent size={56} />
+                  </div>
+                  <div>
+                    <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide leading-tight">
+                      {sector.name}
+                    </h3>
+                    <span className="font-comic text-xs text-[#FA824C]">
+                      {sector.snackRating}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="font-body text-xs sm:text-sm text-[#5C3D2E] leading-relaxed">
+                  {sector.description}
+                </p>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <div className="p-2 bg-[#FFF8ED] rounded border-2 border-[#1E1B18] text-center">
+                    <span className="font-body text-[10px] font-bold text-[#5C3D2E] uppercase block">ENTRY</span>
+                    <span className="font-comic text-sm text-[#1E1B18]">{sector.entryFee}</span>
+                  </div>
+                  <div className="p-2 bg-[#FFF8ED] rounded border-2 border-[#1E1B18] text-center">
+                    <span className="font-body text-[10px] font-bold text-[#5C3D2E] uppercase block">RESPAWN</span>
+                    <span className="font-comic text-sm text-[#70A288]">{sector.respawn}</span>
+                  </div>
+                </div>
+
+                {/* Rules List */}
+                <div className="flex flex-col gap-1.5 pt-2 border-t-2 border-[#1E1B18]/15">
+                  <span className="font-comic text-xs uppercase text-[#1E1B18]">MEADOW PERKS:</span>
                   {sector.rules.map((rule, idx) => (
-                    <div key={idx} className="flex items-center gap-2 font-mono text-xs text-slate-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00ff88] shrink-0" />
+                    <div key={idx} className="flex items-center gap-2 font-body text-xs text-[#1E1B18]">
+                      <span className="w-2 h-2 rounded-full bg-[#FA824C] border border-[#1E1B18]" />
                       <span>{rule}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/10">
+              <div className="mt-6 pt-4 border-t-2 border-[#1E1B18]/15">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -148,10 +163,14 @@ export const ArenasView: React.FC<ArenasViewProps> = ({ onSelectArena }) => {
                     sounds.playBoostSound();
                     onSelectArena(sector.type);
                   }}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#00f5d4] to-[#00ff88] text-[#002820] font-display text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,245,212,0.4)] hover:shadow-[0_0_30px_rgba(0,245,212,0.8)] cursor-pointer hover:scale-[1.01]"
+                  className={`comic-btn w-full uppercase text-base py-3 ${
+                    sector.type === 'free'
+                      ? 'bg-[#FFD13B] hover:bg-[#FFE066] text-[#1E1B18]'
+                      : 'bg-[#FA824C] hover:bg-[#FF9666] text-white'
+                  }`}
                 >
-                  <span>SLITHER INTO GRID</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>ENTER THIS MEADOW</span>
+                  <ArrowRight className="w-4 h-4 ml-2 inline" />
                 </button>
               </div>
             </div>

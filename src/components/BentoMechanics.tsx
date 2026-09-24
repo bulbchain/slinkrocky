@@ -1,144 +1,134 @@
 import React from 'react';
-import {
-  CircleDot,
-  Swords,
-  Trophy,
-  Zap,
-  Flame,
-  Magnet,
-} from 'lucide-react';
 import { sounds } from '../audio';
+import {
+  SlinkHungry,
+  SlinkSpeedy,
+  SlinkChampion,
+  SoundBurst,
+} from './RetroCartoonCharacters';
+import { Zap, Sparkles, Award } from 'lucide-react';
 
 export const BentoMechanics: React.FC = () => {
   return (
-    <section className="w-full max-w-7xl mx-auto flex flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end border-b border-white/10 pb-6">
+    <section className="w-full max-w-7xl mx-auto flex flex-col gap-6 px-4 py-12 sm:px-6 lg:px-8">
+      {/* Header Styled as Comic Strip Intro */}
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end border-b-3 border-[#1E1B18] pb-6">
         <div>
-          <div className="mb-2 flex items-center gap-2 text-cyan-400">
-            <Zap className="h-4 w-4" />
-            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#00f5d4]">
-              SLINK SURVIVAL DYNAMICS
+          <div className="mb-2 inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+            <Zap className="h-4 w-4 text-[#1E1B18]" />
+            <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
+              3 EASY RULES OF THE MEADOW
             </span>
           </div>
 
-          <h2 className="font-display text-3xl sm:text-4xl font-black uppercase tracking-tight text-white">
-            DOMINATE THE CYBER GRID
+          <h2 className="font-comic text-4xl sm:text-5xl uppercase tracking-wide text-[#1E1B18] drop-shadow-[2px_2px_0px_rgba(250,130,76,0.3)]">
+            HOW TO BE A TOP WORM
           </h2>
         </div>
 
-        <p className="max-w-md font-mono text-sm leading-relaxed text-slate-300">
-          Eat glowing orbs, execute sharp kinetic cuts against rival trails, and absorb
-          their cosmic remains to become the apex cyber worm in the arena.
+        <p className="max-w-md font-body text-sm sm:text-base leading-relaxed text-[#5C3D2E] font-medium">
+          Chomp shiny apples, zip around your rivals, and watch your wobbly tail grow longer than a garden hose!
         </p>
       </div>
 
-      {/* 3 Core Mechanics */}
+      {/* 3 Physical Comic Strip Panels */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* CARD 1 — CONSUME & SCALE */}
+        {/* PANEL 1 — CHOMP APPLES */}
         <div
           onMouseEnter={() => sounds.playBeep(660)}
-          className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-cyan-500/30 bg-[#0c1026]/80 p-6 shadow-xl transition-all hover:border-cyan-400 hover:bg-[#101633] hover:-translate-y-1 sm:p-8"
+          className="group comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden"
         >
-          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-[#00f5d4]/15 blur-3xl transition-all group-hover:bg-[#00f5d4]/30" />
+          {/* Comic Panel Number Stamp */}
+          <div className="flex items-center justify-between pb-3 border-b-2 border-[#1E1B18]/15">
+            <span className="font-comic text-sm uppercase text-[#FA824C] tracking-wider">
+              EPISODE 01
+            </span>
+            <SoundBurst text="CHOMP!" color="#FFD13B" className="text-xs" />
+          </div>
 
-          <div className="relative z-10 flex flex-col gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-950/70 text-[#00f5d4] shadow-[0_0_20px_rgba(0,245,212,0.3)]">
-              <CircleDot className="h-6 w-6" />
+          <div className="my-5 flex flex-col items-center text-center">
+            <div className="p-3 bg-[#FFF0D6] rounded-2xl border-2 border-[#1E1B18] shadow-[3px_3px_0px_#1E1B18] mb-4 group-hover:scale-105 transition-transform">
+              <SlinkHungry size={70} />
             </div>
 
-            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#00f5d4]">
-              01. BIOMASS HARVEST
-            </span>
-
-            <h3 className="font-display text-xl font-bold uppercase tracking-wide text-white">
-              EAT &amp; SCALE UP
+            <h3 className="font-comic text-2xl uppercase tracking-wide text-[#1E1B18] mb-2">
+              1. CHOMP &amp; GROW!
             </h3>
 
-            <p className="font-mono text-xs sm:text-sm leading-relaxed text-slate-300">
-              Start lean and agile. Slither across the grid devouring luminous energy orbs.
-              Each bite extends your segmented trail, turning your body into an inescapable obstacle for rivals.
+            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#5C3D2E]">
+              Slither across the soil gobbling juicy red apples, sweet oranges, strawberries, and velvety plums. Every fruit adds a plump segment to your wiggly body!
             </p>
           </div>
 
-          <div className="mt-8 flex items-center justify-between rounded-xl border border-cyan-500/20 bg-[#060814]/80 p-3.5">
-            <span className="font-mono text-[10px] text-slate-400 uppercase tracking-wider">
-              PRIMARY TACTIC
-            </span>
-            <span className="font-mono text-xs font-bold text-[#00f5d4]">
-              COLLECT ENERGY ORBS
+          <div className="rounded-lg border-2 border-[#1E1B18] bg-[#FFF8ED] p-3 text-center shadow-[2px_2px_0px_#1E1B18]">
+            <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
+              FRUIT HARVEST: <strong className="text-[#FA824C]">+35 TO +65 PTS</strong>
             </span>
           </div>
         </div>
 
-        {/* CARD 2 — KINETIC CUT & TRAP */}
+        {/* PANEL 2 — ZOOM & TRAP */}
         <div
           onMouseEnter={() => sounds.playBeep(720)}
-          className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-pink-500/30 bg-[#0c1026]/80 p-6 shadow-xl transition-all hover:border-pink-400 hover:bg-[#101633] hover:-translate-y-1 sm:p-8"
+          className="group comic-card bg-[#78C0E0] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden"
         >
-          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-[#ff007f]/15 blur-3xl transition-all group-hover:bg-[#ff007f]/30" />
+          <div className="flex items-center justify-between pb-3 border-b-2 border-[#1E1B18]/25">
+            <span className="font-comic text-sm uppercase text-[#1E1B18] tracking-wider">
+              EPISODE 02
+            </span>
+            <SoundBurst text="ZOOM!" color="#FA824C" className="text-xs" />
+          </div>
 
-          <div className="relative z-10 flex flex-col gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-pink-400/40 bg-pink-950/70 text-[#ff007f] shadow-[0_0_20px_rgba(255,0,127,0.3)]">
-              <Swords className="h-6 w-6" />
+          <div className="my-5 flex flex-col items-center text-center">
+            <div className="p-3 bg-white rounded-2xl border-2 border-[#1E1B18] shadow-[3px_3px_0px_#1E1B18] mb-4 group-hover:scale-105 transition-transform">
+              <SlinkSpeedy size={70} />
             </div>
 
-            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff007f]">
-              02. KINETIC INTERCEPTION
-            </span>
-
-            <h3 className="font-display text-xl font-bold uppercase tracking-wide text-white">
-              CUT &amp; TRAP RIVALS
+            <h3 className="font-comic text-2xl uppercase tracking-wide text-[#1E1B18] mb-2">
+              2. CUT &amp; COIL!
             </h3>
 
-            <p className="font-mono text-xs sm:text-sm leading-relaxed text-slate-300">
-              Hold boost to dash across the path of oncoming worms. When their head crashes into your
-              glowing tail, they shatter into high-value Star Loot orbs for you to feast upon.
+            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#1E1B18] font-medium">
+              Hold space or tap boost to spurt ahead of fast centipedes, sneaky snakes, and chubby slugs! If their head bumps into your tail, they poof into a heap of ripe fruits!
             </p>
           </div>
 
-          <div className="mt-8 flex items-center justify-between rounded-xl border border-pink-500/20 bg-[#060814]/80 p-3.5">
-            <span className="font-mono text-[10px] text-slate-400 uppercase tracking-wider">
-              COMBAT RULE
-            </span>
-            <span className="font-mono text-xs font-bold text-[#ff007f]">
-              HEAD-TO-TAIL SHATTER
+          <div className="rounded-lg border-2 border-[#1E1B18] bg-white p-3 text-center shadow-[2px_2px_0px_#1E1B18]">
+            <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
+              TAKEDOWN BURST: <strong className="text-[#E63946]">+500 PTS</strong>
             </span>
           </div>
         </div>
 
-        {/* CARD 3 — APEX DOMINATION */}
+        {/* PANEL 3 — BECOME THE CHAMP */}
         <div
-          onMouseEnter={() => sounds.playBeep(780)}
-          className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-amber-500/30 bg-[#0c1026]/80 p-6 shadow-xl transition-all hover:border-amber-400 hover:bg-[#101633] hover:-translate-y-1 sm:p-8"
+          onMouseEnter={() => sounds.playBeep(800)}
+          className="group comic-card bg-[#FFD13B] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden"
         >
-          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-[#ffaa00]/15 blur-3xl transition-all group-hover:bg-[#ffaa00]/30" />
+          <div className="flex items-center justify-between pb-3 border-b-2 border-[#1E1B18]/25">
+            <span className="font-comic text-sm uppercase text-[#1E1B18] tracking-wider">
+              EPISODE 03
+            </span>
+            <SoundBurst text="HOORAY!" color="#70A288" className="text-xs" />
+          </div>
 
-          <div className="relative z-10 flex flex-col gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-amber-400/40 bg-amber-950/70 text-amber-400 shadow-[0_0_20px_rgba(255,170,0,0.3)]">
-              <Trophy className="h-6 w-6" />
+          <div className="my-5 flex flex-col items-center text-center">
+            <div className="p-3 bg-[#FFFDF8] rounded-2xl border-2 border-[#1E1B18] shadow-[3px_3px_0px_#1E1B18] mb-4 group-hover:scale-105 transition-transform">
+              <SlinkChampion size={70} />
             </div>
 
-            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-amber-400">
-              03. LEADERBOARD REIGN
-            </span>
-
-            <h3 className="font-display text-xl font-bold uppercase tracking-wide text-white">
-              APEX DOMINATION
+            <h3 className="font-comic text-2xl uppercase tracking-wide text-[#1E1B18] mb-2">
+              3. WEAR THE CROWN!
             </h3>
 
-            <p className="font-mono text-xs sm:text-sm leading-relaxed text-slate-300">
-              Coil around smaller worms to enclose them, pick up Magnet and Overclock power-ups,
-              and maintain your score to reign as the supreme titan of the SLINK arena.
+            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#1E1B18] font-medium">
+              Reach the top of the Meadow Leaderboard! Earn glossy winner ribbons, funny cartoon trophies, and bounties of tasty $SLINK tokens!
             </p>
           </div>
 
-          <div className="mt-8 flex items-center justify-between rounded-xl border border-amber-500/20 bg-[#060814]/80 p-3.5">
-            <span className="font-mono text-[10px] text-slate-400 uppercase tracking-wider">
-              ENDGAME GOAL
-            </span>
-            <span className="font-mono text-xs font-bold text-amber-400">
-              RANK #1 ON LEADERBOARD
+          <div className="rounded-lg border-2 border-[#1E1B18] bg-white p-3 text-center shadow-[2px_2px_0px_#1E1B18]">
+            <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
+              TOP PRIZE: <strong className="text-[#FA824C]">GOLDEN CROWN &amp; TOKENS</strong>
             </span>
           </div>
         </div>

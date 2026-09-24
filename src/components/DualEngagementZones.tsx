@@ -1,6 +1,7 @@
 import React from 'react';
-import { ArrowRight, ShieldCheck, Flame, Zap, Trophy } from 'lucide-react';
+import { ArrowRight, Lock, Sparkles, Trophy, Zap, ShieldCheck } from 'lucide-react';
 import { sounds } from '../audio';
+import { SlinkSpeedy, SlinkChampion } from './RetroCartoonCharacters';
 
 interface DualEngagementZonesProps {
   onSelectFree: () => void;
@@ -12,155 +13,159 @@ export const DualEngagementZones: React.FC<DualEngagementZonesProps> = ({
   onSelectStaked,
 }) => {
   return (
-    <section className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-[#060814]/80 border-y border-white/10">
-      <div className="max-w-7xl mx-auto flex flex-col gap-10">
+    <section className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-[#FA824C] border-y-3 border-[#1E1B18] relative overflow-hidden">
+      {/* Background Comic Halftone Details */}
+      <div className="absolute inset-0 opacity-10 bg-comic-dots pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto flex flex-col gap-8 relative z-10">
         {/* SECTION HEADER */}
         <div className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-[10px] font-bold uppercase tracking-widest mb-2">
-            <Zap className="w-3.5 h-3.5" />
-            CHOOSE YOUR SLINK ARENA
+          <div className="inline-block px-3 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] text-[#1E1B18] font-comic text-xs uppercase tracking-wider mb-2 -rotate-1">
+            ★ STEP RIGHT UP! PICK YOUR STAGE ★
           </div>
 
-          <h2 className="font-display text-3xl sm:text-4xl uppercase text-white font-black tracking-tight">
-            SELECT COMBAT ZONE
+          <h2 className="font-comic text-4xl sm:text-5xl uppercase text-[#FFF8ED] tracking-wide drop-shadow-[3px_3px_0px_#1E1B18]">
+            CHOOSE YOUR SLINK ARENA!
           </h2>
 
-          <p className="font-mono text-sm text-slate-300 mt-2">
-            Jump into the free-for-all grid to practice slithering maneuvers, or prepare for high-stakes $SLINK bounty runs.
+          <p className="font-body text-base text-[#1E1B18] font-semibold mt-2">
+            Practice for fun in the Sunny Meadow or enter the high-stakes Bounty Bowl for sweet $SLINK token loot!
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-2">
-          {/* CARD 1: FREE ARCADE ARENA */}
-          <div className="relative rounded-2xl p-6 sm:p-8 bg-[#0c1026]/90 border border-cyan-500/30 backdrop-blur-xl flex flex-col justify-between shadow-[0_10px_35px_rgba(0,0,0,0.6)] overflow-hidden group hover:border-cyan-400 transition-all">
-            {/* Top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00f5d4] via-[#00ff88] to-[#00f5d4] shadow-[0_0_15px_#00f5d4]" />
-
+          {/* CARD 1: SUNNY MEADOW (FREE ARCADE) */}
+          <div className="comic-card bg-[#FFFDF8] p-6 sm:p-8 flex flex-col justify-between">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold text-[#00f5d4] px-3 py-1 bg-cyan-950/80 rounded-lg border border-cyan-500/30 tracking-wider uppercase">
-                  ZONE 01 · ARCADE GRID
+                <span className="font-comic text-xs uppercase px-2.5 py-1 rounded bg-[#70A288] text-[#FFF8ED] border-2 border-[#1E1B18] shadow-[1px_1px_0px_#1E1B18]">
+                  ZONE 01 · PRACTICE FIELD
                 </span>
 
-                <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#00ff88]">
-                  <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse shadow-[0_0_8px_#00ff88]" />
-                  INSTANT DROP
+                <span className="flex items-center gap-1.5 font-comic text-xs text-[#1E1B18] bg-[#FFD13B] px-2 py-0.5 rounded border border-[#1E1B18]">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  INSTANT RESPAWN
                 </span>
               </div>
 
-              <div>
-                <h3 className="font-display text-2xl sm:text-3xl uppercase text-white font-black tracking-tight">
-                  FREE ARCADE ARENA
-                </h3>
-                <p className="font-mono text-xs text-cyan-300/80 tracking-wider mt-1">
-                  Endless Slither · Instant Respawn · 0 Gas Fees
-                </p>
+              <div className="flex items-center gap-4">
+                <div className="p-2 rounded-xl bg-[#78C0E0] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+                  <SlinkSpeedy size={54} />
+                </div>
+                <div>
+                  <h3 className="font-comic text-3xl uppercase text-[#1E1B18] tracking-wide leading-tight">
+                    SUNNY MEADOW
+                  </h3>
+                  <p className="font-body text-xs font-bold text-[#5C3D2E]">
+                    Endless Slither · 100% Free · No Wallet Needed
+                  </p>
+                </div>
               </div>
 
-              <p className="font-mono text-sm text-slate-300 leading-relaxed">
-                Enter the global vector grid with no wallet required. Eat glowing biomass, grow your cyber worm,
-                trap rivals with your radiant trail, and fight for the #1 spot on the global leaderboard.
+              <p className="font-body text-sm text-[#1E1B18] leading-relaxed">
+                Hop in anytime! Devour juicy red apples, grow ridiculously long, outmaneuver silly bot worms, and climb the public Sunday comic leaderboard!
               </p>
 
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 font-mono text-xs">
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">ENTRY</span>
-                  <span className="text-[#00f5d4] text-sm font-black mt-0.5">FREE</span>
+              {/* Stats Comic Boxes */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">ENTRY</span>
+                  <span className="font-comic text-base text-[#70A288]">FREE</span>
                 </div>
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">RESPAWN</span>
-                  <span className="text-white text-sm font-black mt-0.5">INSTANT</span>
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">RESPAWN</span>
+                  <span className="font-comic text-base text-[#1E1B18]">INSTANT</span>
                 </div>
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">TICKS</span>
-                  <span className="text-emerald-400 text-sm font-black mt-0.5">60 FPS</span>
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">TICKS</span>
+                  <span className="font-comic text-base text-[#FA824C]">60 FPS</span>
                 </div>
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">POWERUPS</span>
-                  <span className="text-amber-400 text-sm font-black mt-0.5">ALL ACTIVE</span>
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">SNACKS</span>
+                  <span className="font-comic text-base text-[#E63946]">APPLES</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-white/10">
+            <div className="mt-6 pt-4 border-t-2 border-[#1E1B18]/15">
               <button
                 type="button"
                 onClick={() => {
                   sounds.playBoostSound();
                   onSelectFree();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#00f5d4] via-[#00ff88] to-[#00f5d4] text-[#002820] font-display font-black text-sm uppercase tracking-widest shadow-[0_0_25px_rgba(0,245,212,0.5)] hover:scale-[1.01] hover:shadow-[0_0_35px_rgba(0,245,212,0.8)] active:scale-[0.99] transition-all cursor-pointer"
+                className="comic-btn w-full bg-[#FFD13B] hover:bg-[#FFE066] text-[#1E1B18] text-lg uppercase py-3"
               >
-                <span>SLITHER IN FREE ARENA</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>SLITHER INTO SUNNY MEADOW</span>
+                <ArrowRight className="w-5 h-5 ml-2" />
               </button>
             </div>
           </div>
 
-          {/* CARD 2: PRO BOUNTY ARENA */}
-          <div className="relative rounded-2xl p-6 sm:p-8 bg-[#0c1026]/90 border border-amber-500/30 backdrop-blur-xl flex flex-col justify-between shadow-[0_10px_35px_rgba(0,0,0,0.6)] overflow-hidden group hover:border-amber-400 transition-all">
-            {/* Top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#ffaa00] via-[#fbbf24] to-[#f97316] shadow-[0_0_15px_#ffaa00]" />
-
+          {/* CARD 2: BOUNTY BOWL (STAKED PRIZES) */}
+          <div className="comic-card bg-[#FFFDF8] p-6 sm:p-8 flex flex-col justify-between">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold text-amber-300 px-3 py-1 bg-amber-950/80 rounded-lg border border-amber-500/30 tracking-wider uppercase">
-                  ZONE 02 · HIGH-STAKES
+                <span className="font-comic text-xs uppercase px-2.5 py-1 rounded bg-[#FA824C] text-[#FFF8ED] border-2 border-[#1E1B18] shadow-[1px_1px_0px_#1E1B18]">
+                  ZONE 02 · PRIZE TOURNAMENT
                 </span>
 
-                <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold text-amber-400">
-                  <Flame className="w-3.5 h-3.5" />
-                  PRO PROTOCOL
+                <span className="flex items-center gap-1.5 font-comic text-xs text-[#1E1B18] bg-[#78C0E0] px-2 py-0.5 rounded border border-[#1E1B18]">
+                  <Trophy className="w-3.5 h-3.5 text-[#FFD13B]" />
+                  $SLINK POOL
                 </span>
               </div>
 
-              <div>
-                <h3 className="font-display text-2xl sm:text-3xl uppercase text-white font-black tracking-tight">
-                  $SLINK BOUNTY RUN
-                </h3>
-                <p className="font-mono text-xs text-amber-300/80 tracking-wider mt-1">
-                  Competitive Wagers · Takedown Bounties · Star Pools
-                </p>
+              <div className="flex items-center gap-4">
+                <div className="p-2 rounded-xl bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+                  <SlinkChampion size={54} />
+                </div>
+                <div>
+                  <h3 className="font-comic text-3xl uppercase text-[#1E1B18] tracking-wide leading-tight">
+                    BOUNTY BOWL
+                  </h3>
+                  <p className="font-body text-xs font-bold text-[#5C3D2E]">
+                    Real Stake · Winner Takes The Sweet Pot
+                  </p>
+                </div>
               </div>
 
-              <p className="font-mono text-sm text-slate-300 leading-relaxed">
-                Put your skills to the test. Stake $SLINK tokens to enter the competitive arena.
-                Every rival you shatter transfers their staked bounty pool into your vault.
+              <p className="font-body text-sm text-[#1E1B18] leading-relaxed">
+                Ready for the big leagues? Stake your $SLINK tokens, cut rival worms with precision tail maneuvers, and harvest their pooled bounty when they pop!
               </p>
 
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 font-mono text-xs">
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">STAKE</span>
-                  <span className="text-amber-400 text-sm font-black mt-0.5">50 $SLINK</span>
+              {/* Stats Comic Boxes */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">BUY-IN</span>
+                  <span className="font-comic text-base text-[#FA824C]">100 $SLINK</span>
                 </div>
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">KILL BOUNTY</span>
-                  <span className="text-amber-300 text-sm font-black mt-0.5">85% CUT</span>
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">PAYOUT</span>
+                  <span className="font-comic text-base text-[#70A288]">INSTANT</span>
                 </div>
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">STATUS</span>
-                  <span className="text-amber-400 text-sm font-black mt-0.5">COMING SOON</span>
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">SECURITY</span>
+                  <span className="font-comic text-base text-[#1E1B18]">SOLANA</span>
                 </div>
-                <div className="p-3 bg-[#060814] rounded-xl border border-white/10 flex flex-col">
-                  <span className="text-slate-400 text-[9px] uppercase font-bold">POOL</span>
-                  <span className="text-cyan-400 text-sm font-black mt-0.5">DYNAMIC</span>
+                <div className="p-2.5 bg-[#FFF8ED] rounded-lg border-2 border-[#1E1B18] text-center shadow-[1px_1px_0px_#1E1B18]">
+                  <span className="font-body text-[10px] uppercase font-bold text-[#5C3D2E] block">PRIZE</span>
+                  <span className="font-comic text-base text-[#FFD13B]">JACKPOT</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-white/10">
+            <div className="mt-6 pt-4 border-t-2 border-[#1E1B18]/15">
               <button
                 type="button"
                 onClick={() => {
-                  sounds.playBeep(680);
+                  sounds.playBoostSound();
                   onSelectStaked();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-[#1a0f00] font-display font-black text-sm uppercase tracking-widest shadow-[0_0_25px_rgba(255,170,0,0.4)] hover:scale-[1.01] hover:shadow-[0_0_35px_rgba(255,170,0,0.6)] active:scale-[0.99] transition-all cursor-pointer"
+                className="comic-btn w-full bg-[#78C0E0] hover:bg-[#59B4D1] text-[#1E1B18] text-lg uppercase py-3"
               >
-                <span>ENTER $SLINK BOUNTY ARENA</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>ENTER BOUNTY BOWL</span>
+                <ArrowRight className="w-5 h-5 ml-2" />
               </button>
             </div>
           </div>

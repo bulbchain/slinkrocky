@@ -1,31 +1,29 @@
 import React from 'react';
 import { sounds } from '../audio';
-import { Sparkles, ExternalLink } from 'lucide-react';
+import { ExternalLink, Heart } from 'lucide-react';
+import { SlinkPeeking } from './RetroCartoonCharacters';
 import slinkLogo from '../assets/images/slink_creature_logo_1790169607687.jpg';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-[#04060f] border-t border-cyan-500/20 py-12 relative">
+    <footer className="w-full bg-[#1E1B18] text-[#FFF8ED] border-t-4 border-[#1E1B18] py-10 relative">
       <div className="w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-8">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3.5">
-            <img
-              src={slinkLogo}
-              alt="SLINK Logo"
-              referrerPolicy="no-referrer"
-              className="w-10 h-10 rounded-xl object-cover border border-cyan-400/30 shadow-[0_0_15px_rgba(0,245,212,0.3)]"
-            />
+            <div className="p-1 bg-[#FFD13B] rounded-xl border-2 border-white shadow-[2px_2px_0px_white]">
+              <SlinkPeeking size={40} />
+            </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="font-display text-xl uppercase bg-gradient-to-r from-[#00f5d4] via-[#ff007f] to-[#ffaa00] bg-clip-text text-transparent font-black tracking-tight">
-                  SLINK
+                <span className="font-comic text-2xl uppercase text-[#FFD13B] tracking-wide">
+                  SLINK!
                 </span>
-                <span className="font-mono text-[9px] bg-white/10 border border-white/10 px-2 py-0.5 rounded text-cyan-300 font-bold">
-                  v3.0-PROD
+                <span className="font-comic text-[11px] bg-[#FA824C] border border-white px-2 py-0.5 rounded text-white">
+                  SUNDAY EDITION
                 </span>
               </div>
-              <p className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
-                VIBRANT CYBER-WORM ARENA · REAL-TIME MULTIPLAYER
+              <p className="font-body text-xs text-[#FFF8ED]/80 font-medium">
+                Vibrant Retro Cartoon Worm Arena · Eat, Boost &amp; Grow
               </p>
             </div>
           </div>
@@ -36,38 +34,38 @@ export const Footer: React.FC = () => {
               target="_blank"
               rel="noreferrer"
               onClick={() => sounds.playBeep(600)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0c1026] hover:bg-[#121838] border border-cyan-400/20 hover:border-cyan-400/60 text-slate-300 hover:text-[#00f5d4] transition-all font-mono text-xs tracking-wider"
+              className="comic-btn bg-[#FFD13B] hover:bg-[#FFE066] text-[#1E1B18] text-sm py-2 px-4 shadow-[3px_3px_0px_white]"
             >
               <span>FOLLOW ON X</span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5 ml-1.5 inline" />
             </a>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10 text-xs font-mono">
-          <div className="flex items-center gap-2 bg-[#0c1026] border border-white/10 px-3.5 py-1.5 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse shadow-[0_0_8px_#00ff88]" />
-            <span className="text-slate-300 text-[10px] font-bold">
-              GLOBAL VECTOR ENGINE · 60 FPS · 0% LATENCY
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-white/20 text-xs font-body font-medium">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#70A288]" />
+            <span className="text-[#FFF8ED] text-xs font-comic">
+              60 FPS CARTOON VECTOR ENGINE · 100% WOBBLY FUN
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400 text-[11px]">
-            <span className="hover:text-cyan-300 transition-colors cursor-pointer">
-              Rules of the Arena
+          <div className="flex items-center gap-4 text-[#FFF8ED]/70 text-xs">
+            <span className="hover:text-[#FFD13B] transition-colors cursor-pointer">
+              Meadow Rules
             </span>
             <span>•</span>
-            <span className="hover:text-cyan-300 transition-colors cursor-pointer">
-              Combat Protocol
+            <span className="hover:text-[#FFD13B] transition-colors cursor-pointer">
+              Apple Nutrition Facts
             </span>
             <span>•</span>
-            <span className="hover:text-cyan-300 transition-colors cursor-pointer">
-              $SLINK Tokenomics
+            <span className="hover:text-[#FFD13B] transition-colors cursor-pointer">
+              $SLINK Token
             </span>
           </div>
 
-          <span className="text-slate-500 text-[11px] text-center md:text-right font-medium">
-            © 2026 SLINK PROTOCOL. ALL RIGHTS RESERVED.
+          <span className="text-[#FFF8ED]/60 text-xs text-center md:text-right">
+            © 2026 SLINK MEADOWS. HAND-DRAWN WITH HUMOR &amp; LOVE.
           </span>
         </div>
       </div>

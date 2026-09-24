@@ -122,6 +122,36 @@ class SoundEngine {
       osc.stop(t + 0.45);
     } catch {}
   }
+
+  // Comic 'POW!' / 'ZAP!' snap sound
+  public playPowZapSound(type: 'pow' | 'zap' = 'pow') {
+    if (this.isMuted) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      if (type === 'zap') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(980, t);
+        osc.frequency.exponentialRampToValueAtTime(220, t + 0.15);
+        gain.gain.setValueAtTime(0.09, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      } else {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, t);
+        osc.frequency.exponentialRampToValueAtTime(840, t + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(140, t + 0.18);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      }
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + (type === 'zap' ? 0.15 : 0.18));
+    } catch {}
+  }
 }
 
 export const sounds = new SoundEngine();

@@ -2,141 +2,201 @@
 
 @layer base {
   :root {
-    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Fredoka', 'Comic Neue', sans-serif;
   }
 
   code, pre, .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
 
-  h1, h2, h3, h4, .font-display, .font-headline {
-    font-family: 'Space Grotesk', sans-serif;
-    letter-spacing: -0.02em;
+  h1, h2, h3, h4, .font-display, .font-comic, .font-headline {
+    font-family: 'Bangers', cursive, sans-serif;
+    letter-spacing: 0.04em;
+  }
+
+  .font-body {
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  .font-hand {
+    font-family: 'Comic Neue', cursive, sans-serif;
   }
 
   body {
-    background-color: #060713;
-    color: #e2e8f8;
+    background-color: #FFF8ED;
+    color: #1E1B18;
     overflow-x: hidden;
   }
 
-  /* Vibrant sleek cyber scrollbar */
+  /* Retro comic scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 10px;
+    height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #04050d;
+    background: #FFF0D6;
+    border-left: 2px solid #1E1B18;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1c223a;
-    border-radius: 9999px;
-    border: 1px solid rgba(0, 245, 212, 0.25);
+    background: #FF7A30;
+    border: 2px solid #1E1B18;
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #2a3458;
-    border-color: rgba(255, 0, 127, 0.4);
+    background: #FFD13B;
   }
 }
 
-/* Luminous Cyber Glows */
-.glow-cyan-sm {
-  box-shadow: 0 0 14px rgba(0, 245, 212, 0.35);
-}
-.glow-cyan-md {
-  box-shadow: 0 0 28px rgba(0, 245, 212, 0.5), 0 0 10px rgba(0, 245, 212, 0.3);
-}
-.glow-cyan-lg {
-  box-shadow: 0 0 45px rgba(0, 245, 212, 0.7), 0 0 20px rgba(0, 245, 212, 0.4);
+/* Comic Panel & Card Utilities */
+.comic-border {
+  border: 3px solid #1E1B18;
 }
 
-.glow-magenta-sm {
-  box-shadow: 0 0 14px rgba(255, 0, 127, 0.35);
-}
-.glow-magenta-md {
-  box-shadow: 0 0 28px rgba(255, 0, 127, 0.55), 0 0 10px rgba(255, 0, 127, 0.3);
-}
-.glow-magenta-lg {
-  box-shadow: 0 0 45px rgba(255, 0, 127, 0.75), 0 0 20px rgba(255, 0, 127, 0.4);
+.comic-border-2 {
+  border: 2px solid #1E1B18;
 }
 
-.glow-lime-sm {
-  box-shadow: 0 0 14px rgba(0, 255, 136, 0.35);
-}
-.glow-lime-md {
-  box-shadow: 0 0 28px rgba(0, 255, 136, 0.55);
+.comic-shadow {
+  box-shadow: 4px 4px 0px #1E1B18;
 }
 
-.glow-violet-md {
-  box-shadow: 0 0 28px rgba(168, 85, 247, 0.55), 0 0 10px rgba(168, 85, 247, 0.3);
+.comic-shadow-sm {
+  box-shadow: 2px 2px 0px #1E1B18;
 }
 
-.glow-amber-md {
-  box-shadow: 0 0 28px rgba(255, 170, 0, 0.55);
+.comic-shadow-lg {
+  box-shadow: 6px 6px 0px #1E1B18;
 }
 
-/* Vibrant Text Neon Glows */
-.glow-text-cyan {
-  text-shadow: 0 0 20px rgba(0, 245, 212, 0.7), 0 0 40px rgba(0, 245, 212, 0.35);
-}
-.glow-text-magenta {
-  text-shadow: 0 0 20px rgba(255, 0, 127, 0.7), 0 0 40px rgba(255, 0, 127, 0.35);
-}
-.glow-text-lime {
-  text-shadow: 0 0 20px rgba(0, 255, 136, 0.7), 0 0 40px rgba(0, 255, 136, 0.35);
-}
-.glow-text-gold {
-  text-shadow: 0 0 18px rgba(255, 187, 0, 0.6);
+.comic-shadow-orange {
+  box-shadow: 4px 4px 0px #FF7A30;
 }
 
-/* Background Cyber Grid & Hex Patterns */
-.bg-slink-grid {
-  background-image: 
-    linear-gradient(rgba(0, 245, 212, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 0, 127, 0.05) 1px, transparent 1px);
-  background-size: 36px 36px;
+.comic-shadow-yellow {
+  box-shadow: 4px 4px 0px #FFD13B;
 }
 
-.bg-cosmic-radial {
-  background: 
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 245, 212, 0.15), transparent 70%),
-    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255, 0, 127, 0.12), transparent 70%),
-    radial-gradient(ellipse 50% 30% at 10% 60%, rgba(168, 85, 247, 0.12), transparent 70%);
+.comic-shadow-blue {
+  box-shadow: 4px 4px 0px #78C0E0;
 }
 
-.bg-hex-pattern {
-  background-color: #060713;
-  background-image: radial-gradient(circle, rgba(0, 245, 212, 0.08) 1.2px, transparent 1.2px);
-  background-size: 24px 24px;
+/* Physical comic panel effect */
+.comic-card {
+  background-color: #FFFFFF;
+  border: 3px solid #1E1B18;
+  box-shadow: 5px 5px 0px #1E1B18;
+  border-radius: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Glassmorphism card utility */
-.slink-card {
-  background: rgba(14, 18, 38, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+.comic-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px #1E1B18;
 }
 
-.slink-card-glow {
-  background: rgba(14, 18, 38, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 245, 212, 0.25);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 245, 212, 0.05);
+.comic-card-flat {
+  background-color: #FFFFFF;
+  border: 3px solid #1E1B18;
+  box-shadow: 4px 4px 0px #1E1B18;
+  border-radius: 8px;
 }
 
-/* Animated Pulse Gradients */
-@keyframes neon-pulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
+/* Comic interactive button */
+.comic-btn {
+  font-family: 'Bangers', cursive, sans-serif;
+  letter-spacing: 0.05em;
+  border: 3px solid #1E1B18;
+  box-shadow: 4px 4px 0px #1E1B18;
+  border-radius: 8px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comic-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #1E1B18;
+}
+
+.comic-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1E1B18;
+}
+
+/* Halftone print dot pattern */
+.bg-comic-dots {
+  background-image: radial-gradient(#1E1B18 1.5px, transparent 1.5px);
+  background-size: 10px 10px;
+}
+
+.bg-comic-dots-cream {
+  background-image: radial-gradient(#E8D8BF 1.5px, transparent 1.5px);
+  background-size: 12px 12px;
+}
+
+/* Retro comic burst / badge angle */
+.comic-tilt-left {
+  transform: rotate(-2deg);
+}
+
+.comic-tilt-right {
+  transform: rotate(2deg);
+}
+
+@keyframes comicBurstPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4) rotate(var(--burst-rot, -4deg));
+    opacity: 0;
   }
-  50% {
+  30% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(var(--burst-rot, -4deg));
     opacity: 1;
-    transform: scale(1.04);
+  }
+  65% {
+    transform: translate(-50%, -50%) scale(1.0) rotate(var(--burst-rot, -4deg));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -60%) scale(0.85) rotate(var(--burst-rot, -4deg));
+    opacity: 0;
   }
 }
 
-.animate-neon-pulse {
-  animation: neon-pulse 3s ease-in-out infinite;
+.animate-comic-burst {
+  animation: comicBurstPop 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Speech bubble tail */
+.speech-bubble {
+  position: relative;
+  background: #FFFFFF;
+  border: 3px solid #1E1B18;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px #1E1B18;
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 30px;
+  border-width: 14px 14px 0 0;
+  border-style: solid;
+  border-color: #FFFFFF transparent transparent transparent;
+  display: block;
+  width: 0;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -18px;
+  left: 28px;
+  border-width: 18px 18px 0 0;
+  border-style: solid;
+  border-color: #1E1B18 transparent transparent transparent;
+  display: block;
+  width: 0;
 }

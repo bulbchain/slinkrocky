@@ -25,8 +25,8 @@ import { sounds } from './audio';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('play-now');
-  const [callsign, setCallsign] = useState<string>('SLINK_VIPER');
-  const [wormColor, setWormColor] = useState<string>('#00f5d4');
+  const [callsign, setCallsign] = useState<string>('WOBBLY_JOE');
+  const [wormColor, setWormColor] = useState<string>('#FA824C');
   const [arenaMode, setArenaMode] = useState<ArenaMode>('free');
 
   // Real-time telemetry tracking from game canvas
@@ -148,7 +148,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060814] text-slate-100 flex flex-col selection:bg-[#00f5d4] selection:text-[#002820] overflow-x-hidden">
+    <div className="min-h-screen bg-[#FFF8ED] text-[#1E1B18] flex flex-col selection:bg-[#FFD13B] selection:text-[#1E1B18] overflow-x-hidden">
       {/* Top Tactical Navigation & Telemetry Bar */}
       <Navbar
         activeTab={activeTab}
@@ -181,6 +181,7 @@ export default function App() {
                   <FlightTerminal
                     callsign={callsign}
                     setCallsign={setCallsign}
+                    wormColor={wormColor}
                     setWormColor={setWormColor}
                     arenaMode={arenaMode}
                     setArenaMode={setArenaMode}
