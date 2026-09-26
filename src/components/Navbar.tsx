@@ -146,15 +146,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             }}
             className={`comic-btn px-4 py-1.5 text-base tracking-wider transition-all cursor-pointer font-bold ${
               wallet.isConnected
-                ? 'bg-[#B4F000] text-[#111111] hover:bg-[#9DE000]'
-                : 'bg-[#111111] text-[#FFFFFF] hover:bg-[#252525]'
+                ? 'bg-[#FFD13B] text-[#111111] hover:bg-[#FFE066]'
+                : 'bg-[#FFD13B] text-[#111111] hover:bg-[#FFE066]'
             }`}
           >
             <Wallet className="w-4 h-4 mr-1.5" />
             <span>
               {wallet.isConnected
                 ? `${wallet.solBalance} SOL`
-                : 'CONNECT'}
+                : wallet.userEmail
+                ? wallet.userEmail.split('@')[0]
+                : 'CONNECT WALLET'}
             </span>
           </button>
         </div>

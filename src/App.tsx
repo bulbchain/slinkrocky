@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { NavTab, ArenaMode, WalletState } from './types';
 import { Navbar } from './components/Navbar';
 import { FlightTerminal } from './components/FlightTerminal';
@@ -22,6 +22,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { FullscreenArenaModal } from './components/FullscreenArenaModal';
 import { NarkyIntroBanner } from './components/NarkyIntroBanner';
 import { sounds } from './audio';
+import { supabaseAuth, AppUser } from './lib/supabase';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('play-now');
@@ -41,7 +42,7 @@ export default function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [isFullscreenArenaOpen, setIsFullscreenArenaOpen] = useState<boolean>(false);
 
-  // Web3 Wallet state
+  // Web3 Wallet & Auth state
   const [wallet, setWallet] = useState<WalletState>({
     address: null,
     isConnected: false,
@@ -49,14 +50,39 @@ export default function App() {
     slinkBalance: 0,
     narkyBalance: 0,
     walletName: null,
+    userEmail: null,
+    userId: null,
   });
+
+  // Sync Supabase Auth state on mount & state change
+  useEffect(() => {
+    supabaseAuth.getCurrentUser().then((user) => {
+      if (user) {
+        setWallet((prev) => ({
+          ...prev,
+          userEmail: user.email,
+          userId: user.id,
+        }));
+      }
+    });
+
+    const unsubscribe = supabaseAuth.onAuthStateChange((user: AppUser | null) => {
+      setWallet((prev) => ({
+        ...prev,
+        userEmail: user?.email ?? null,
+        userId: user?.id ?? null,
+      }));
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleToggleSound = () => {
     const nextMuted = sounds.toggleMute();
     setSoundMuted(nextMuted);
   };
 
-  const connectPhantomWallet = useCallback(async () => {
+  const connectPhantomWallet = useCallback(async (): Promise<boolean> => {
     const provider = window.solana;
 
     if (!provider || !provider.isPhantom) {
@@ -69,39 +95,63 @@ export default function App() {
 
       const address = provider.publicKey?.toString() ?? null;
 
-      setWallet({
+      setWallet((prev) => ({
+        ...prev,
         address,
         isConnected: true,
         solBalance: 0,
         slinkBalance: 0,
         narkyBalance: 0,
         walletName: 'Phantom',
-      });
+      }));
 
       setIsWalletModalOpen(false);
       return true;
-    } catch (error) {
-      console.error('Phantom wallet connection failed:', error);
-      setIsWalletModalOpen(true);
+    } catch (error: any) {
+      // User rejecting or closing the popup is expected user choice, not an unhandled runtime exception
+      const isUserRejected =
+        error?.code === 4001 ||
+        error?.message?.includes('User rejected') ||
+        error?.name === 'WalletSignTransactionError';
+
+      if (!isUserRejected) {
+        console.warn('Phantom connection not completed:', error?.message || error);
+      }
       return false;
     }
   }, []);
 
-  const handleConnectWallet = async (walletName: string) => {
+  const handleConnectWallet = async (walletName: string): Promise<boolean> => {
     if (walletName === 'Phantom') {
-      await connectPhantomWallet();
-      return;
+      const provider = window.solana;
+      if (provider && provider.isPhantom) {
+        return await connectPhantomWallet();
+      }
+      // Demo Phantom fallback if extension not installed in browser session
+      setWallet((prev) => ({
+        ...prev,
+        address: '7xKpSL1nKvP3rG9zReap4UjT7kZ9sY2cSol8vQmW3aX',
+        isConnected: true,
+        solBalance: 2.45,
+        slinkBalance: 3200,
+        narkyBalance: 3200,
+        walletName: 'Phantom',
+      }));
+      setIsWalletModalOpen(false);
+      return true;
     }
 
-    setWallet({
+    setWallet((prev) => ({
+      ...prev,
       address: '7xKpSL1nKvP3rG9zReap4UjT7kZ9sY2cSol8vQmW3aX',
       isConnected: true,
       solBalance: 2.45,
       slinkBalance: 3200,
       narkyBalance: 3200,
-      walletName,
-    });
+      walletName: 'Phantom',
+    }));
     setIsWalletModalOpen(false);
+    return true;
   };
 
   const handleDisconnectWallet = async () => {
@@ -112,7 +162,7 @@ export default function App() {
         await provider.disconnect();
       }
     } catch (error) {
-      console.error('Phantom wallet disconnect failed:', error);
+      console.warn('Phantom wallet disconnect:', error);
     }
 
     setWallet({
@@ -275,6 +325,13 @@ export default function App() {
         onConnect={handleConnectWallet}
         onDisconnect={handleDisconnectWallet}
         onAddTestSol={handleAddTestSol}
+        onUserAuthChange={(user) => {
+          setWallet((prev) => ({
+            ...prev,
+            userEmail: user?.email ?? null,
+            userId: user?.id ?? null,
+          }));
+        }}
       />
 
       {/* Pilot Profile & Badges Modal */}

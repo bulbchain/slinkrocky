@@ -63,6 +63,8 @@ export interface WalletState {
   solBalance: number;
   slinkBalance: number;
   narkyBalance?: number;
+  userEmail?: string | null;
+  userId?: string | null;
 }
 
 export interface GameStats {

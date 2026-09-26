@@ -156,7 +156,11 @@ export const TokenRewardsView: React.FC<TokenRewardsProps> = ({ wallet, onOpenWa
             <button
               type="button"
               onClick={handleStake}
-              className="comic-btn w-full bg-[#B4F000] hover:bg-[#cbf738] text-[#111111] text-lg uppercase py-3.5 rounded-xl border-2 border-[#111111] shadow-[3px_3px_0px_#111111] font-black"
+              className={`comic-btn w-full text-lg uppercase py-3.5 rounded-xl border-2 border-[#111111] shadow-[3px_3px_0px_#111111] font-black ${
+                wallet.isConnected
+                  ? 'bg-[#B4F000] hover:bg-[#cbf738] text-[#111111]'
+                  : 'bg-[#FFD13B] hover:bg-[#FFE066] text-[#111111]'
+              }`}
             >
               {wallet.isConnected ? 'DEPOSIT IN THE VAULT' : 'CONNECT WALLET TO STAKE'}
             </button>

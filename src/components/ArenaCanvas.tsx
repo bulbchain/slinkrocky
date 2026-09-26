@@ -20,7 +20,7 @@ import {
   Flame,
   Sparkles,
 } from 'lucide-react';
-import { SlinkHungry, SlinkOops } from './RetroCartoonCharacters';
+import { SlinkHungry } from './RetroCartoonCharacters';
 
 interface ArenaCanvasProps {
   callsign: string;
@@ -2699,7 +2699,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
               ZOIKS! TAIL BUMP!
             </div>
 
-            <SlinkOops size={90} className="mx-auto my-1" color={wormColor} />
+            <SlinkHungry size={92} className="mx-auto my-1" color={wormColor} waterDrop={false} showFruit={false} />
 
             <div className="font-comic text-3xl uppercase tracking-wide text-[#1E1B18]">
               ROUND FINISHED!

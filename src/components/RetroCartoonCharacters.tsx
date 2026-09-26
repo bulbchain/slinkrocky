@@ -10,6 +10,8 @@ export interface CharacterProps {
   size?: number;
   color?: string;
   secondaryColor?: string;
+  waterDrop?: boolean;
+  showFruit?: boolean;
 }
 
 const getAltColor = (mainColor: string, secondary?: string): string => {
@@ -29,6 +31,8 @@ export const SlinkHungry: React.FC<CharacterProps> = ({
   size = 120,
   color = '#FA824C',
   secondaryColor,
+  waterDrop = false,
+  showFruit = true,
 }) => {
   const altColor = getAltColor(color, secondaryColor);
   return (
@@ -92,15 +96,49 @@ export const SlinkHungry: React.FC<CharacterProps> = ({
         strokeWidth="2.5"
       />
 
-      {/* Floating shiny cartoon apple / food */}
-      <circle cx="40" cy="32" r="12" fill="#E63946" stroke="#1E1B18" strokeWidth="3.5" />
-      <path d="M40 20C41 15 45 14 45 14" stroke="#5C3D2E" strokeWidth="3" strokeLinecap="round" />
-      <ellipse cx="44" cy="18" rx="4" ry="2" fill="#70A288" stroke="#1E1B18" strokeWidth="2" />
-      <circle cx="37" cy="28" r="2" fill="#FFFFFF" />
+      {/* Cartoon Water Drop on Head (for Round Finished / defeat / panting slither) */}
+      {waterDrop && (
+        <g id="water-drop-on-head">
+          {/* Subtle contact shadow on head curve */}
+          <ellipse cx="114" cy="22" rx="7" ry="3" fill="#1E1B18" opacity="0.25" />
 
-      {/* Action comic speed droplets */}
-      <path d="M60 30L68 34" stroke="#1E1B18" strokeWidth="3" strokeLinecap="round" />
-      <path d="M62 24L72 26" stroke="#1E1B18" strokeWidth="3" strokeLinecap="round" />
+          {/* Plump glossy cartoon teardrop / water drop resting on head */}
+          <path
+            d="M116 4C116 4 106 13 106 19.5C106 24.5 110.5 28 115.5 28C120.5 28 125 24.5 125 19.5C125 13 116 4 116 4Z"
+            fill="#55B3F3"
+            stroke="#1E1B18"
+            strokeWidth="3.2"
+            strokeLinejoin="round"
+          />
+
+          {/* Curved specular shine reflection */}
+          <path
+            d="M109 16.5C108.2 18.5 108.5 22 111.5 24.5"
+            stroke="#FFFFFF"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+          <circle cx="115.5" cy="11" r="1.5" fill="#FFFFFF" />
+
+          {/* Small secondary water splash droplet hovering above */}
+          <circle cx="122" cy="3.5" r="2.2" fill="#55B3F3" stroke="#1E1B18" strokeWidth="1.6" />
+          <circle cx="121.3" cy="2.8" r="0.7" fill="#FFFFFF" />
+        </g>
+      )}
+
+      {/* Floating shiny cartoon apple / food */}
+      {showFruit && (
+        <g id="slink-floating-fruit">
+          <circle cx="40" cy="32" r="12" fill="#E63946" stroke="#1E1B18" strokeWidth="3.5" />
+          <path d="M40 20C41 15 45 14 45 14" stroke="#5C3D2E" strokeWidth="3" strokeLinecap="round" />
+          <ellipse cx="44" cy="18" rx="4" ry="2" fill="#70A288" stroke="#1E1B18" strokeWidth="2" />
+          <circle cx="37" cy="28" r="2" fill="#FFFFFF" />
+
+          {/* Action comic speed droplets */}
+          <path d="M60 30L68 34" stroke="#1E1B18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M62 24L72 26" stroke="#1E1B18" strokeWidth="3" strokeLinecap="round" />
+        </g>
+      )}
     </svg>
   );
 };
