@@ -22,7 +22,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { FullscreenArenaModal } from './components/FullscreenArenaModal';
 import { NarkyIntroBanner } from './components/NarkyIntroBanner';
 import { sounds } from './audio';
-import { supabaseAuth, AppUser } from './lib/supabase';
+import { supabaseAuth, getStoredLocalUser, AppUser } from './lib/supabase';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('play-now');
@@ -43,15 +43,18 @@ export default function App() {
   const [isFullscreenArenaOpen, setIsFullscreenArenaOpen] = useState<boolean>(false);
 
   // Web3 Wallet & Auth state
-  const [wallet, setWallet] = useState<WalletState>({
-    address: null,
-    isConnected: false,
-    solBalance: 0,
-    slinkBalance: 0,
-    narkyBalance: 0,
-    walletName: null,
-    userEmail: null,
-    userId: null,
+  const [wallet, setWallet] = useState<WalletState>(() => {
+    const cachedUser = getStoredLocalUser();
+    return {
+      address: null,
+      isConnected: false,
+      solBalance: 0,
+      slinkBalance: 0,
+      narkyBalance: 0,
+      walletName: null,
+      userEmail: cachedUser?.email ?? null,
+      userId: cachedUser?.id ?? null,
+    };
   });
 
   // Sync Supabase Auth state on mount & state change
@@ -165,6 +168,37 @@ export default function App() {
       console.warn('Phantom wallet disconnect:', error);
     }
 
+    setWallet((prev) => ({
+      ...prev,
+      address: null,
+      isConnected: false,
+      solBalance: 0,
+      slinkBalance: 0,
+      narkyBalance: 0,
+      walletName: null,
+    }));
+    setIsWalletModalOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    sounds.playBeep(520);
+    try {
+      await supabaseAuth.signOut();
+    } catch (err) {
+      console.warn('Supabase sign out error:', err);
+    }
+
+    if (wallet.isConnected) {
+      try {
+        const provider = window.solana;
+        if (provider?.disconnect) {
+          await provider.disconnect();
+        }
+      } catch (err) {
+        console.warn('Wallet disconnect error on sign out:', err);
+      }
+    }
+
     setWallet({
       address: null,
       isConnected: false,
@@ -172,6 +206,8 @@ export default function App() {
       slinkBalance: 0,
       narkyBalance: 0,
       walletName: null,
+      userEmail: null,
+      userId: null,
     });
     setIsWalletModalOpen(false);
   };
@@ -205,16 +241,13 @@ export default function App() {
         setActiveTab={setActiveTab}
         wallet={wallet}
         onOpenWalletModal={() => {
-          if (!wallet.isConnected) {
-            void connectPhantomWallet();
-            return;
-          }
           setIsWalletModalOpen(true);
         }}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
         callsign={callsign}
         soundMuted={soundMuted}
         onToggleSound={handleToggleSound}
+        onSignOut={handleSignOut}
       />
 
       {/* Main View Router */}
@@ -325,6 +358,7 @@ export default function App() {
         onConnect={handleConnectWallet}
         onDisconnect={handleDisconnectWallet}
         onAddTestSol={handleAddTestSol}
+        onSignOut={handleSignOut}
         onUserAuthChange={(user) => {
           setWallet((prev) => ({
             ...prev,

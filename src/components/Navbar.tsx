@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavTab, WalletState } from '../types';
 import { sounds } from '../audio';
-import { Wallet, User, Volume2, VolumeX } from 'lucide-react';
+import { Wallet, User, Volume2, VolumeX, LogOut, ShieldCheck } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -12,6 +12,7 @@ interface NavbarProps {
   callsign: string;
   soundMuted: boolean;
   onToggleSound: () => void;
+  onSignOut?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -23,6 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   callsign,
   soundMuted,
   onToggleSound,
+  onSignOut,
 }) => {
   const navItems: { id: NavTab; label: string; tag?: string }[] = [
     { id: 'play-now', label: 'PLAY GAME' },
@@ -138,27 +140,56 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </button>
 
-          {/* Connect / Wallet Button */}
-          <button
-            onClick={() => {
-              sounds.playBeep(780);
-              onOpenWalletModal();
-            }}
-            className={`comic-btn px-4 py-1.5 text-base tracking-wider transition-all cursor-pointer font-bold ${
-              wallet.isConnected
-                ? 'bg-[#FFD13B] text-[#111111] hover:bg-[#FFE066]'
-                : 'bg-[#FFD13B] text-[#111111] hover:bg-[#FFE066]'
-            }`}
-          >
-            <Wallet className="w-4 h-4 mr-1.5" />
-            <span>
-              {wallet.isConnected
-                ? `${wallet.solBalance} SOL`
-                : wallet.userEmail
-                ? wallet.userEmail.split('@')[0]
-                : 'CONNECT WALLET'}
-            </span>
-          </button>
+          {/* Connect / Wallet / Account Controls */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => {
+                sounds.playBeep(780);
+                onOpenWalletModal();
+              }}
+              title={
+                wallet.isConnected
+                  ? `Phantom Wallet: ${wallet.solBalance} SOL`
+                  : wallet.userEmail
+                  ? `Logged in as ${wallet.userEmail} · Click to manage account`
+                  : 'Connect Account or Wallet'
+              }
+              className={`comic-btn px-3 sm:px-4 py-1.5 text-xs sm:text-sm tracking-wider transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                wallet.isConnected || wallet.userEmail
+                  ? 'bg-[#B4F000] text-[#111111] hover:bg-[#cbf738]'
+                  : 'bg-[#FFD13B] text-[#111111] hover:bg-[#FFE066]'
+              }`}
+            >
+              {wallet.userEmail ? (
+                <ShieldCheck className="w-4 h-4 text-[#111111] shrink-0" />
+              ) : (
+                <Wallet className="w-4 h-4 text-[#111111] shrink-0" />
+              )}
+              <span className="font-comic font-black">
+                {wallet.isConnected
+                  ? `${wallet.solBalance} SOL`
+                  : wallet.userEmail
+                  ? wallet.userEmail.split('@')[0]
+                  : 'CONNECT WALLET'}
+              </span>
+            </button>
+
+            {/* Direct Quick Sign Out button if user is authenticated with email or wallet */}
+            {(wallet.userEmail || wallet.isConnected) && onSignOut && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSignOut();
+                }}
+                title="Sign out of account"
+                className="comic-btn px-2 sm:px-3 py-1.5 bg-[#FF5D8F] hover:bg-[#ff75a0] text-white rounded-lg border-2 border-[#111111] flex items-center gap-1 font-comic text-xs font-black shadow-[2px_2px_0px_#111111] cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">SIGN OUT</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
