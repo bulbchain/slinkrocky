@@ -1,7 +1,10 @@
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL || 'https://mjbinxhkzdwycdltizhk.supabase.co';
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  'sb_publishable_GIEwS5ikmIKom9o4TBZehw_qa1MSLtM';
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl &&
@@ -207,6 +210,11 @@ export const supabaseAuth = {
       const { data, error } = await supabase.auth.signUp({
         email: normalizedEmail,
         password,
+        options: {
+          data: {
+            name: normalizedEmail.split('@')[0],
+          },
+        },
       });
       if (error) {
         return { user: null, error: error.message };
@@ -214,6 +222,19 @@ export const supabaseAuth = {
       if (!data.user?.email) {
         return { user: null, error: 'Signup failed. Please try again.' };
       }
+
+      // Best-effort profile sync to a 'profiles' table if it exists in Supabase
+      try {
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          email: data.user.email,
+          name: normalizedEmail.split('@')[0],
+          updated_at: new Date().toISOString(),
+        });
+      } catch {
+        // Table may not exist or RLS may apply; auth.users is the source of truth
+      }
+
       const appUser: AppUser = {
         id: data.user.id,
         email: data.user.email,
