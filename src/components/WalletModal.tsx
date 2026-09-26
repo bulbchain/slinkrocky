@@ -235,9 +235,24 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
         {/* Status Alerts */}
         {errorMsg && (
-          <div className="p-3 rounded-xl bg-[#FFE5EC] border-2 border-[#111111] text-[#B80036] text-xs font-bold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{errorMsg}</span>
+          <div className="p-3 rounded-xl bg-[#FFE5EC] border-2 border-[#111111] text-[#B80036] text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-[2px_2px_0px_#111111]">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-[#B80036]" />
+              <span>{errorMsg}</span>
+            </div>
+            {authMode === 'signin' && errorMsg.includes('NEW ACCOUNT') && (
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playBeep(440);
+                  setAuthMode('signup');
+                  setErrorMsg(null);
+                }}
+                className="comic-btn px-2.5 py-1 bg-[#FFD13B] text-[#111111] rounded-lg border-2 border-[#111111] text-[11px] font-black uppercase whitespace-nowrap self-start sm:self-auto cursor-pointer shadow-[1px_1px_0px_#111111]"
+              >
+                Create Account Now
+              </button>
+            )}
           </div>
         )}
 
