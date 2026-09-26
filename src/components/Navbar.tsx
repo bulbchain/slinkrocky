@@ -33,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-[#FFF8ED] border-b-3 border-[#1E1B18] shadow-[0_4px_0px_#1E1B18]">
+    <header className="fixed top-0 left-0 w-full z-50 bg-[#F4EEDF] border-b-3 border-[#111111] shadow-[0_4px_0px_#111111]">
       <div className="w-full px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
         {/* Brand & Logo */}
         <div className="flex items-center gap-4 sm:gap-8 min-w-0">
@@ -45,29 +45,29 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-2.5 text-left group focus:outline-none cursor-pointer"
           >
             {/* Hand-drawn mini Slink face SVG */}
-            <div className="w-10 h-10 rounded-lg bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] flex items-center justify-center group-hover:-rotate-6 transition-transform">
+            <div className="w-10 h-10 rounded-lg bg-[#B4F000] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] flex items-center justify-center group-hover:-rotate-6 transition-transform">
               <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="16" fill="#FA824C" stroke="#1E1B18" strokeWidth="2.5" />
-                <circle cx="15" cy="16" r="4.5" fill="#FFFFFF" stroke="#1E1B18" strokeWidth="2" />
-                <circle cx="16" cy="16" r="2" fill="#1E1B18" />
-                <circle cx="25" cy="16" r="4.5" fill="#FFFFFF" stroke="#1E1B18" strokeWidth="2" />
-                <circle cx="24" cy="16" r="2" fill="#1E1B18" />
-                <path d="M14 24C16 28 24 28 26 24" stroke="#1E1B18" strokeWidth="2.5" strokeLinecap="round" />
-                <ellipse cx="12" cy="21" rx="2" ry="1" fill="#FF5964" />
-                <ellipse cx="28" cy="21" rx="2" ry="1" fill="#FF5964" />
+                <circle cx="20" cy="20" r="16" fill="#FA824C" stroke="#111111" strokeWidth="2.5" />
+                <circle cx="15" cy="16" r="4.5" fill="#FFFFFF" stroke="#111111" strokeWidth="2" />
+                <circle cx="16" cy="16" r="2" fill="#111111" />
+                <circle cx="25" cy="16" r="4.5" fill="#FFFFFF" stroke="#111111" strokeWidth="2" />
+                <circle cx="24" cy="16" r="2" fill="#111111" />
+                <path d="M14 24C16 28 24 28 26 24" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
+                <ellipse cx="12" cy="21" rx="2" ry="1" fill="#FF5D8F" />
+                <ellipse cx="28" cy="21" rx="2" ry="1" fill="#FF5D8F" />
               </svg>
             </div>
 
             <div className="flex flex-col -space-y-1">
               <div className="flex items-center gap-1.5">
-                <span className="font-comic text-2xl sm:text-3xl tracking-wide text-[#FA824C] drop-shadow-[2px_2px_0px_#1E1B18]">
+                <span className="font-comic text-2xl sm:text-3xl tracking-wide text-[#111111] drop-shadow-[2px_2px_0px_#B4F000]">
                   SLINK!
                 </span>
-                <span className="px-1.5 py-0.5 font-comic text-xs uppercase bg-[#78C0E0] text-[#1E1B18] border border-[#1E1B18] shadow-[1px_1px_0px_#1E1B18] rotate-3">
+                <span className="px-1.5 py-0.5 font-comic text-xs uppercase bg-[#55B3F3] text-[#111111] border border-[#111111] shadow-[1px_1px_0px_#111111] rotate-3 font-bold">
                   WORM
                 </span>
               </div>
-              <span className="font-hand text-[11px] font-bold text-[#5C3D2E] tracking-tight hidden sm:block">
+              <span className="font-hand text-[11px] font-bold text-[#111111]/70 tracking-tight hidden sm:block">
                 The Retro Cartoon Arena
               </span>
             </div>
@@ -84,16 +84,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                     sounds.playBeep(720);
                     setActiveTab(item.id);
                   }}
-                  className={`font-comic text-base tracking-wider px-3 py-1.5 rounded-lg transition-all relative cursor-pointer ${
+                  className={`font-comic text-base tracking-wider px-3.5 py-1.5 rounded-lg transition-all relative cursor-pointer ${
                     isActive
-                      ? 'bg-[#FFD13B] text-[#1E1B18] border-2 border-[#1E1B18] shadow-[3px_3px_0px_#1E1B18] -rotate-1'
-                      : 'text-[#1E1B18] hover:bg-[#FFE066]/50 border-2 border-transparent'
+                      ? 'bg-[#B4F000] text-[#111111] border-2 border-[#111111] shadow-[3px_3px_0px_#111111] -rotate-1 font-bold'
+                      : 'text-[#111111] hover:bg-[#FFFFFF] border-2 border-transparent'
                   }`}
                 >
                   <span className="flex items-center gap-1.5">
                     {item.label}
                     {item.tag && (
-                      <span className="bg-[#FA824C] text-white text-[10px] px-1 py-0.2 rounded border border-[#1E1B18] font-bold">
+                      <span className="bg-[#FF5D8F] text-white text-[10px] px-1.5 py-0.2 rounded border border-[#111111] font-bold">
                         {item.tag}
                       </span>
                     )}
@@ -113,12 +113,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playBeep(520);
             }}
             title={soundMuted ? 'Unmute sounds' : 'Mute sounds'}
-            className="p-2 rounded-lg bg-white border-2 border-[#1E1B18] text-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] hover:bg-[#FFD13B] transition-all cursor-pointer"
+            className="p-2 rounded-lg bg-white border-2 border-[#111111] text-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-[#B4F000] transition-all cursor-pointer"
           >
             {soundMuted ? (
-              <VolumeX className="w-4 h-4 text-[#FA824C]" />
+              <VolumeX className="w-4 h-4 text-[#FF5D8F]" />
             ) : (
-              <Volume2 className="w-4 h-4 text-[#1E1B18]" />
+              <Volume2 className="w-4 h-4 text-[#111111]" />
             )}
           </button>
 
@@ -128,12 +128,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playBeep(640);
               onOpenProfileModal();
             }}
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] hover:bg-[#78C0E0]/30 transition-all cursor-pointer"
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-[#55B3F3]/20 transition-all cursor-pointer"
           >
-            <div className="w-5 h-5 rounded-full bg-[#78C0E0] border border-[#1E1B18] flex items-center justify-center text-[#1E1B18]">
+            <div className="w-5 h-5 rounded-full bg-[#55B3F3] border border-[#111111] flex items-center justify-center text-[#111111]">
               <User className="w-3 h-3" />
             </div>
-            <span className="font-comic text-sm text-[#1E1B18] uppercase">
+            <span className="font-comic text-sm text-[#111111] uppercase font-bold">
               {callsign || 'SLINKY'}
             </span>
           </button>
@@ -144,10 +144,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               sounds.playBeep(780);
               onOpenWalletModal();
             }}
-            className={`comic-btn px-4 py-1.5 text-base tracking-wider transition-all cursor-pointer ${
+            className={`comic-btn px-4 py-1.5 text-base tracking-wider transition-all cursor-pointer font-bold ${
               wallet.isConnected
-                ? 'bg-[#70A288] text-white hover:bg-[#588157]'
-                : 'bg-[#FA824C] text-[#FFF8ED] hover:bg-[#FF7A30]'
+                ? 'bg-[#B4F000] text-[#111111] hover:bg-[#9DE000]'
+                : 'bg-[#111111] text-[#FFFFFF] hover:bg-[#252525]'
             }`}
           >
             <Wallet className="w-4 h-4 mr-1.5" />
@@ -161,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Mobile Horizontal Sub-Navigation */}
-      <div className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-[#FFF0D6] border-t-2 border-[#1E1B18] overflow-x-auto">
+      <div className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-[#E8E2D2] border-t-2 border-[#111111] overflow-x-auto">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
@@ -171,10 +171,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sounds.playBeep(720);
                 setActiveTab(item.id);
               }}
-              className={`font-comic text-xs px-2.5 py-1 whitespace-nowrap rounded border-2 cursor-pointer ${
+              className={`font-comic text-xs px-2.5 py-1 whitespace-nowrap rounded border-2 cursor-pointer font-bold ${
                 isActive
-                  ? 'bg-[#FFD13B] text-[#1E1B18] border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]'
-                  : 'bg-white text-[#1E1B18] border-[#1E1B18]/40'
+                  ? 'bg-[#B4F000] text-[#111111] border-[#111111] shadow-[2px_2px_0px_#111111]'
+                  : 'bg-white text-[#111111] border-[#111111]/40'
               }`}
             >
               {item.label}

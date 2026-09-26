@@ -26,7 +26,7 @@ import { sounds } from './audio';
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('play-now');
   const [callsign, setCallsign] = useState<string>('WOBBLY_JOE');
-  const [wormColor, setWormColor] = useState<string>('#FA824C');
+  const [wormColor, setWormColor] = useState<string>('#B4F000');
   const [arenaMode, setArenaMode] = useState<ArenaMode>('free');
 
   // Real-time telemetry tracking from game canvas
@@ -148,7 +148,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF8ED] text-[#1E1B18] flex flex-col selection:bg-[#FFD13B] selection:text-[#1E1B18] overflow-x-hidden">
+    <div className="min-h-screen bg-[#E8E2D2] text-[#111111] flex flex-col selection:bg-[#B4F000] selection:text-[#111111] overflow-x-hidden">
       {/* Top Tactical Navigation & Telemetry Bar */}
       <Navbar
         activeTab={activeTab}

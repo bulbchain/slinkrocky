@@ -124,15 +124,18 @@ interface BotCraft {
   isHunting?: boolean;
   isBotBoosting?: boolean;
   boostTimer?: number;
+  fruitsEaten?: number;
+  circleCounter?: number;
+  lastTargetOrbId?: number;
 }
 
 const ORB_PALETTE = [
-  '#FA824C', // Tangerine Orange
-  '#FFD13B', // Sunny Yellow
-  '#78C0E0', // Sky Blue
-  '#70A288', // Muted Grass Green
-  '#E63946', // Cartoon Red Apple
-  '#5C3D2E', // Chocolate Brown
+  '#FF5D8F', // Electric Neon Strawberry Pink
+  '#FF9E00', // Radiant Sun Orange
+  '#B4F000', // Energetic Lime Glow
+  '#55B3F3', // Bright Cyan Sky
+  '#9D4EDD', // Electric Purple Grape
+  '#00F5D4', // Vibrant Cyber Mint
 ];
 
 export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
@@ -220,11 +223,11 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
   const [hintVisible, setHintVisible] = useState<boolean>(true);
 
   const [roster, setRoster] = useState<{ name: string; score: number; isPlayer?: boolean; color?: string }[]>([
-    { name: '🐛 CENTI_SPEED', score: 8420, color: '#D62828' },
-    { name: '🐍 JADE_MAMBA', score: 6810, color: '#2A9D8F' },
-    { name: '🐌 BANANA_SLUG', score: 5320, color: '#FFD13B' },
-    { name: '🐛 SCUTTLE_REX', score: 4190, color: '#F77F00' },
-    { name: '🪱 WOBBLY_EARTH', score: 3250, color: '#FA824C' },
+    { name: '⚡ NEON_STRIKE', score: 8420, color: '#FF0055' },
+    { name: '🐍 CYBER_VIPER', score: 6810, color: '#00F5D4' },
+    { name: '🐛 HYPER_CENTI', score: 5320, color: '#FF7700' },
+    { name: '🐌 TOXIC_SLUG', score: 4190, color: '#B4F000' },
+    { name: '🪱 SOLAR_WOBBLER', score: 3250, color: '#55B3F3' },
     { name: callsign || '🪱 SLINK_VIPER', score: 450, isPlayer: true, color: wormColor },
   ]);
 
@@ -456,27 +459,27 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
     }
 
     const creatureSkins: SoilCreatureSkin[] = [
-      // 1. FAST CENTIPEDES (Multi-legged, quick scurrying soil predators)
-      { name: 'CRIMSON_CENTIPEDE', creatureType: 'centipede', color: '#D62828', coreColor: '#FA824C', eyeColor: '#FFD13B', thickness: 8.5, baseSpeed: 5.2, turnRate: 0.065, namePrefix: '🐛 CENTI' },
-      { name: 'JADE_CENTIPEDE', creatureType: 'centipede', color: '#2A9D8F', coreColor: '#E76F51', eyeColor: '#E9C46A', thickness: 8.0, baseSpeed: 5.0, turnRate: 0.060, namePrefix: '🐛 SCUTTLE' },
-      { name: 'AMBER_CENTIPEDE', creatureType: 'centipede', color: '#F77F00', coreColor: '#FCBF49', eyeColor: '#003049', thickness: 9.0, baseSpeed: 5.4, turnRate: 0.070, namePrefix: '🐛 DART' },
-      { name: 'VOID_CENTIPEDE', creatureType: 'centipede', color: '#7209B7', coreColor: '#4CC9F0', eyeColor: '#F72585', thickness: 8.5, baseSpeed: 5.3, turnRate: 0.065, namePrefix: '🐛 CENTI' },
+      // 1. FAST CENTIPEDES (Multi-legged, quick scurrying predators with neon pop highlights)
+      { name: 'HYPER_MAGMA', creatureType: 'centipede', color: '#FF0055', coreColor: '#FF9E00', eyeColor: '#B4F000', thickness: 9.5, baseSpeed: 5.3, turnRate: 0.068, namePrefix: '🐛 INFERNO' },
+      { name: 'CYBER_CENTI', creatureType: 'centipede', color: '#00F5D4', coreColor: '#7B2CBF', eyeColor: '#FF5D8F', thickness: 9.0, baseSpeed: 5.1, turnRate: 0.062, namePrefix: '🐛 CYBER' },
+      { name: 'SOLAR_STRIKE', creatureType: 'centipede', color: '#FF7700', coreColor: '#FFDD00', eyeColor: '#00F5D4', thickness: 9.2, baseSpeed: 5.4, turnRate: 0.070, namePrefix: '🐛 SOLAR' },
+      { name: 'ULTRA_VIOLET', creatureType: 'centipede', color: '#8338EC', coreColor: '#3A86FF', eyeColor: '#B4F000', thickness: 9.2, baseSpeed: 5.3, turnRate: 0.066, namePrefix: '🐛 VOID' },
 
-      // 2. SNAKES (Sleek, sinuous, diamond backed with flickering forked tongue)
-      { name: 'COPPER_VIPER', creatureType: 'snake', color: '#BC6C25', coreColor: '#DDA15E', eyeColor: '#1E1B18', thickness: 9.0, baseSpeed: 4.2, turnRate: 0.045, namePrefix: '🐍 VIPER' },
-      { name: 'CORAL_SNAKE', creatureType: 'snake', color: '#E63946', coreColor: '#FFD13B', eyeColor: '#1E1B18', thickness: 8.5, baseSpeed: 4.4, turnRate: 0.048, namePrefix: '🐍 CORAL' },
-      { name: 'EMERALD_MAMBA', creatureType: 'snake', color: '#38B000', coreColor: '#CCFF33', eyeColor: '#1E1B18', thickness: 9.0, baseSpeed: 4.6, turnRate: 0.050, namePrefix: '🐍 MAMBA' },
-      { name: 'DIAMOND_COIL', creatureType: 'snake', color: '#1D3557', coreColor: '#A8DADC', eyeColor: '#E63946', thickness: 9.2, baseSpeed: 4.1, turnRate: 0.044, namePrefix: '🐍 COBRA' },
+      // 2. SNAKES (Sleek, sinuous, vibrant neon diamond scales with dual-tone eyes and flickering tongue)
+      { name: 'CYBER_VIPER', creatureType: 'snake', color: '#00F5D4', coreColor: '#06D6A0', eyeColor: '#111111', thickness: 10.0, baseSpeed: 4.4, turnRate: 0.048, namePrefix: '🐍 VIPER' },
+      { name: 'NEON_CORAL', creatureType: 'snake', color: '#FF0055', coreColor: '#FFBE0B', eyeColor: '#111111', thickness: 9.8, baseSpeed: 4.5, turnRate: 0.050, namePrefix: '🐍 CORAL' },
+      { name: 'PLASMA_MAMBA', creatureType: 'snake', color: '#B4F000', coreColor: '#00F5D4', eyeColor: '#111111', thickness: 10.2, baseSpeed: 4.6, turnRate: 0.052, namePrefix: '🐍 MAMBA' },
+      { name: 'ROYAL_COBRA', creatureType: 'snake', color: '#3A86FF', coreColor: '#8338EC', eyeColor: '#FFBE0B', thickness: 10.4, baseSpeed: 4.3, turnRate: 0.046, namePrefix: '🐍 COBRA' },
 
-      // 3. SLUGS (Chubby, squishy, eye stalks on head, glistening slime trail)
-      { name: 'BANANA_SLUG', creatureType: 'slug', color: '#FFD13B', coreColor: '#FFFDF8', eyeColor: '#1E1B18', thickness: 13.0, baseSpeed: 2.5, turnRate: 0.038, namePrefix: '🐌 SLUG' },
-      { name: 'GARDEN_SLUG', creatureType: 'slug', color: '#70A288', coreColor: '#B7E4C7', eyeColor: '#1E1B18', thickness: 13.5, baseSpeed: 2.4, turnRate: 0.035, namePrefix: '🐌 SLIME' },
-      { name: 'MUD_SLUG', creatureType: 'slug', color: '#6C584C', coreColor: '#DDBEA9', eyeColor: '#1E1B18', thickness: 12.8, baseSpeed: 2.3, turnRate: 0.036, namePrefix: '🐌 MUD' },
+      // 3. SLUGS (Modern chunky bio-luminescent slugs with glowing eye stalks)
+      { name: 'LIME_GLOW', creatureType: 'slug', color: '#B4F000', coreColor: '#00F5D4', eyeColor: '#111111', thickness: 13.5, baseSpeed: 2.6, turnRate: 0.040, namePrefix: '🐌 TOXIC' },
+      { name: 'COSMIC_BERRY', creatureType: 'slug', color: '#FF5D8F', coreColor: '#FFD13B', eyeColor: '#111111', thickness: 13.8, baseSpeed: 2.5, turnRate: 0.038, namePrefix: '🐌 COSMO' },
+      { name: 'AQUA_PULSE', creatureType: 'slug', color: '#55B3F3', coreColor: '#B4F000', eyeColor: '#111111', thickness: 13.2, baseSpeed: 2.4, turnRate: 0.038, namePrefix: '🐌 SLIME' },
 
-      // 4. WORMS (Classic cheerful earthworms with ribbed segments)
-      { name: 'EARTH_WORM', creatureType: 'worm', color: '#FA824C', coreColor: '#FFF0D6', eyeColor: '#1E1B18', thickness: 9.0, baseSpeed: 3.2, turnRate: 0.045, namePrefix: '🪱 SLINK' },
-      { name: 'ROSY_WOBBLER', creatureType: 'worm', color: '#FF85A1', coreColor: '#FFE5EC', eyeColor: '#1E1B18', thickness: 8.5, baseSpeed: 3.4, turnRate: 0.048, namePrefix: '🪱 WOBBLE' },
-      { name: 'NIGHTCRAWLER', creatureType: 'worm', color: '#6D597A', coreColor: '#B56576', eyeColor: '#1E1B18', thickness: 9.5, baseSpeed: 3.1, turnRate: 0.042, namePrefix: '🪱 CRAWL' },
+      // 4. WORMS (Fresh electric candy and pop-art worms with shiny segmentation)
+      { name: 'ELECTRIC_TANGERINE', creatureType: 'worm', color: '#FF7700', coreColor: '#FFDD00', eyeColor: '#111111', thickness: 10.0, baseSpeed: 3.4, turnRate: 0.048, namePrefix: '🪱 SLINK' },
+      { name: 'CANDY_WOBBLER', creatureType: 'worm', color: '#FF5D8F', coreColor: '#FFFFFF', eyeColor: '#111111', thickness: 9.8, baseSpeed: 3.5, turnRate: 0.050, namePrefix: '🪱 CANDY' },
+      { name: 'CYAN_CRAWLER', creatureType: 'worm', color: '#00F5D4', coreColor: '#3A86FF', eyeColor: '#111111', thickness: 10.2, baseSpeed: 3.3, turnRate: 0.046, namePrefix: '🪱 NITRO' },
     ];
 
     const createSingleBot = (index: number): BotCraft => {
@@ -485,8 +488,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       const isFastPasser = skin.creatureType === 'centipede'
         ? Math.random() < 0.65
         : skin.creatureType === 'snake'
-        ? Math.random() < 0.35
-        : Math.random() < 0.15;
+        ? Math.random() < 0.40
+        : Math.random() < 0.20;
 
       const angle = Math.random() * Math.PI * 2;
       const r = Math.sqrt(Math.random()) * (ARENA_RADIUS - 120);
@@ -494,13 +497,13 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       const by = ARENA_CENTER_Y + Math.sin(angle) * r;
 
       const bTrail: TrailPoint[] = [];
-      const trailLen = isFastPasser ? 48 : Math.floor(Math.random() * 20 + 26);
+      const trailLen = isFastPasser ? 45 : Math.floor(Math.random() * 16 + 24);
       for (let j = 0; j < 20; j++) {
         bTrail.push({ x: bx - j * 2.5, y: by - j * 2.5 });
       }
 
       const botSurnames = [
-        'MAX', 'DASH', 'FANG', 'STRIDE', 'CHOMP', 'SPEEDY', 'COIL', 'BLAZE', 'VIPER', 'SWIFT'
+        'VORTEX', 'APEX', 'NEO', 'DASH', 'FANG', 'STRIDE', 'CHOMP', 'SPEEDY', 'COIL', 'BLAZE', 'VIPER', 'SWIFT'
       ];
       const surname = botSurnames[Math.floor(Math.random() * botSurnames.length)];
       const botName = isFastPasser
@@ -533,6 +536,9 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         isHunting: false,
         isBotBoosting: false,
         boostTimer: 0,
+        fruitsEaten: 0,
+        circleCounter: 0,
+        lastTargetOrbId: -1,
       };
     };
 
@@ -896,7 +902,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       ctx.restore();
     };
 
-    // DRAW SOIL CREATURES: CENTIPEDE, SNAKE, SLUG, WORM
+    // DRAW SOIL CREATURES: CENTIPEDE, SNAKE, SLUG, WORM (MODERN CRISP POP ART & ARCADE DESIGN)
     const drawSoilCreature = (
       points: TrailPoint[],
       headX: number,
@@ -904,7 +910,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       angle: number,
       color: string,
       coreColor: string,
-      _eyeColor: string,
+      eyeColor: string,
       baseThickness: number,
       isPlayer = false,
       boosting = false,
@@ -918,29 +924,29 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
       ctx.save();
       const segmentCount = points.length;
 
-      // 1. Draw outer black comic outline for full body trail
+      // 1. Draw outer deep dark comic contour for the whole creature
       ctx.beginPath();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.strokeStyle = '#1E1B18';
-      ctx.lineWidth = (creatureType === 'slug' ? baseThickness * 1.25 : baseThickness) + 6;
+      ctx.strokeStyle = '#111111';
+      ctx.lineWidth = (creatureType === 'slug' ? baseThickness * 1.3 : baseThickness) + 6;
       ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
         ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.stroke();
 
-      // 2. Draw colorful body fill
+      // 2. Draw glossy neon body fill
       ctx.beginPath();
-      ctx.strokeStyle = hasPhaseShield ? '#78C0E0' : color;
-      ctx.lineWidth = creatureType === 'slug' ? baseThickness * 1.25 : baseThickness;
+      ctx.strokeStyle = hasPhaseShield ? '#00F5D4' : color;
+      ctx.lineWidth = creatureType === 'slug' ? baseThickness * 1.3 : baseThickness;
       ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
         ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.stroke();
 
-      // 3. CENTIPEDE SCURRYING LEGS
+      // 3. CENTIPEDE SCURRYING ARTICULATED LEGS WITH NEON CLAWS
       if (creatureType === 'centipede') {
         for (let i = 1; i < segmentCount - 1; i += 2) {
           const pt = points[i];
@@ -952,35 +958,35 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           const ny = dx / len;
 
           const progress = 1 - i / segmentCount;
-          const segRadius = (baseThickness / 2) * (0.6 + progress * 0.4);
+          const segRadius = (baseThickness / 2) * (0.65 + progress * 0.45);
           const legOsc = Math.sin(frameCount * 0.45 + i * 0.85);
-          const legLength = segRadius + 8;
+          const legLength = segRadius + 9;
 
           // Left Leg
-          const lKneeX = pt.x + nx * (segRadius * 0.9) - (dx / len) * (legOsc * 3);
-          const lKneeY = pt.y + ny * (segRadius * 0.9) - (dy / len) * (legOsc * 3);
-          const lFootX = lKneeX + nx * legLength - (dx / len) * (legOsc * 4 + 2);
-          const lFootY = lKneeY + ny * legLength - (dy / len) * (legOsc * 4 + 2);
+          const lKneeX = pt.x + nx * (segRadius * 0.95) - (dx / len) * (legOsc * 3.5);
+          const lKneeY = pt.y + ny * (segRadius * 0.95) - (dy / len) * (legOsc * 3.5);
+          const lFootX = lKneeX + nx * legLength - (dx / len) * (legOsc * 4.5 + 2);
+          const lFootY = lKneeY + ny * legLength - (dy / len) * (legOsc * 4.5 + 2);
 
-          ctx.strokeStyle = '#1E1B18';
-          ctx.lineWidth = 2.4;
+          ctx.strokeStyle = '#111111';
+          ctx.lineWidth = 2.6;
           ctx.beginPath();
           ctx.moveTo(pt.x, pt.y);
           ctx.lineTo(lKneeX, lKneeY);
           ctx.lineTo(lFootX, lFootY);
           ctx.stroke();
 
-          // Left claw tip
-          ctx.fillStyle = '#1E1B18';
+          // Left claw accent tip (glowing neon)
+          ctx.fillStyle = coreColor || '#B4F000';
           ctx.beginPath();
-          ctx.arc(lFootX, lFootY, 1.8, 0, Math.PI * 2);
+          ctx.arc(lFootX, lFootY, 2.2, 0, Math.PI * 2);
           ctx.fill();
 
           // Right Leg (opposite phase)
-          const rKneeX = pt.x - nx * (segRadius * 0.9) + (dx / len) * (legOsc * 3);
-          const rKneeY = pt.y - ny * (segRadius * 0.9) + (dy / len) * (legOsc * 3);
-          const rFootX = rKneeX - nx * legLength + (dx / len) * (legOsc * 4 - 2);
-          const rFootY = rKneeY - ny * legLength + (dy / len) * (legOsc * 4 - 2);
+          const rKneeX = pt.x - nx * (segRadius * 0.95) + (dx / len) * (legOsc * 3.5);
+          const rKneeY = pt.y - ny * (segRadius * 0.95) + (dy / len) * (legOsc * 3.5);
+          const rFootX = rKneeX - nx * legLength + (dx / len) * (legOsc * 4.5 - 2);
+          const rFootY = rKneeY - ny * legLength + (dy / len) * (legOsc * 4.5 - 2);
 
           ctx.beginPath();
           ctx.moveTo(pt.x, pt.y);
@@ -988,73 +994,84 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           ctx.lineTo(rFootX, rFootY);
           ctx.stroke();
 
-          // Right claw tip
-          ctx.fillStyle = '#1E1B18';
+          // Right claw accent tip
           ctx.beginPath();
-          ctx.arc(rFootX, rFootY, 1.8, 0, Math.PI * 2);
+          ctx.arc(rFootX, rFootY, 2.2, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
-      // 4. Individual comic segments & patterns
+      // 4. Individual 3D Pop Segments & Pattern Accents
       for (let i = segmentCount - 1; i >= 0; i--) {
         const pt = points[i];
         const progress = 1 - i / segmentCount;
-        const widthMult = creatureType === 'slug' ? 0.75 : 0.55;
+        const widthMult = creatureType === 'slug' ? 0.8 : 0.6;
         const segRadius = (baseThickness / 2) * (widthMult + progress * 0.45);
 
-        // Segment outline + fill
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 2.5;
-        ctx.fillStyle = i % 2 === 0 ? color : (coreColor || '#FFD13B');
+        // Segment circle + crisp ink border
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2.4;
+        ctx.fillStyle = i % 2 === 0 ? color : (coreColor || '#FFFFFF');
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, segRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
+        // Modern 3D gloss specular spot on top of each node
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.beginPath();
+        ctx.arc(pt.x - segRadius * 0.3, pt.y - segRadius * 0.3, Math.max(1.2, segRadius * 0.32), 0, Math.PI * 2);
+        ctx.fill();
+
         if (creatureType === 'snake') {
-          // Snake Diamond back pattern
+          // Modern Snake Neon Diamond Spine
           if (i % 2 === 1) {
-            ctx.fillStyle = coreColor || '#FFD13B';
-            ctx.strokeStyle = '#1E1B18';
-            ctx.lineWidth = 1.4;
-            const diaR = segRadius * 0.65;
+            ctx.fillStyle = coreColor || '#00F5D4';
+            ctx.strokeStyle = '#111111';
+            ctx.lineWidth = 1.6;
+            const diaR = segRadius * 0.72;
             ctx.beginPath();
             ctx.moveTo(pt.x, pt.y - diaR);
-            ctx.lineTo(pt.x + diaR * 0.7, pt.y);
+            ctx.lineTo(pt.x + diaR * 0.75, pt.y);
             ctx.lineTo(pt.x, pt.y + diaR);
-            ctx.lineTo(pt.x - diaR * 0.7, pt.y);
+            ctx.lineTo(pt.x - diaR * 0.75, pt.y);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
+
+            // Diamond inner gleam
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, Math.max(1, diaR * 0.25), 0, Math.PI * 2);
+            ctx.fill();
           }
         } else if (creatureType === 'slug') {
-          // Slug soft mantle spot
+          // Slug soft bioluminescent mantle spot
           if (i % 3 === 0) {
-            ctx.fillStyle = '#FFFDF8';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.beginPath();
-            ctx.ellipse(pt.x, pt.y, segRadius * 0.5, segRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.ellipse(pt.x, pt.y, segRadius * 0.55, segRadius * 0.32, 0, 0, Math.PI * 2);
             ctx.fill();
           }
         } else if (creatureType === 'centipede') {
           // Centipede armored ridge plate
-          ctx.strokeStyle = '#1E1B18';
-          ctx.lineWidth = 1.6;
+          ctx.strokeStyle = '#111111';
+          ctx.lineWidth = 1.8;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, segRadius * 0.8, -0.6 * Math.PI, 0.6 * Math.PI);
+          ctx.arc(pt.x, pt.y, segRadius * 0.82, -0.65 * Math.PI, 0.65 * Math.PI);
           ctx.stroke();
         } else {
-          // Worm Belly spot
+          // Worm Belly ribbed spot
           if (i % 3 === 0) {
-            ctx.fillStyle = '#FFFDF8';
+            ctx.fillStyle = '#FFFFFF';
             ctx.beginPath();
-            ctx.arc(pt.x - 1, pt.y - 1, Math.max(1, segRadius * 0.35), 0, Math.PI * 2);
+            ctx.arc(pt.x - 1, pt.y - 1, Math.max(1.2, segRadius * 0.36), 0, Math.PI * 2);
             ctx.fill();
           }
         }
       }
 
-      // 5. Centipede Tail Cerci (streamers)
+      // 5. Centipede Streamers / Tail Cerci
       if (creatureType === 'centipede' && segmentCount > 2) {
         const lastPt = points[segmentCount - 1];
         const prevPt = points[segmentCount - 2];
@@ -1066,76 +1083,83 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         const tNormX = -tDirY;
         const tNormY = tDirX;
 
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 2.4;
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2.6;
         ctx.beginPath();
         // Left cercus
         ctx.moveTo(lastPt.x, lastPt.y);
         ctx.quadraticCurveTo(
-          lastPt.x + tNormX * 6 + tDirX * 8,
-          lastPt.y + tNormY * 6 + tDirY * 8,
-          lastPt.x + tNormX * 12 + tDirX * 16,
-          lastPt.y + tNormY * 12 + tDirY * 16
+          lastPt.x + tNormX * 7 + tDirX * 9,
+          lastPt.y + tNormY * 7 + tDirY * 9,
+          lastPt.x + tNormX * 14 + tDirX * 18,
+          lastPt.y + tNormY * 14 + tDirY * 18
         );
         // Right cercus
         ctx.moveTo(lastPt.x, lastPt.y);
         ctx.quadraticCurveTo(
-          lastPt.x - tNormX * 6 + tDirX * 8,
-          lastPt.y - tNormY * 6 + tDirY * 8,
-          lastPt.x - tNormX * 12 + tDirX * 16,
-          lastPt.y - tNormY * 12 + tDirY * 16
+          lastPt.x - tNormX * 7 + tDirX * 9,
+          lastPt.y - tNormY * 7 + tDirY * 9,
+          lastPt.x - tNormX * 14 + tDirX * 18,
+          lastPt.y - tNormY * 14 + tDirY * 18
         );
         ctx.stroke();
+
+        // Glowing tips
+        ctx.fillStyle = coreColor || '#B4F000';
+        ctx.beginPath();
+        ctx.arc(lastPt.x + tNormX * 14 + tDirX * 18, lastPt.y + tNormY * 14 + tDirY * 18, 2.5, 0, Math.PI * 2);
+        ctx.arc(lastPt.x - tNormX * 14 + tDirX * 18, lastPt.y - tNormY * 14 + tDirY * 18, 2.5, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // 6. Expressive Head (Per Creature Type)
+      // 6. Expressive Modern Head (Per Creature Type)
       ctx.save();
       ctx.translate(headX, headY);
       ctx.rotate(angle + Math.PI / 2);
 
-      const headRadius = baseThickness * (creatureType === 'slug' ? 1.25 : 1.05);
+      const headRadius = baseThickness * (creatureType === 'slug' ? 1.3 : 1.1);
 
       if (creatureType === 'centipede') {
-        // --- CENTIPEDE HEAD ---
-        // Pincer mandibles at front
-        ctx.strokeStyle = '#1E1B18';
-        ctx.fillStyle = '#2B1810';
-        ctx.lineWidth = 2.5;
+        // --- MODERN CENTIPEDE HEAD ---
+        // Mandibles at front
+        ctx.strokeStyle = '#111111';
+        ctx.fillStyle = '#111111';
+        ctx.lineWidth = 2.8;
         // Left pincer
         ctx.beginPath();
         ctx.moveTo(-headRadius * 0.4, -headRadius * 0.4);
-        ctx.quadraticCurveTo(-headRadius * 1.1, -headRadius * 1.2, -headRadius * 0.1, -headRadius * 1.2);
+        ctx.quadraticCurveTo(-headRadius * 1.15, -headRadius * 1.25, -headRadius * 0.1, -headRadius * 1.25);
         ctx.stroke();
         // Right pincer
         ctx.beginPath();
         ctx.moveTo(headRadius * 0.4, -headRadius * 0.4);
-        ctx.quadraticCurveTo(headRadius * 1.1, -headRadius * 1.2, headRadius * 0.1, -headRadius * 1.2);
+        ctx.quadraticCurveTo(headRadius * 1.15, -headRadius * 1.25, headRadius * 0.1, -headRadius * 1.25);
         ctx.stroke();
 
-        // Twitching curved antennae
-        const antOsc = Math.sin(frameCount * 0.25) * 5;
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 2.5;
+        // Twitching curved antennae with neon glowing spheres
+        const antOsc = Math.sin(frameCount * 0.25) * 5.5;
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2.6;
         ctx.beginPath();
         // Left antenna
         ctx.moveTo(-headRadius * 0.5, -headRadius * 0.6);
-        ctx.quadraticCurveTo(-headRadius * 1.3 + antOsc, -headRadius * 1.6, -headRadius * 1.6 + antOsc * 1.5, -headRadius * 2.2);
+        ctx.quadraticCurveTo(-headRadius * 1.3 + antOsc, -headRadius * 1.6, -headRadius * 1.65 + antOsc * 1.5, -headRadius * 2.3);
         // Right antenna
         ctx.moveTo(headRadius * 0.5, -headRadius * 0.6);
-        ctx.quadraticCurveTo(headRadius * 1.3 - antOsc, -headRadius * 1.6, headRadius * 1.6 - antOsc * 1.5, -headRadius * 2.2);
+        ctx.quadraticCurveTo(headRadius * 1.3 - antOsc, -headRadius * 1.6, headRadius * 1.65 - antOsc * 1.5, -headRadius * 2.3);
         ctx.stroke();
 
-        // Antenna black tips
-        ctx.fillStyle = '#FFD13B';
+        // Antenna glowing tips
+        ctx.fillStyle = coreColor || '#B4F000';
         ctx.beginPath();
-        ctx.arc(-headRadius * 1.6 + antOsc * 1.5, -headRadius * 2.2, 2.5, 0, Math.PI * 2);
-        ctx.arc(headRadius * 1.6 - antOsc * 1.5, -headRadius * 2.2, 2.5, 0, Math.PI * 2);
+        ctx.arc(-headRadius * 1.65 + antOsc * 1.5, -headRadius * 2.3, 3, 0, Math.PI * 2);
+        ctx.arc(headRadius * 1.65 - antOsc * 1.5, -headRadius * 2.3, 3, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
         // Armored head plate
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 3.6;
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
@@ -1143,214 +1167,240 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         ctx.stroke();
 
         // Forehead armor brow
-        ctx.fillStyle = coreColor || '#FA824C';
+        ctx.fillStyle = coreColor || '#FF9E00';
         ctx.beginPath();
-        ctx.arc(0, -headRadius * 0.2, headRadius * 0.6, 0, Math.PI);
+        ctx.arc(0, -headRadius * 0.22, headRadius * 0.62, 0, Math.PI);
         ctx.fill();
         ctx.stroke();
 
-        // Bug Compound Eyes
+        // Big Cyber/Predator Eyes
         const eyeOffset = headRadius * 0.55;
         [-eyeOffset, eyeOffset].forEach((ex) => {
-          ctx.fillStyle = '#1E1B18';
+          ctx.fillStyle = '#111111';
           ctx.beginPath();
-          ctx.arc(ex, -headRadius * 0.25, headRadius * 0.32, 0, Math.PI * 2);
+          ctx.arc(ex, -headRadius * 0.25, headRadius * 0.34, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.fillStyle = '#FFD13B';
+          ctx.fillStyle = coreColor || '#B4F000';
           ctx.beginPath();
-          ctx.arc(ex - 1, -headRadius * 0.3, 1.8, 0, Math.PI * 2);
-          ctx.arc(ex + 1, -headRadius * 0.2, 1.2, 0, Math.PI * 2);
+          ctx.arc(ex - 1, -headRadius * 0.3, 2.2, 0, Math.PI * 2);
+          ctx.arc(ex + 1, -headRadius * 0.2, 1.4, 0, Math.PI * 2);
           ctx.fill();
         });
       } else if (creatureType === 'snake') {
-        // --- SNAKE HEAD (Viper shape + flickering forked tongue) ---
-        // Flickering forked tongue
-        const tongueWiggle = Math.sin(frameCount * 0.35) * 3;
-        ctx.strokeStyle = '#E63946';
-        ctx.lineWidth = 2.2;
+        // --- MODERN SNAKE HEAD (Aggressive Angular Viper + Forked Tongue) ---
+        const tongueWiggle = Math.sin(frameCount * 0.35) * 3.5;
+        ctx.strokeStyle = '#FF0055';
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
-        ctx.moveTo(0, -headRadius * 0.9);
-        ctx.lineTo(tongueWiggle, -headRadius * 1.8);
+        ctx.moveTo(0, -headRadius * 0.95);
+        ctx.lineTo(tongueWiggle, -headRadius * 1.85);
         // Fork left
-        ctx.lineTo(tongueWiggle - 4, -headRadius * 2.2);
-        ctx.moveTo(tongueWiggle, -headRadius * 1.8);
+        ctx.lineTo(tongueWiggle - 4.5, -headRadius * 2.3);
+        ctx.moveTo(tongueWiggle, -headRadius * 1.85);
         // Fork right
-        ctx.lineTo(tongueWiggle + 4, -headRadius * 2.2);
+        ctx.lineTo(tongueWiggle + 4.5, -headRadius * 2.3);
         ctx.stroke();
 
-        // Triangular Viper Head
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 3.5;
+        // Sharp Viper Head
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 3.6;
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.moveTo(0, -headRadius * 1.15); // snout
-        ctx.lineTo(headRadius * 0.95, -headRadius * 0.1); // right jaw
-        ctx.lineTo(headRadius * 0.7, headRadius * 0.7); // right back
-        ctx.lineTo(-headRadius * 0.7, headRadius * 0.7); // left back
-        ctx.lineTo(-headRadius * 0.95, -headRadius * 0.1); // left jaw
+        ctx.moveTo(0, -headRadius * 1.25); // snout
+        ctx.lineTo(headRadius * 1.05, -headRadius * 0.1); // right jaw
+        ctx.lineTo(headRadius * 0.75, headRadius * 0.75); // right back
+        ctx.lineTo(-headRadius * 0.75, headRadius * 0.75); // left back
+        ctx.lineTo(-headRadius * 1.05, -headRadius * 0.1); // left jaw
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Diamond forehead scale
-        ctx.fillStyle = coreColor || '#FFD13B';
+        // Forehead Diamond Scale
+        ctx.fillStyle = coreColor || '#FFFFFF';
         ctx.beginPath();
-        ctx.moveTo(0, -headRadius * 0.55);
-        ctx.lineTo(headRadius * 0.35, 0);
-        ctx.lineTo(0, headRadius * 0.45);
-        ctx.lineTo(-headRadius * 0.35, 0);
+        ctx.moveTo(0, -headRadius * 0.65);
+        ctx.lineTo(headRadius * 0.4, 0);
+        ctx.lineTo(0, headRadius * 0.5);
+        ctx.lineTo(-headRadius * 0.4, 0);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Slit Viper Eyes
-        const eyeOffset = headRadius * 0.52;
+        // Gloss highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.beginPath();
+        ctx.arc(-headRadius * 0.3, -headRadius * 0.5, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glowing Cat/Viper Slit Eyes
+        const eyeOffset = headRadius * 0.58;
         [-eyeOffset, eyeOffset].forEach((ex) => {
-          ctx.fillStyle = '#FFD13B';
-          ctx.strokeStyle = '#1E1B18';
-          ctx.lineWidth = 1.8;
+          ctx.fillStyle = coreColor || '#B4F000';
+          ctx.strokeStyle = '#111111';
+          ctx.lineWidth = 2.0;
           ctx.beginPath();
-          ctx.ellipse(ex, -headRadius * 0.15, headRadius * 0.28, headRadius * 0.22, 0, 0, Math.PI * 2);
+          ctx.ellipse(ex, -headRadius * 0.16, headRadius * 0.32, headRadius * 0.24, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
 
-          // Slit pupil
-          ctx.fillStyle = '#1E1B18';
+          // Fierce Slit pupil
+          ctx.fillStyle = '#111111';
           ctx.beginPath();
-          ctx.ellipse(ex, -headRadius * 0.15, 1.2, headRadius * 0.18, 0, 0, Math.PI * 2);
+          ctx.ellipse(ex, -headRadius * 0.16, 1.4, headRadius * 0.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Gleam
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(ex - 1.2, -headRadius * 0.22, 1.2, 0, Math.PI * 2);
           ctx.fill();
         });
       } else if (creatureType === 'slug') {
-        // --- SLUG HEAD (Soft rounded face + prominent eye stalks) ---
-        // Eye Stalks (Tentacles)
-        const stalkWobble = Math.sin(frameCount * 0.12) * 2;
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 3.2;
+        // --- MODERN SLUG HEAD (Chubby Bio-luminescent face + Eye stalks) ---
+        const stalkWobble = Math.sin(frameCount * 0.14) * 2.2;
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 3.4;
         ctx.fillStyle = color;
 
         // Left eye stalk
         ctx.beginPath();
         ctx.moveTo(-headRadius * 0.4, -headRadius * 0.3);
-        ctx.quadraticCurveTo(-headRadius * 0.7, -headRadius * 1.1 + stalkWobble, -headRadius * 0.6 + stalkWobble, -headRadius * 1.7);
+        ctx.quadraticCurveTo(-headRadius * 0.75, -headRadius * 1.15 + stalkWobble, -headRadius * 0.65 + stalkWobble, -headRadius * 1.8);
         ctx.stroke();
 
         // Right eye stalk
         ctx.beginPath();
         ctx.moveTo(headRadius * 0.4, -headRadius * 0.3);
-        ctx.quadraticCurveTo(headRadius * 0.7, -headRadius * 1.1 - stalkWobble, headRadius * 0.6 - stalkWobble, -headRadius * 1.7);
+        ctx.quadraticCurveTo(headRadius * 0.75, -headRadius * 1.15 - stalkWobble, headRadius * 0.65 - stalkWobble, -headRadius * 1.8);
         ctx.stroke();
 
         // Left eyeball at stalk tip
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 2.0;
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2.2;
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.arc(-headRadius * 0.6 + stalkWobble, -headRadius * 1.7, 4.2, 0, Math.PI * 2);
+        ctx.arc(-headRadius * 0.65 + stalkWobble, -headRadius * 1.8, 4.8, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#1E1B18';
+        ctx.fillStyle = '#111111';
         ctx.beginPath();
-        ctx.arc(-headRadius * 0.6 + stalkWobble, -headRadius * 1.7 - 0.8, 2.0, 0, Math.PI * 2);
+        ctx.arc(-headRadius * 0.65 + stalkWobble, -headRadius * 1.8 - 0.8, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(-headRadius * 0.65 + stalkWobble - 1, -headRadius * 1.8 - 1.6, 1.2, 0, Math.PI * 2);
         ctx.fill();
 
         // Right eyeball at stalk tip
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.arc(headRadius * 0.6 - stalkWobble, -headRadius * 1.7, 4.2, 0, Math.PI * 2);
+        ctx.arc(headRadius * 0.65 - stalkWobble, -headRadius * 1.8, 4.8, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#1E1B18';
+        ctx.fillStyle = '#111111';
         ctx.beginPath();
-        ctx.arc(headRadius * 0.6 - stalkWobble, -headRadius * 1.7 - 0.8, 2.0, 0, Math.PI * 2);
+        ctx.arc(headRadius * 0.65 - stalkWobble, -headRadius * 1.8 - 0.8, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(headRadius * 0.65 - stalkWobble - 1, -headRadius * 1.8 - 1.6, 1.2, 0, Math.PI * 2);
         ctx.fill();
 
         // Chubby rounded slug head
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 3.6;
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Cheerful slug mouth
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 2.0;
+        // Specular glow
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(0, -headRadius * 0.35, headRadius * 0.4, headRadius * 0.22, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Mouth
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2.2;
         ctx.beginPath();
         ctx.arc(0, headRadius * 0.25, headRadius * 0.25, 0.2 * Math.PI, 0.8 * Math.PI);
         ctx.stroke();
 
-        // Lower sensory tentacles
-        ctx.fillStyle = coreColor || '#FA824C';
+        // Lower tentacles
+        ctx.fillStyle = coreColor || '#00F5D4';
         ctx.beginPath();
-        ctx.arc(-headRadius * 0.5, headRadius * 0.35, 2.5, 0, Math.PI * 2);
-        ctx.arc(headRadius * 0.5, headRadius * 0.35, 2.5, 0, Math.PI * 2);
+        ctx.arc(-headRadius * 0.52, headRadius * 0.36, 2.8, 0, Math.PI * 2);
+        ctx.arc(headRadius * 0.52, headRadius * 0.36, 2.8, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       } else {
-        // --- CLASSIC CARTOON WORM HEAD ---
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 3.5;
+        // --- MODERN ENERGETIC WORM HEAD ---
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 3.6;
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(0, 0, headRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Forehead highlight
-        ctx.fillStyle = '#FFFDF8';
+        // Crisp 3D Forehead highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.beginPath();
-        ctx.arc(0, -headRadius * 0.35, headRadius * 0.45, 0, Math.PI * 2);
+        ctx.arc(0, -headRadius * 0.36, headRadius * 0.48, 0, Math.PI * 2);
         ctx.fill();
 
         // Rosy Cheeks
-        ctx.fillStyle = '#FF5964';
+        ctx.fillStyle = '#FF0055';
         ctx.beginPath();
-        ctx.arc(-headRadius * 0.65, 0, headRadius * 0.2, 0, Math.PI * 2);
-        ctx.arc(headRadius * 0.65, 0, headRadius * 0.2, 0, Math.PI * 2);
+        ctx.arc(-headRadius * 0.65, 0.5, headRadius * 0.22, 0, Math.PI * 2);
+        ctx.arc(headRadius * 0.65, 0.5, headRadius * 0.22, 0, Math.PI * 2);
         ctx.fill();
 
-        // Googly Eyes
+        // Expressive Googly Eyes
         const eyeOffsetX = headRadius * 0.42;
         const eyeOffsetY = -headRadius * 0.28;
-        const eyeRadius = headRadius * 0.35;
-        const pupilRadius = eyeRadius * 0.52;
+        const eyeRadius = headRadius * 0.36;
+        const pupilRadius = eyeRadius * 0.54;
 
         [-eyeOffsetX, eyeOffsetX].forEach((ex) => {
-          ctx.strokeStyle = '#1E1B18';
-          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#111111';
+          ctx.lineWidth = 2.6;
           ctx.fillStyle = '#FFFFFF';
           ctx.beginPath();
           ctx.arc(ex, eyeOffsetY, eyeRadius, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
 
-          ctx.fillStyle = '#1E1B18';
+          ctx.fillStyle = '#111111';
           ctx.beginPath();
           ctx.arc(ex, eyeOffsetY - 1.2, pupilRadius, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.fillStyle = '#FFFFFF';
           ctx.beginPath();
-          ctx.arc(ex - 1, eyeOffsetY - 2.2, pupilRadius * 0.4, 0, Math.PI * 2);
+          ctx.arc(ex - 1.2, eyeOffsetY - 2.4, pupilRadius * 0.45, 0, Math.PI * 2);
           ctx.fill();
         });
 
-        // Smiling Mouth
-        ctx.strokeStyle = '#1E1B18';
-        ctx.lineWidth = 2.5;
+        // Dynamic Smiling Mouth
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2.6;
         ctx.beginPath();
-        ctx.arc(0, headRadius * 0.2, headRadius * 0.35, 0.2 * Math.PI, 0.8 * Math.PI);
+        ctx.arc(0, headRadius * 0.2, headRadius * 0.38, 0.2 * Math.PI, 0.8 * Math.PI);
         ctx.stroke();
 
-        // Tongue sticking out
+        // Tongue sticking out for player
         if (isPlayer) {
-          ctx.fillStyle = '#FF5964';
+          ctx.fillStyle = '#FF0055';
           ctx.beginPath();
-          ctx.arc(0, headRadius * 0.48, headRadius * 0.16, 0, Math.PI);
+          ctx.arc(0, headRadius * 0.5, headRadius * 0.18, 0, Math.PI);
           ctx.fill();
           ctx.stroke();
         }
@@ -1358,8 +1408,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
 
       // Bubble Shield Aura
       if (hasPhaseShield) {
-        ctx.strokeStyle = '#78C0E0';
-        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = '#00F5D4';
+        ctx.lineWidth = 3.6;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
         ctx.arc(0, 0, headRadius * 1.7, 0, Math.PI * 2);
@@ -1374,11 +1424,31 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         emitSparks(headX - Math.cos(angle) * 14, headY - Math.sin(angle) * 14, '#FFFDF8', 2, 2.0);
       }
 
-      // Callsign tag above head
-      ctx.fillStyle = '#1E1B18';
-      ctx.font = 'bold 12px "Bangers", cursive, sans-serif';
+      // Modern Pop Badge & Callsign Tag above head
       const label = isPlayer ? callsignTag || 'WOBBLY_JOE' : callsignTag || color;
-      ctx.fillText(label, headX - 22, headY - headRadius - 8);
+      ctx.save();
+      ctx.font = '900 12px "Bangers", cursive, sans-serif';
+      const textMetrics = ctx.measureText(label);
+      const tagWidth = textMetrics.width + 12;
+      const tagHeight = 16;
+      const tagX = headX - tagWidth / 2;
+      const tagY = headY - headRadius - 20;
+
+      // Small badge container
+      ctx.fillStyle = isPlayer ? '#B4F000' : 'rgba(255, 255, 255, 0.92)';
+      ctx.strokeStyle = '#111111';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(tagX, tagY, tagWidth, tagHeight, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Text with drop shadow
+      ctx.fillStyle = '#111111';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, headX, tagY + tagHeight / 2 + 1);
+      ctx.restore();
 
       ctx.restore();
     };
@@ -1730,29 +1800,67 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         // TACTICAL 3: Hunt orbs if not in aggressive combat
         if (!hasTarget) {
           let closestOrb: Orb | null = null;
-          let minDist = 220;
+          let closestOrbIdx = -1;
+          let minDist = 260;
 
-          for (let i = 0; i < orbs.length; i += 2) {
-            const d = Math.hypot(orbs[i].x - bot.x, orbs[i].y - bot.y);
-            if (d < minDist) {
-              minDist = d;
-              closestOrb = orbs[i];
+          // If the bot has been circling the same fruit for too long, break orbit and find another or cruise forward
+          if (bot.circleCounter && bot.circleCounter > 40) {
+            bot.circleCounter--;
+            // Cruise in straight or slight wander direction to disengage orbit
+            bot.angle += (Math.random() - 0.5) * 0.04;
+          } else {
+            for (let i = 0; i < orbs.length; i++) {
+              if (bot.lastTargetOrbId === i && (bot.circleCounter || 0) > 30) continue;
+              const d = Math.hypot(orbs[i].x - bot.x, orbs[i].y - bot.y);
+              if (d < minDist) {
+                minDist = d;
+                closestOrb = orbs[i];
+                closestOrbIdx = i;
+              }
+            }
+
+            if (closestOrb) {
+              const dToOrb = minDist;
+              const angleToOrb = Math.atan2(closestOrb.y - bot.y, closestOrb.x - bot.x);
+
+              let diff = angleToOrb - bot.angle;
+              while (diff < -Math.PI) diff += Math.PI * 2;
+              while (diff > Math.PI) diff -= Math.PI * 2;
+
+              // Check if bot is close and turning in circles around it
+              if (dToOrb < 75 && Math.abs(diff) > 1.2) {
+                bot.circleCounter = (bot.circleCounter || 0) + 1;
+                bot.lastTargetOrbId = closestOrbIdx;
+              } else if (dToOrb > 100) {
+                bot.circleCounter = Math.max(0, (bot.circleCounter || 0) - 2);
+              }
+
+              // When close to fruit, snap turning rate or overshoot slightly so it never circles endlessly
+              if (dToOrb < 60) {
+                // Direct aggressive snap directly through the fruit center
+                targetAngle = angleToOrb;
+                hasTarget = true;
+                // Boost turning authority at close proximity to ensure interception
+                const closeSnapTurn = Math.min(1.0, (bot.turnRate || 0.05) * 3.8);
+                bot.angle += diff * closeSnapTurn;
+              } else {
+                targetAngle = angleToOrb;
+                hasTarget = true;
+                const aggressiveTurn = bot.turnRate * (currentDifficulty === 'hard' ? 1.4 : 1.2);
+                bot.angle += diff * aggressiveTurn;
+              }
             }
           }
-
-          if (closestOrb) {
-            targetAngle = Math.atan2(closestOrb.y - bot.y, closestOrb.x - bot.x);
-            hasTarget = true;
-          }
-        }
-
-        if (hasTarget) {
+        } else {
+          // Has wall or player target
           let diff = targetAngle - bot.angle;
           while (diff < -Math.PI) diff += Math.PI * 2;
           while (diff > Math.PI) diff -= Math.PI * 2;
           const aggressiveTurn = bot.turnRate * (currentDifficulty === 'hard' ? 1.35 : 1.1);
           bot.angle += diff * aggressiveTurn;
-        } else {
+        }
+
+        if (!hasTarget && (!bot.circleCounter || bot.circleCounter <= 0)) {
           bot.angle += (Math.random() - 0.5) * (bot.isFastPasser ? 0.03 : 0.08);
         }
 
@@ -1767,11 +1875,29 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
         bot.trail.unshift({ x: bot.x, y: bot.y });
         if (bot.trail.length > bot.maxTrail) bot.trail.pop();
 
-        // Bot eats orbs
+        // Bot eats orbs and GROWS! (Competitive dynamic arena)
+        // Generous fruit vacuum radius for bots to smoothly collect fruit without misses
+        const botChompRadius = bot.thickness + 18;
         for (let i = orbs.length - 1; i >= 0; i--) {
           const d = Math.hypot(orbs[i].x - bot.x, orbs[i].y - bot.y);
-          if (d < bot.thickness + orbs[i].radius + 5) {
-            emitSparks(orbs[i].x, orbs[i].y, bot.color, 4, 0.8);
+          if (d < botChompRadius + orbs[i].radius) {
+            emitSparks(orbs[i].x, orbs[i].y, bot.color, 6, 1.1);
+            bot.circleCounter = 0;
+            bot.lastTargetOrbId = -1;
+
+            // Bot grows in segments and score!
+            const orbVal = orbs[i].value || 45;
+            bot.score = (bot.score || 0) + orbVal;
+            bot.fruitsEaten = (bot.fruitsEaten || 0) + 1;
+            bot.maxTrail = Math.min(180, bot.maxTrail + (orbs[i].isLoot ? 2 : 1));
+
+            // Increase thickness slightly as they eat more fruit (up to 18px)
+            if (bot.fruitsEaten % 6 === 0 && bot.thickness < 18) {
+              bot.thickness += 0.5;
+              // Visual grow burst popup above bot
+              addScorePopup(bot.x, bot.y - 18, `GROW!`, bot.color, 0.9);
+            }
+
             if (orbs[i].isLoot) {
               orbs.splice(i, 1);
             } else {
@@ -1780,11 +1906,158 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
           }
         }
 
-        // 1. PLAYER CUTS BOT (Player Victory)
-        // Safe offset to prevent accidental self-head collisions
-        for (let t = 8; t < player.trail.length; t++) {
+        // --- COMPREHENSIVE COMBAT & ACCURATE COLLISION DETECTION ---
+        const playerHeadR = player.thickness * 1.15 + 3;
+        const botHeadR = bot.thickness * (bot.creatureType === 'slug' ? 1.3 : 1.15) + 3;
+        const playerBodyR = player.thickness * 0.55 + 3;
+        const botBodyR = bot.thickness * 0.55 + 3;
+
+        // 1. DIRECT HEAD-TO-HEAD TOUCH (Player Head & Bot Head)
+        const headToHeadDist = Math.hypot(player.x - bot.x, player.y - bot.y);
+        const headToHeadThreshold = playerHeadR + botHeadR + 4;
+
+        if (headToHeadDist < headToHeadThreshold) {
+          // Direct Head-on collision occurred!
+          if (hasPhase) {
+            // Player Phase Shield shatters the bot
+            localKills += 1;
+            currentCombo += 1;
+            comboTimer = 260;
+            setComboCount(currentCombo);
+            const award = (bot.isFastPasser ? 1200 : 600) + currentCombo * 180;
+            localScore += award;
+            screenShake = 18;
+            emitSparks(bot.x, bot.y, '#00F5D4', 50, 4.0);
+            addScorePopup(bot.x, bot.y - 20, `PHASE DEFLECT! +${award}`, '#00F5D4', 1.3);
+            sounds.playShatter();
+            dropLootOrbs(bot.x, bot.y, bot.score || 500);
+            setAlertText(`${bot.name} SHATTERED BY SHIELD!`);
+            setAlertColor('#00F5D4');
+            setTimeout(() => setAlertText('ARENA LIVE'), 2600);
+            setKills(localKills);
+            setScore(Math.floor(localScore));
+            setBestToday((prev) => Math.max(prev, Math.floor(localScore)));
+            if (onKillsUpdate) onKillsUpdate(localKills);
+            if (onScoreUpdate) onScoreUpdate(Math.floor(localScore));
+            bots[bIdx] = createSingleBot(bIdx);
+            return;
+          } else if (isBoosting || mobileInput.boost) {
+            // Player was boosting: Player ram overpowers bot!
+            localKills += 1;
+            currentCombo += 1;
+            comboTimer = 260;
+            setComboCount(currentCombo);
+            const award = (bot.isFastPasser ? 1400 : 700) + currentCombo * 200;
+            localScore += award;
+            screenShake = 20;
+            emitSparks(bot.x, bot.y, bot.color, 55, 4.2);
+            addScorePopup(bot.x, bot.y - 20, `HEAD-ON RAM! +${award}`, '#B4F000', 1.4);
+            sounds.playShatter();
+            dropLootOrbs(bot.x, bot.y, bot.score || 500);
+            setAlertText(`HEAD-ON TAKEDOWN: ${bot.name}`);
+            setAlertColor('#B4F000');
+            setTimeout(() => setAlertText('ARENA LIVE'), 2600);
+            setKills(localKills);
+            setScore(Math.floor(localScore));
+            setBestToday((prev) => Math.max(prev, Math.floor(localScore)));
+            if (onKillsUpdate) onKillsUpdate(localKills);
+            if (onScoreUpdate) onScoreUpdate(Math.floor(localScore));
+            bots[bIdx] = createSingleBot(bIdx);
+            return;
+          } else if (bot.isBotBoosting && (bot.score || 0) > localScore * 1.2) {
+            // Bot was boosting and significantly larger: Eliminates player
+            screenShake = 20;
+            emitSparks(player.x, player.y, player.color, 45, 3.5);
+            addScorePopup(player.x, player.y - 20, `RAMMED HEAD-ON BY ${bot.name}`, '#ff007f');
+            sounds.playShatter();
+            dropLootOrbs(player.x, player.y, localScore);
+            setAlertText(`RAMMED HEAD-ON BY ${bot.name}`);
+            setAlertColor('#ff007f');
+            setTimeout(() => setAlertText('ARENA LIVE'), 2600);
+            bot.score = (bot.score || 0) + 500;
+            bot.maxTrail = Math.min(180, bot.maxTrail + 12);
+            localScore = Math.max(0, localScore - 200);
+            setScore(Math.floor(localScore));
+            setBestToday((prev) => Math.max(prev, Math.floor(localScore)));
+            if (onScoreUpdate) onScoreUpdate(Math.floor(localScore));
+
+            player.x = ARENA_CENTER_X;
+            player.y = ARENA_CENTER_Y;
+            player.angle = -Math.PI / 2;
+            player.trail = [];
+            for (let i = 0; i < 22; i++) player.trail.push({ x: player.x, y: player.y + i * 3 });
+
+            isBoosting = false;
+            mobileInput.boost = false;
+            isPausedRef.current = true;
+            setIsPaused(true);
+            setLastScore(Math.floor(localScore));
+            setShareAvailable(true);
+            setShowDeathModal(true);
+            return;
+          } else if (localScore >= (bot.score || 0)) {
+            // Player is larger or equal in mass: Player wins head-on clash!
+            localKills += 1;
+            currentCombo += 1;
+            comboTimer = 260;
+            setComboCount(currentCombo);
+            const award = (bot.isFastPasser ? 1200 : 500) + currentCombo * 180;
+            localScore += award;
+            screenShake = 16;
+            emitSparks(bot.x, bot.y, bot.color, 50, 4.0);
+            addScorePopup(bot.x, bot.y - 20, `HEAD-ON CLASH WIN! +${award}`, '#FF9E00', 1.3);
+            sounds.playShatter();
+            dropLootOrbs(bot.x, bot.y, bot.score || 450);
+            setAlertText(`${bot.name} ELIMINATED`);
+            setAlertColor('#ff007f');
+            setTimeout(() => setAlertText('ARENA LIVE'), 2600);
+            setKills(localKills);
+            setScore(Math.floor(localScore));
+            setBestToday((prev) => Math.max(prev, Math.floor(localScore)));
+            if (onKillsUpdate) onKillsUpdate(localKills);
+            if (onScoreUpdate) onScoreUpdate(Math.floor(localScore));
+            bots[bIdx] = createSingleBot(bIdx);
+            return;
+          } else {
+            // Bot is larger: Eliminates player
+            screenShake = 18;
+            emitSparks(player.x, player.y, player.color, 45, 3.5);
+            addScorePopup(player.x, player.y - 20, `HEAD-ON CLASH WITH ${bot.name}`, '#ff007f');
+            sounds.playShatter();
+            dropLootOrbs(player.x, player.y, localScore);
+            setAlertText(`KILLED BY ${bot.name}`);
+            setAlertColor('#ff007f');
+            setTimeout(() => setAlertText('ARENA LIVE'), 2600);
+            bot.score = (bot.score || 0) + 500;
+            bot.maxTrail = Math.min(180, bot.maxTrail + 12);
+            localScore = Math.max(0, localScore - 200);
+            setScore(Math.floor(localScore));
+            setBestToday((prev) => Math.max(prev, Math.floor(localScore)));
+            if (onScoreUpdate) onScoreUpdate(Math.floor(localScore));
+
+            player.x = ARENA_CENTER_X;
+            player.y = ARENA_CENTER_Y;
+            player.angle = -Math.PI / 2;
+            player.trail = [];
+            for (let i = 0; i < 22; i++) player.trail.push({ x: player.x, y: player.y + i * 3 });
+
+            isBoosting = false;
+            mobileInput.boost = false;
+            isPausedRef.current = true;
+            setIsPaused(true);
+            setLastScore(Math.floor(localScore));
+            setShareAvailable(true);
+            setShowDeathModal(true);
+            return;
+          }
+        }
+
+        // 2. BOT HEAD HITS PLAYER BODY (Player Victory - Bot Cut by Player Trail)
+        // Checks from segment 1 onwards with realistic touching radius
+        const botCutThreshold = botHeadR + playerBodyR + 3;
+        for (let t = 1; t < player.trail.length; t++) {
           const td = Math.hypot(player.trail[t].x - bot.x, player.trail[t].y - bot.y);
-          if (td < player.thickness + 6) {
+          if (td < botCutThreshold) {
             localKills += 1;
             currentCombo += 1;
             comboTimer = 260;
@@ -1816,15 +2089,66 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
             if (onScoreUpdate) onScoreUpdate(Math.floor(localScore));
 
             bots[bIdx] = createSingleBot(bIdx);
-            break;
+            return;
           }
         }
 
-        // 2. BOT CUTS PLAYER (Bot Victory unless Phase Shield active)
+        // 3. BOT CUTS OTHER BOTS (Bot-to-Bot Head-to-Head & Trail Takedowns)
+        for (let obIdx = 0; obIdx < bots.length; obIdx++) {
+          if (obIdx === bIdx) continue;
+          const otherBot = bots[obIdx];
+          const otherHeadR = otherBot.thickness * (otherBot.creatureType === 'slug' ? 1.3 : 1.15) + 3;
+          const otherBodyR = otherBot.thickness * 0.55 + 3;
+
+          // A. Bot-to-Bot Head-to-Head Collision
+          const b2bHeadDist = Math.hypot(bot.x - otherBot.x, bot.y - otherBot.y);
+          if (b2bHeadDist < botHeadR + otherHeadR + 4) {
+            // Lower score bot shatters
+            if ((bot.score || 0) >= (otherBot.score || 0)) {
+              emitSparks(otherBot.x, otherBot.y, otherBot.color, 30, 2.5);
+              dropLootOrbs(otherBot.x, otherBot.y, Math.min(600, otherBot.score || 350));
+              bot.score = (bot.score || 0) + 400;
+              bot.maxTrail = Math.min(180, bot.maxTrail + 10);
+              addScorePopup(bot.x, bot.y - 18, `+400 CHOMP!`, bot.color, 1.0);
+              bots[obIdx] = createSingleBot(obIdx);
+            } else {
+              emitSparks(bot.x, bot.y, bot.color, 30, 2.5);
+              dropLootOrbs(bot.x, bot.y, Math.min(600, bot.score || 350));
+              otherBot.score = (otherBot.score || 0) + 400;
+              otherBot.maxTrail = Math.min(180, otherBot.maxTrail + 10);
+              addScorePopup(otherBot.x, otherBot.y - 18, `+400 CHOMP!`, otherBot.color, 1.0);
+              bots[bIdx] = createSingleBot(bIdx);
+              return;
+            }
+            break;
+          }
+
+          // B. Bot Head hit otherBot's body trail
+          let hitOther = false;
+          const b2bTrailThreshold = botHeadR + otherBodyR + 3;
+          for (let ot = 1; ot < otherBot.trail.length; ot++) {
+            const botBotDist = Math.hypot(otherBot.trail[ot].x - bot.x, otherBot.trail[ot].y - bot.y);
+            if (botBotDist < b2bTrailThreshold) {
+              // bot ran into otherBot's body!
+              emitSparks(bot.x, bot.y, bot.color, 30, 2.5);
+              dropLootOrbs(bot.x, bot.y, Math.min(600, bot.score || 350));
+              otherBot.score = (otherBot.score || 0) + 400;
+              otherBot.maxTrail = Math.min(180, otherBot.maxTrail + 10);
+              addScorePopup(otherBot.x, otherBot.y - 18, `+400 CHOMP!`, otherBot.color, 1.0);
+              bots[bIdx] = createSingleBot(bIdx);
+              hitOther = true;
+              return;
+            }
+          }
+          if (hitOther) break;
+        }
+
+        // 4. PLAYER HEAD HITS BOT BODY (Bot Victory - Player Cut by Bot Trail)
         if (!hasPhase) {
-          for (let t = 5; t < bot.trail.length; t++) {
+          const playerCutThreshold = playerHeadR + botBodyR + 3;
+          for (let t = 1; t < bot.trail.length; t++) {
             const pd = Math.hypot(bot.trail[t].x - player.x, bot.trail[t].y - player.y);
-            if (pd < player.thickness + 5) {
+            if (pd < playerCutThreshold) {
               screenShake = 18;
               emitSparks(player.x, player.y, player.color, 45, 3.5);
               addScorePopup(player.x, player.y - 20, `ELIMINATED BY ${bot.name}`, '#ff007f');
@@ -1837,6 +2161,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
               setTimeout(() => setAlertText('ARENA LIVE'), 2600);
 
               bot.score = (bot.score || 0) + 500;
+              bot.maxTrail = Math.min(180, bot.maxTrail + 12);
               localScore = Math.max(0, localScore - 200);
 
               setScore(Math.floor(localScore));
@@ -1857,7 +2182,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
               setLastScore(Math.floor(localScore));
               setShareAvailable(true);
               setShowDeathModal(true);
-              break;
+              return;
             }
           }
         }
@@ -2475,20 +2800,24 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({
               {roster.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`flex items-center justify-between ${
+                  className={`flex items-center justify-between py-0.5 px-1.5 rounded-lg border transition-all ${
                     item.isPlayer
-                      ? 'text-[#FA824C] font-bold py-0.5 px-1 rounded bg-[#FFF0D6] border border-[#1E1B18]'
-                      : 'text-[#1E1B18]'
+                      ? 'text-[#111111] font-bold bg-[#B4F000] border-[#111111] shadow-[1px_1px_0px_#111111]'
+                      : 'text-[#111111] bg-[#F4EEDF]/80 border-transparent hover:border-[#111111]'
                   }`}
                 >
-                  <span className="truncate max-w-[95px] flex items-center gap-1">
-                    <span className="font-comic text-xs text-[#5C3D2E]">
+                  <span className="truncate max-w-[105px] flex items-center gap-1.5">
+                    <span className="font-comic text-xs font-black text-[#555555]">
                       {idx + 1}.
                     </span>{' '}
-                    {item.name}
+                    <span
+                      className="w-2.5 h-2.5 rounded-full border border-[#111111] shrink-0"
+                      style={{ backgroundColor: item.color || '#B4F000' }}
+                    />
+                    <span className="truncate font-comic text-xs font-bold">{item.name}</span>
                   </span>
-                  <span className="font-comic text-xs">
-                    {item.score}
+                  <span className="font-comic text-xs font-black">
+                    {item.score.toLocaleString()}
                   </span>
                 </div>
               ))}

@@ -23,9 +23,11 @@
   }
 
   body {
-    background-color: #FFF8ED;
-    color: #1E1B18;
+    background-color: #E8E2D2;
+    color: #111111;
     overflow-x: hidden;
+    background-image: radial-gradient(#111111 1.2px, transparent 1.2px);
+    background-size: 20px 20px;
   }
 
   /* Retro comic scrollbar */
@@ -34,12 +36,12 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #FFF0D6;
-    border-left: 2px solid #1E1B18;
+    background: #E8E2D2;
+    border-left: 2px solid #111111;
   }
   ::-webkit-scrollbar-thumb {
-    background: #FF7A30;
-    border: 2px solid #1E1B18;
+    background: #FA824C;
+    border: 2px solid #111111;
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
@@ -47,29 +49,60 @@
   }
 }
 
+/* Wetcat / Neo-Brutalist Halftone dot patterns */
+.bg-halftone-blue {
+  background-color: #55B3F3;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.45) 2.2px, transparent 2.2px);
+  background-size: 16px 16px;
+}
+
+.bg-halftone-pink {
+  background-color: #FF5D8F;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.35) 2px, transparent 2px);
+  background-size: 16px 16px;
+}
+
+.bg-halftone-lime {
+  background-color: #B4F000;
+  background-image: radial-gradient(rgba(17, 17, 17, 0.18) 2px, transparent 2px);
+  background-size: 16px 16px;
+}
+
+.bg-halftone-dark {
+  background-color: #121316;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.8px, transparent 1.8px);
+  background-size: 18px 18px;
+}
+
+.bg-halftone-cream {
+  background-color: #F4EEDF;
+  background-image: radial-gradient(rgba(17, 17, 17, 0.15) 1.8px, transparent 1.8px);
+  background-size: 16px 16px;
+}
+
 /* Comic Panel & Card Utilities */
 .comic-border {
-  border: 3px solid #1E1B18;
+  border: 3px solid #111111;
 }
 
 .comic-border-2 {
-  border: 2px solid #1E1B18;
+  border: 2px solid #111111;
 }
 
 .comic-shadow {
-  box-shadow: 4px 4px 0px #1E1B18;
+  box-shadow: 4px 4px 0px #111111;
 }
 
 .comic-shadow-sm {
-  box-shadow: 2px 2px 0px #1E1B18;
+  box-shadow: 2px 2px 0px #111111;
 }
 
 .comic-shadow-lg {
-  box-shadow: 6px 6px 0px #1E1B18;
+  box-shadow: 6px 6px 0px #111111;
 }
 
 .comic-shadow-orange {
-  box-shadow: 4px 4px 0px #FF7A30;
+  box-shadow: 4px 4px 0px #FA824C;
 }
 
 .comic-shadow-yellow {
@@ -77,28 +110,28 @@
 }
 
 .comic-shadow-blue {
-  box-shadow: 4px 4px 0px #78C0E0;
+  box-shadow: 4px 4px 0px #55B3F3;
 }
 
-/* Physical comic panel effect */
+/* Physical comic panel effect with neo-brutalist pop offset */
 .comic-card {
   background-color: #FFFFFF;
-  border: 3px solid #1E1B18;
-  box-shadow: 5px 5px 0px #1E1B18;
-  border-radius: 8px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 3px solid #111111;
+  box-shadow: 5px 5px 0px #111111;
+  border-radius: 10px;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .comic-card:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0px #1E1B18;
+  box-shadow: 7px 7px 0px #111111;
 }
 
 .comic-card-flat {
   background-color: #FFFFFF;
-  border: 3px solid #1E1B18;
-  box-shadow: 4px 4px 0px #1E1B18;
-  border-radius: 8px;
+  border: 3px solid #111111;
+  box-shadow: 4px 4px 0px #111111;
+  border-radius: 10px;
 }
 
 /* Comic interactive button */

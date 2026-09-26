@@ -12,16 +12,16 @@ export const EngagementLoop: React.FC = () => {
     <section className="w-full py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-8">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto">
-        <div className="inline-block px-3 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] text-[#1E1B18] font-comic text-xs uppercase tracking-wider mb-2">
+        <div className="inline-block px-3 py-1 rounded-full bg-[#B4F000] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] text-[#111111] font-comic text-xs uppercase tracking-wider mb-2 font-black">
           THE ROAD TO GLORY
         </div>
 
-        <h2 className="font-comic text-4xl sm:text-5xl uppercase text-[#1E1B18] tracking-wide">
+        <h2 className="font-comic text-4xl sm:text-5xl uppercase text-[#111111] tracking-wide">
           THE 3-STEP ASCENSION LOOP
         </h2>
 
-        <p className="font-body text-base text-[#5C3D2E] font-medium mt-1">
-          From a tiny hungry wiggle to the undisputed king of the Sunday funny pages!
+        <p className="font-body text-base text-[#555555] font-semibold mt-1">
+          From a tiny hungry wiggle to the undisputed king of the funny pages!
         </p>
       </div>
 
@@ -30,93 +30,93 @@ export const EngagementLoop: React.FC = () => {
         {/* STEP 1 */}
         <div
           onMouseEnter={() => sounds.playBeep(580)}
-          className="comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden"
+          className="comic-card bg-white p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden border-3 border-[#111111] shadow-[6px_6px_0px_#111111] rounded-2xl"
         >
           <div className="flex items-center justify-between">
-            <div className="p-2 rounded-xl bg-[#78C0E0] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+            <div className="p-2 rounded-xl bg-[#55B3F3] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]">
               <SlinkPeeking size={46} />
             </div>
 
-            <span className="font-comic text-4xl text-[#78C0E0] select-none">
+            <span className="font-comic text-4xl text-[#55B3F3] select-none font-black">
               01
             </span>
           </div>
 
           <div>
-            <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide">
+            <h3 className="font-comic text-2xl uppercase text-[#111111] tracking-wide">
               1. PICK A SILLY LOOK
             </h3>
 
-            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
-              Name your worm something hilarious, select bright cartoon colors (Tangerine, Sunny, Sky, Clover), and wriggle straight onto the meadow grass!
+            <p className="font-body text-xs sm:text-sm text-[#444444] mt-2 leading-relaxed font-medium">
+              Name your creature something hilarious, select bright pop colors, and wriggle straight onto the arena field!
             </p>
           </div>
 
-          <div className="mt-auto pt-3 border-t-2 border-[#1E1B18]/15 flex items-center justify-between">
-            <span className="font-comic text-xs text-[#1E1B18]">STEP: START</span>
-            <SoundBurst text="READY!" color="#FFD13B" className="text-xs" />
+          <div className="mt-auto pt-3 border-t-2 border-[#111111]/15 flex items-center justify-between">
+            <span className="font-comic text-xs text-[#111111] font-bold">STEP: START</span>
+            <SoundBurst text="READY!" color="#B4F000" className="text-xs" />
           </div>
         </div>
 
         {/* STEP 2 */}
         <div
           onMouseEnter={() => sounds.playBeep(680)}
-          className="comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden"
+          className="comic-card bg-white p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden border-3 border-[#111111] shadow-[6px_6px_0px_#111111] rounded-2xl"
         >
           <div className="flex items-center justify-between">
-            <div className="p-2 rounded-xl bg-[#FA824C] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+            <div className="p-2 rounded-xl bg-[#FF5D8F] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]">
               <SlinkHungry size={46} />
             </div>
 
-            <span className="font-comic text-4xl text-[#FA824C] select-none">
+            <span className="font-comic text-4xl text-[#FF5D8F] select-none font-black">
               02
             </span>
           </div>
 
           <div>
-            <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide">
+            <h3 className="font-comic text-2xl uppercase text-[#111111] tracking-wide">
               2. MUNCH &amp; GROW!
             </h3>
 
-            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
-              Snack on juicy Honeycrisp apples, catch bubbly power-ups (Magnets, Bubble Shields, Nitro Rockets), and circle rivals until they get tangled up!
+            <p className="font-body text-xs sm:text-sm text-[#444444] mt-2 leading-relaxed font-medium">
+              Snack on juicy fruit orbs, catch bubbly power-ups, and cut off rivals with tactical boost trajectories!
             </p>
           </div>
 
-          <div className="mt-auto pt-3 border-t-2 border-[#1E1B18]/15 flex items-center justify-between">
-            <span className="font-comic text-xs text-[#1E1B18]">STEP: FEAST</span>
-            <SoundBurst text="CHOMP!" color="#FA824C" className="text-xs" />
+          <div className="mt-auto pt-3 border-t-2 border-[#111111]/15 flex items-center justify-between">
+            <span className="font-comic text-xs text-[#111111] font-bold">STEP: FEAST</span>
+            <SoundBurst text="CHOMP!" color="#FF5D8F" className="text-xs" />
           </div>
         </div>
 
         {/* STEP 3 */}
         <div
           onMouseEnter={() => sounds.playBeep(780)}
-          className="comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden"
+          className="comic-card bg-white p-6 sm:p-7 flex flex-col gap-4 relative overflow-hidden border-3 border-[#111111] shadow-[6px_6px_0px_#111111] rounded-2xl"
         >
           <div className="flex items-center justify-between">
-            <div className="p-2 rounded-xl bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+            <div className="p-2 rounded-xl bg-[#B4F000] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]">
               <SlinkChampion size={46} />
             </div>
 
-            <span className="font-comic text-4xl text-[#FFD13B] select-none">
+            <span className="font-comic text-4xl text-[#B4F000] select-none font-black">
               03
             </span>
           </div>
 
           <div>
-            <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide">
+            <h3 className="font-comic text-2xl uppercase text-[#111111] tracking-wide">
               3. CLAIM THE PRIZE
             </h3>
 
-            <p className="font-body text-xs sm:text-sm text-[#5C3D2E] mt-2 leading-relaxed">
-              Conquer the #1 spot on the leaderboard! Earn shiny cartoon ribbons, glory in the Daily Slink Gazette, and collect $SLINK token payouts!
+            <p className="font-body text-xs sm:text-sm text-[#444444] mt-2 leading-relaxed font-medium">
+              Conquer the #1 spot on the leaderboard! Earn shiny ribbons and climb the live high score rankings!
             </p>
           </div>
 
-          <div className="mt-auto pt-3 border-t-2 border-[#1E1B18]/15 flex items-center justify-between">
-            <span className="font-comic text-xs text-[#1E1B18]">STEP: VICTORY</span>
-            <SoundBurst text="HOORAY!" color="#70A288" className="text-xs" />
+          <div className="mt-auto pt-3 border-t-2 border-[#111111]/15 flex items-center justify-between">
+            <span className="font-comic text-xs text-[#111111] font-bold">STEP: VICTORY</span>
+            <SoundBurst text="HOORAY!" color="#B4F000" className="text-xs" />
           </div>
         </div>
       </div>

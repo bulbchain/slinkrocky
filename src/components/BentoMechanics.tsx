@@ -31,104 +31,104 @@ export const BentoMechanics: React.FC = () => {
         </p>
       </div>
 
-      {/* 3 Physical Comic Strip Panels */}
+      {/* 3 Physical Comic Strip Panels (Matching Wetcat card color trio: Cyan, Hot Pink, Lime) */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* PANEL 1 — CHOMP APPLES */}
+        {/* PANEL 1 — CHOMP FRUIT (CYAN) */}
         <div
           onMouseEnter={() => sounds.playBeep(660)}
-          className="group comic-card bg-[#FFFDF8] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden"
+          className="group comic-card bg-[#55B3F3] border-3 border-[#111111] shadow-[6px_6px_0px_#111111] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden rounded-2xl"
         >
           {/* Comic Panel Number Stamp */}
-          <div className="flex items-center justify-between pb-3 border-b-2 border-[#1E1B18]/15">
-            <span className="font-comic text-sm uppercase text-[#FA824C] tracking-wider">
+          <div className="flex items-center justify-between pb-3 border-b-3 border-[#111111]/30">
+            <span className="font-comic text-sm uppercase text-[#111111] tracking-wider font-bold">
               EPISODE 01
             </span>
             <SoundBurst text="CHOMP!" color="#FFD13B" className="text-xs" />
           </div>
 
           <div className="my-5 flex flex-col items-center text-center">
-            <div className="p-3 bg-[#FFF0D6] rounded-2xl border-2 border-[#1E1B18] shadow-[3px_3px_0px_#1E1B18] mb-4 group-hover:scale-105 transition-transform">
+            <div className="p-3.5 bg-white rounded-2xl border-3 border-[#111111] shadow-[3px_3px_0px_#111111] mb-4 group-hover:scale-105 transition-transform">
               <SlinkHungry size={70} />
             </div>
 
-            <h3 className="font-comic text-2xl uppercase tracking-wide text-[#1E1B18] mb-2">
+            <h3 className="font-comic text-3xl uppercase tracking-wide text-[#111111] mb-2 font-bold drop-shadow-[1px_1px_0px_white]">
               1. CHOMP &amp; GROW!
             </h3>
 
-            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#5C3D2E]">
+            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#111111] font-semibold">
               Slither across the soil gobbling juicy red apples, sweet oranges, strawberries, and velvety plums. Every fruit adds a plump segment to your wiggly body!
             </p>
           </div>
 
-          <div className="rounded-lg border-2 border-[#1E1B18] bg-[#FFF8ED] p-3 text-center shadow-[2px_2px_0px_#1E1B18]">
-            <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
-              FRUIT HARVEST: <strong className="text-[#FA824C]">+35 TO +65 PTS</strong>
+          <div className="rounded-xl border-3 border-[#111111] bg-white p-3 text-center shadow-[3px_3px_0px_#111111]">
+            <span className="font-comic text-xs uppercase tracking-wider text-[#111111] font-bold">
+              FRUIT HARVEST: <strong className="text-[#FF5D8F]">+35 TO +65 PTS</strong>
             </span>
           </div>
         </div>
 
-        {/* PANEL 2 — ZOOM & TRAP */}
+        {/* PANEL 2 — ZOOM & TRAP (HOT PINK) */}
         <div
           onMouseEnter={() => sounds.playBeep(720)}
-          className="group comic-card bg-[#78C0E0] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden"
+          className="group comic-card bg-[#FF5D8F] border-3 border-[#111111] shadow-[6px_6px_0px_#111111] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden rounded-2xl"
         >
-          <div className="flex items-center justify-between pb-3 border-b-2 border-[#1E1B18]/25">
-            <span className="font-comic text-sm uppercase text-[#1E1B18] tracking-wider">
+          <div className="flex items-center justify-between pb-3 border-b-3 border-[#111111]/30">
+            <span className="font-comic text-sm uppercase text-[#111111] tracking-wider font-bold">
               EPISODE 02
             </span>
-            <SoundBurst text="ZOOM!" color="#FA824C" className="text-xs" />
+            <SoundBurst text="ZOOM!" color="#B4F000" className="text-xs" />
           </div>
 
           <div className="my-5 flex flex-col items-center text-center">
-            <div className="p-3 bg-white rounded-2xl border-2 border-[#1E1B18] shadow-[3px_3px_0px_#1E1B18] mb-4 group-hover:scale-105 transition-transform">
+            <div className="p-3.5 bg-white rounded-2xl border-3 border-[#111111] shadow-[3px_3px_0px_#111111] mb-4 group-hover:scale-105 transition-transform">
               <SlinkSpeedy size={70} />
             </div>
 
-            <h3 className="font-comic text-2xl uppercase tracking-wide text-[#1E1B18] mb-2">
+            <h3 className="font-comic text-3xl uppercase tracking-wide text-[#111111] mb-2 font-bold drop-shadow-[1px_1px_0px_white]">
               2. CUT &amp; COIL!
             </h3>
 
-            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#1E1B18] font-medium">
+            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#111111] font-semibold">
               Hold space or tap boost to spurt ahead of fast centipedes, sneaky snakes, and chubby slugs! If their head bumps into your tail, they poof into a heap of ripe fruits!
             </p>
           </div>
 
-          <div className="rounded-lg border-2 border-[#1E1B18] bg-white p-3 text-center shadow-[2px_2px_0px_#1E1B18]">
-            <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
-              TAKEDOWN BURST: <strong className="text-[#E63946]">+500 PTS</strong>
+          <div className="rounded-xl border-3 border-[#111111] bg-white p-3 text-center shadow-[3px_3px_0px_#111111]">
+            <span className="font-comic text-xs uppercase tracking-wider text-[#111111] font-bold">
+              TAKEDOWN BURST: <strong className="text-[#B4F000] drop-shadow-[1px_1px_0px_#111111]">+500 PTS</strong>
             </span>
           </div>
         </div>
 
-        {/* PANEL 3 — BECOME THE CHAMP */}
+        {/* PANEL 3 — BECOME THE CHAMP (LIME GREEN) */}
         <div
           onMouseEnter={() => sounds.playBeep(800)}
-          className="group comic-card bg-[#FFD13B] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden"
+          className="group comic-card bg-[#B4F000] border-3 border-[#111111] shadow-[6px_6px_0px_#111111] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden rounded-2xl"
         >
-          <div className="flex items-center justify-between pb-3 border-b-2 border-[#1E1B18]/25">
-            <span className="font-comic text-sm uppercase text-[#1E1B18] tracking-wider">
+          <div className="flex items-center justify-between pb-3 border-b-3 border-[#111111]/30">
+            <span className="font-comic text-sm uppercase text-[#111111] tracking-wider font-bold">
               EPISODE 03
             </span>
-            <SoundBurst text="HOORAY!" color="#70A288" className="text-xs" />
+            <SoundBurst text="HOORAY!" color="#FF5D8F" className="text-xs" />
           </div>
 
           <div className="my-5 flex flex-col items-center text-center">
-            <div className="p-3 bg-[#FFFDF8] rounded-2xl border-2 border-[#1E1B18] shadow-[3px_3px_0px_#1E1B18] mb-4 group-hover:scale-105 transition-transform">
+            <div className="p-3.5 bg-white rounded-2xl border-3 border-[#111111] shadow-[3px_3px_0px_#111111] mb-4 group-hover:scale-105 transition-transform">
               <SlinkChampion size={70} />
             </div>
 
-            <h3 className="font-comic text-2xl uppercase tracking-wide text-[#1E1B18] mb-2">
+            <h3 className="font-comic text-3xl uppercase tracking-wide text-[#111111] mb-2 font-bold drop-shadow-[1px_1px_0px_white]">
               3. WEAR THE CROWN!
             </h3>
 
-            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#1E1B18] font-medium">
+            <p className="font-body text-xs sm:text-sm leading-relaxed text-[#111111] font-semibold">
               Reach the top of the Meadow Leaderboard! Earn glossy winner ribbons, funny cartoon trophies, and bounties of tasty $SLINK tokens!
             </p>
           </div>
 
-          <div className="rounded-lg border-2 border-[#1E1B18] bg-white p-3 text-center shadow-[2px_2px_0px_#1E1B18]">
-            <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
-              TOP PRIZE: <strong className="text-[#FA824C]">GOLDEN CROWN &amp; TOKENS</strong>
+          <div className="rounded-xl border-3 border-[#111111] bg-white p-3 text-center shadow-[3px_3px_0px_#111111]">
+            <span className="font-comic text-xs uppercase tracking-wider text-[#111111] font-bold">
+              TOP PRIZE: <strong className="text-[#FF5D8F]">GOLDEN CROWN &amp; TOKENS</strong>
             </span>
           </div>
         </div>

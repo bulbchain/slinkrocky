@@ -64,19 +64,19 @@ export const ArenasView: React.FC<ArenasViewProps> = ({ onSelectArena }) => {
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
       {/* Header */}
       <div className="flex flex-col gap-3 text-center max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#FFD13B] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18] mx-auto">
-          <MapPin className="h-4 w-4 text-[#1E1B18]" />
-          <span className="font-comic text-xs uppercase tracking-wider text-[#1E1B18]">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#B4F000] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] mx-auto">
+          <MapPin className="h-4 w-4 text-[#111111]" />
+          <span className="font-comic text-xs uppercase tracking-wider text-[#111111] font-black">
             CHOOSE YOUR PLAYGROUND
           </span>
         </div>
 
-        <h1 className="font-comic text-4xl sm:text-6xl uppercase text-[#1E1B18] tracking-wide">
+        <h1 className="font-comic text-4xl sm:text-6xl uppercase text-[#111111] tracking-wide">
           SLINK MEADOW LOCATIONS
         </h1>
 
-        <p className="font-body text-base text-[#5C3D2E] font-medium leading-relaxed">
-          From peaceful apple orchards to high-energy prize arenas, pick your favorite comic backdrop and start slithering!
+        <p className="font-body text-base text-[#555555] font-semibold leading-relaxed">
+          From peaceful apple orchards to high-energy prize arenas, pick your favorite backdrop and start slithering!
         </p>
       </div>
 
@@ -93,69 +93,69 @@ export const ArenasView: React.FC<ArenasViewProps> = ({ onSelectArena }) => {
                 setSelectedId(sector.id);
                 sounds.playBeep(640);
               }}
-              className={`comic-card bg-[#FFFDF8] p-6 flex flex-col justify-between cursor-pointer transition-all hover:-translate-y-1 ${
+              className={`comic-card bg-white rounded-2xl p-6 flex flex-col justify-between cursor-pointer transition-all hover:-translate-y-1 ${
                 isSelected
-                  ? 'border-4 border-[#1E1B18] shadow-[8px_8px_0px_#1E1B18] ring-4 ring-[#FFD13B]'
-                  : 'border-3 border-[#1E1B18] shadow-[4px_4px_0px_#1E1B18]'
+                  ? 'border-4 border-[#111111] shadow-[8px_8px_0px_#111111] ring-4 ring-[#B4F000]'
+                  : 'border-3 border-[#111111] shadow-[5px_5px_0px_#111111]'
               }`}
             >
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <span
                     style={{ backgroundColor: sector.badgeColor }}
-                    className="font-comic text-xs uppercase text-white px-2.5 py-1 rounded border-2 border-[#1E1B18] shadow-[1px_1px_0px_#1E1B18]"
+                    className="font-comic text-xs uppercase text-white px-3 py-1 rounded-full border-2 border-[#111111] shadow-[1px_1px_0px_#111111] font-black"
                   >
                     {sector.badge}
                   </span>
 
-                  <span className="font-comic text-xs text-[#1E1B18] bg-[#FFF8ED] px-2 py-0.5 rounded border border-[#1E1B18]">
-                    {sector.worms} WORMS IN PLAY
+                  <span className="font-comic text-xs text-[#111111] bg-[#F4EEDF] px-2.5 py-0.5 rounded-full border border-[#111111] font-bold">
+                    {sector.worms} IN PLAY
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-[#FFF8ED] border-2 border-[#1E1B18] shadow-[2px_2px_0px_#1E1B18]">
+                  <div className="p-2 rounded-2xl bg-[#F4EEDF] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]">
                     <CharacterComponent size={56} />
                   </div>
                   <div>
-                    <h3 className="font-comic text-2xl uppercase text-[#1E1B18] tracking-wide leading-tight">
+                    <h3 className="font-comic text-2xl uppercase text-[#111111] tracking-wide leading-tight font-black">
                       {sector.name}
                     </h3>
-                    <span className="font-comic text-xs text-[#FA824C]">
+                    <span className="font-comic text-xs text-[#FF5D8F] font-black">
                       {sector.snackRating}
                     </span>
                   </div>
                 </div>
 
-                <p className="font-body text-xs sm:text-sm text-[#5C3D2E] leading-relaxed">
+                <p className="font-body text-xs sm:text-sm text-[#444444] font-medium leading-relaxed">
                   {sector.description}
                 </p>
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-2 pt-2">
-                  <div className="p-2 bg-[#FFF8ED] rounded border-2 border-[#1E1B18] text-center">
-                    <span className="font-body text-[10px] font-bold text-[#5C3D2E] uppercase block">ENTRY</span>
-                    <span className="font-comic text-sm text-[#1E1B18]">{sector.entryFee}</span>
+                  <div className="p-2 bg-[#F4EEDF] rounded-xl border-2 border-[#111111] text-center">
+                    <span className="font-body text-[10px] font-black text-[#555555] uppercase block">ENTRY</span>
+                    <span className="font-comic text-sm text-[#111111] font-black">{sector.entryFee}</span>
                   </div>
-                  <div className="p-2 bg-[#FFF8ED] rounded border-2 border-[#1E1B18] text-center">
-                    <span className="font-body text-[10px] font-bold text-[#5C3D2E] uppercase block">RESPAWN</span>
-                    <span className="font-comic text-sm text-[#70A288]">{sector.respawn}</span>
+                  <div className="p-2 bg-[#F4EEDF] rounded-xl border-2 border-[#111111] text-center">
+                    <span className="font-body text-[10px] font-black text-[#555555] uppercase block">RESPAWN</span>
+                    <span className="font-comic text-sm text-[#111111] font-black">{sector.respawn}</span>
                   </div>
                 </div>
 
                 {/* Rules List */}
-                <div className="flex flex-col gap-1.5 pt-2 border-t-2 border-[#1E1B18]/15">
-                  <span className="font-comic text-xs uppercase text-[#1E1B18]">MEADOW PERKS:</span>
+                <div className="flex flex-col gap-1.5 pt-2 border-t-2 border-[#111111]/15">
+                  <span className="font-comic text-xs uppercase text-[#111111] font-black">MEADOW PERKS:</span>
                   {sector.rules.map((rule, idx) => (
-                    <div key={idx} className="flex items-center gap-2 font-body text-xs text-[#1E1B18]">
-                      <span className="w-2 h-2 rounded-full bg-[#FA824C] border border-[#1E1B18]" />
+                    <div key={idx} className="flex items-center gap-2 font-body text-xs text-[#111111] font-medium">
+                      <span className="w-2 h-2 rounded-full bg-[#B4F000] border border-[#111111]" />
                       <span>{rule}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t-2 border-[#1E1B18]/15">
+              <div className="mt-6 pt-4 border-t-2 border-[#111111]/15">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -163,10 +163,10 @@ export const ArenasView: React.FC<ArenasViewProps> = ({ onSelectArena }) => {
                     sounds.playBoostSound();
                     onSelectArena(sector.type);
                   }}
-                  className={`comic-btn w-full uppercase text-base py-3 ${
+                  className={`comic-btn w-full uppercase text-base py-3 rounded-xl border-2 border-[#111111] font-black ${
                     sector.type === 'free'
-                      ? 'bg-[#FFD13B] hover:bg-[#FFE066] text-[#1E1B18]'
-                      : 'bg-[#FA824C] hover:bg-[#FF9666] text-white'
+                      ? 'bg-[#B4F000] hover:bg-[#cbf738] text-[#111111]'
+                      : 'bg-[#FF5D8F] hover:bg-[#ff75a0] text-white'
                   }`}
                 >
                   <span>ENTER THIS MEADOW</span>
