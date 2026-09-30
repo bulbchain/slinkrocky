@@ -2,7 +2,6 @@ import React from 'react';
 import { NavTab, WalletState } from '../types';
 import { sounds } from '../audio';
 import { Wallet, User, Volume2, VolumeX, LogOut, ShieldCheck } from 'lucide-react';
-import logo from '../asset/logo.png';
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -39,21 +38,26 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="fixed top-0 left-0 w-full z-50 bg-[#F4EEDF] border-b-3 border-[#111111] shadow-[0_4px_0px_#111111]">
       <div className="w-full px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
         {/* Brand & Logo */}
-        <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+        <div className="flex items-center gap-4 sm:gap-8 min-w-0">
           <button
             onClick={() => {
               sounds.playBeep(600);
               setActiveTab('play-now');
             }}
-            className="flex items-center gap-3 text-left group focus:outline-none cursor-pointer"
+            className="flex items-center gap-2.5 text-left group focus:outline-none cursor-pointer"
           >
-            {/* Dramatically increased logo size container for both mobile & desktop */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center group-hover:-rotate-6 transition-transform shrink-0">
-              <img
-                src={logo}
-                alt="Slink logo"
-                className="w-full h-full object-contain scale-125 drop-shadow-[2px_2px_0px_#111111]"
-              />
+            {/* Hand-drawn mini Slink face SVG */}
+            <div className="w-10 h-10 rounded-lg bg-[#B4F000] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] flex items-center justify-center group-hover:-rotate-6 transition-transform">
+              <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="16" fill="#FA824C" stroke="#111111" strokeWidth="2.5" />
+                <circle cx="15" cy="16" r="4.5" fill="#FFFFFF" stroke="#111111" strokeWidth="2" />
+                <circle cx="16" cy="16" r="2" fill="#111111" />
+                <circle cx="25" cy="16" r="4.5" fill="#FFFFFF" stroke="#111111" strokeWidth="2" />
+                <circle cx="24" cy="16" r="2" fill="#111111" />
+                <path d="M14 24C16 28 24 28 26 24" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
+                <ellipse cx="12" cy="21" rx="2" ry="1" fill="#FF5D8F" />
+                <ellipse cx="28" cy="21" rx="2" ry="1" fill="#FF5D8F" />
+              </svg>
             </div>
 
             <div className="flex flex-col -space-y-1">
@@ -88,10 +92,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                       : 'text-[#111111] hover:bg-[#FFFFFF] border-2 border-transparent'
                   }`}
                 >
-                  <span className="flex items-center gap-1.5 relative">
+                  <span className="flex items-center gap-1.5">
                     {item.label}
                     {item.tag && (
-                      <span className="absolute -top-3.5 -right-3 bg-[#FF5D8F] text-white text-[9px] px-1.5 py-0.5 rounded border border-[#111111] font-bold shadow-[1px_1px_0px_#111111] rotate-6 animate-pulse">
+                      <span className="bg-[#FF5D8F] text-white text-[10px] px-1.5 py-0.2 rounded border border-[#111111] font-bold">
                         {item.tag}
                       </span>
                     )}
@@ -173,7 +177,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Direct Quick Sign Out button if user is authenticated with email or wallet */}
             {(wallet.userEmail || wallet.isConnected) && onSignOut && (
               <button
-                type="type"
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSignOut();
@@ -200,20 +204,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sounds.playBeep(720);
                 setActiveTab(item.id);
               }}
-              className={`font-comic text-xs px-2.5 py-1 whitespace-nowrap rounded border-2 cursor-pointer font-bold relative ${
+              className={`font-comic text-xs px-2.5 py-1 whitespace-nowrap rounded border-2 cursor-pointer font-bold ${
                 isActive
                   ? 'bg-[#B4F000] text-[#111111] border-[#111111] shadow-[2px_2px_0px_#111111]'
                   : 'bg-white text-[#111111] border-[#111111]/40'
               }`}
             >
-              <span className="flex items-center gap-1">
-                {item.label}
-                {item.tag && (
-                  <span className="bg-[#FF5D8F] text-white text-[8px] px-1 py-0 rounded border border-[#111111] font-bold">
-                    {item.tag}
-                  </span>
-                )}
-              </span>
+              {item.label}
             </button>
           );
         })}
